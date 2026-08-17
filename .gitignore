@@ -1,0 +1,15 @@
+/_build/
+/cover/
+/deps/
+/doc/
+/.expert
+/.fetch
+/.env.dev
+erl_crash.dump
+*.ez
+/tmp/
+crysa-*.tar
+/priv/static/assets/
+/priv/static/cache_manifest.json
+npm-debug.log
+/assets/node_modules/
