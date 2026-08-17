@@ -12,5 +12,6 @@ defmodule Crysa.Notifications do
   def actions, do: @actions
 
   @spec create_notification(map()) :: {:ok, Notification.t()} | {:error, Ecto.Changeset.t()}
-  def create_notification(attrs), do: %Notification{} |> Notification.changeset(attrs) |> Repo.insert()
+  def create_notification(attrs),
+    do: %Notification{} |> Notification.changeset(attrs) |> Repo.insert()
 end

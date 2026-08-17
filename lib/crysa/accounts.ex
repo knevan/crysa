@@ -30,7 +30,8 @@ defmodule Crysa.Accounts do
   @spec create_profile(map()) :: {:ok, UserProfile.t()} | {:error, Ecto.Changeset.t()}
   def create_profile(attrs), do: %UserProfile{} |> UserProfile.changeset(attrs) |> Repo.insert()
 
-  @spec create_password_reset_token(map()) :: {:ok, PasswordResetToken.t()} | {:error, Ecto.Changeset.t()}
+  @spec create_password_reset_token(map()) ::
+          {:ok, PasswordResetToken.t()} | {:error, Ecto.Changeset.t()}
   def create_password_reset_token(attrs) do
     %PasswordResetToken{} |> PasswordResetToken.changeset(attrs) |> Repo.insert()
   end

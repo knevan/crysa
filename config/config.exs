@@ -20,7 +20,6 @@ config :phoenix_live_view,
   # the attribute set on all root tags. Used for Phoenix.LiveView.ColocatedCSS.
   root_tag_attribute: "phx-r"
 
-
 # Configure the mailer
 config :crysa, Crysa.Mailer, adapter: Swoosh.Adapters.Local
 

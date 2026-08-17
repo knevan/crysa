@@ -2,20 +2,25 @@ import Config
 import Nvir
 
 dotenv!(
-  dev: ".env.dev"
+  dev: ".env.dev",
+  test: ".env.test"
 )
 
 database_url =
-    case env!("DATABASE_URL", :string!, nil) do
-      nil -> nil
-      url -> String.trim(url)
-    end
+  case env!("DATABASE_URL", :string, "") do
+    "" -> nil
+    url -> String.trim(url)
+  end
 
-if env!("PHX_SERVER", :string!, nil) do
+if env!("PHX_SERVER", :string, "") != "" do
   config :crysa, CrysaWeb.Endpoint, server: true
 end
 
 config :crysa, CrysaWeb.Endpoint, http: [port: env!("PORT", :integer!, 4000)]
+
+if config_env() in [:dev, :test] and database_url do
+  config :crysa, Crysa.Repo, url: database_url
+end
 
 if config_env() == :dev do
   # Reload browser tabs when matching files change.

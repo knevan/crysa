@@ -12,7 +12,6 @@ defmodule Crysa.MixProject do
       deps: deps(),
       compilers: [:phoenix_live_view] ++ Mix.compilers(),
       listeners: [Phoenix.CodeReloader],
-
       usage_rules: [
         file: "AGENTS.md",
         usage_rules: [

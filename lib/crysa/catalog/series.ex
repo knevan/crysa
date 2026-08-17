@@ -27,6 +27,8 @@ defmodule Crysa.Catalog.Series do
     field :rating_sum, :integer, default: 0
     field :next_check_at, :utc_datetime
     field :last_checked_at, :utc_datetime
+    field :check_interval_minutes, :integer, default: 60
+    field :last_chapter_at, :utc_datetime
     field :last_error, :string
 
     has_many :chapters, Chapter
@@ -54,6 +56,8 @@ defmodule Crysa.Catalog.Series do
       :rating_sum,
       :next_check_at,
       :last_checked_at,
+      :check_interval_minutes,
+      :last_chapter_at,
       :last_error
     ])
     |> normalize_text_fields()
@@ -65,7 +69,13 @@ defmodule Crysa.Catalog.Series do
     |> validate_number(:view_count, greater_than_or_equal_to: 0)
     |> validate_number(:rating_count, greater_than_or_equal_to: 0)
     |> validate_number(:rating_sum, greater_than_or_equal_to: 0)
+    |> validate_number(:check_interval_minutes,
+      greater_than_or_equal_to: 15,
+      less_than_or_equal_to: 10_080
+    )
     |> validate_length(:last_error, max: 2_000)
+    |> check_constraint(:publication_status, name: :series_publication_status_check)
+    |> check_constraint(:processing_status, name: :series_processing_status_check)
     |> unique_constraint(:slug)
     |> unique_constraint(:source_url)
   end

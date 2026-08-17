@@ -25,7 +25,9 @@ if admin_email && admin_username && admin_password_hash do
          role_id: superadmin_role.id,
          active: true
        }) do
-    {:ok, _user} -> :ok
+    {:ok, _user} ->
+      :ok
+
     {:error, changeset} ->
       if changeset.errors[:email] || changeset.errors[:username] do
         :ok

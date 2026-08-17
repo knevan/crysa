@@ -13,5 +13,6 @@ defmodule Crysa.Library do
   def create_rating(attrs), do: %Rating{} |> Rating.changeset(attrs) |> Repo.insert()
 
   @spec create_view_log(map()) :: {:ok, SeriesViewLog.t()} | {:error, Ecto.Changeset.t()}
-  def create_view_log(attrs), do: %SeriesViewLog{} |> SeriesViewLog.changeset(attrs) |> Repo.insert()
+  def create_view_log(attrs),
+    do: %SeriesViewLog{} |> SeriesViewLog.changeset(attrs) |> Repo.insert()
 end

@@ -46,7 +46,6 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
 
     create unique_index(:user_profiles, [:user_id])
 
-
     create table(:password_reset_tokens) do
       add :user_id, references(:users, on_delete: :delete_all), null: false
       add :token_digest, :binary, null: false
@@ -93,6 +92,8 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
       add :rating_sum, :integer, null: false, default: 0
       add :next_check_at, :utc_datetime
       add :last_checked_at, :utc_datetime
+      add :check_interval_minutes, :integer, null: false, default: 60
+      add :last_chapter_at, :utc_datetime
       add :last_error, :text
 
       timestamps(type: :utc_datetime)
@@ -103,18 +104,27 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
     create index(:series, [:publication_status])
     create index(:series, [:processing_status])
     create index(:series, [:next_check_at])
-    execute("CREATE INDEX series_title_trgm_index ON series USING gin (title gin_trgm_ops)", "DROP INDEX IF EXISTS series_title_trgm_index")
+
+    execute(
+      "CREATE INDEX series_title_trgm_index ON series USING gin (title gin_trgm_ops)",
+      "DROP INDEX IF EXISTS series_title_trgm_index"
+    )
 
     create table(:series_categories, primary_key: false) do
       add :series_id, references(:series, on_delete: :delete_all), null: false, primary_key: true
-      add :category_id, references(:categories, on_delete: :restrict), null: false, primary_key: true
+
+      add :category_id, references(:categories, on_delete: :restrict),
+        null: false,
+        primary_key: true
     end
+
     create index(:series_categories, [:category_id])
 
     create table(:series_authors, primary_key: false) do
       add :series_id, references(:series, on_delete: :delete_all), null: false, primary_key: true
       add :author_id, references(:authors, on_delete: :restrict), null: false, primary_key: true
     end
+
     create index(:series_authors, [:author_id])
 
     create table(:series_chapters) do
@@ -134,6 +144,7 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
 
       timestamps(type: :utc_datetime)
     end
+
     create unique_index(:series_chapters, [:series_id, :chapter_key])
     create unique_index(:series_chapters, [:source_url])
     create index(:series_chapters, [:series_id, :sort_key])
@@ -150,8 +161,8 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
 
       timestamps(type: :utc_datetime)
     end
+
     create unique_index(:chapter_images, [:chapter_id, :image_order])
-    create index(:chapter_images, [:chapter_id])
 
     create table(:user_bookmarks) do
       add :user_id, references(:users, on_delete: :delete_all), null: false
@@ -159,6 +170,7 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
 
       timestamps(type: :utc_datetime, updated_at: false)
     end
+
     create unique_index(:user_bookmarks, [:user_id, :series_id])
     create index(:user_bookmarks, [:series_id])
 
@@ -169,9 +181,13 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
 
       timestamps(type: :utc_datetime)
     end
+
     create unique_index(:series_ratings, [:user_id, :series_id])
     create index(:series_ratings, [:series_id])
-    create constraint(:series_ratings, :rating_between_1_and_5, check: "rating >= 1 AND rating <= 5")
+
+    create constraint(:series_ratings, :rating_between_1_and_5,
+             check: "rating >= 1 AND rating <= 5"
+           )
 
     create table(:series_view_log) do
       add :series_id, references(:series, on_delete: :delete_all), null: false
@@ -181,6 +197,7 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
 
       timestamps(type: :utc_datetime, updated_at: false)
     end
+
     create index(:series_view_log, [:series_id, :inserted_at])
     create index(:series_view_log, [:inserted_at])
 
@@ -188,7 +205,7 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
       add :user_id, references(:users, on_delete: :nilify_all)
       add :series_id, references(:series, on_delete: :delete_all)
       add :chapter_id, references(:series_chapters, on_delete: :delete_all)
-      add :parent_id, references(:comments, on_delete: :nilify_all)
+      add :parent_id, references(:comments, on_delete: :restrict)
       add :body_markdown, :text, null: false
       add :body_html, :text, null: false
       add :deleted_at, :utc_datetime
@@ -197,10 +214,14 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
 
       timestamps(type: :utc_datetime)
     end
+
     create index(:comments, [:series_id, :inserted_at])
     create index(:comments, [:chapter_id, :inserted_at])
     create index(:comments, [:parent_id])
-    create constraint(:comments, :comments_single_target, check: "num_nonnulls(series_id, chapter_id) = 1")
+
+    create constraint(:comments, :comments_single_target,
+             check: "num_nonnulls(series_id, chapter_id) = 1"
+           )
 
     create table(:comment_attachments) do
       add :comment_id, references(:comments, on_delete: :delete_all), null: false
@@ -211,16 +232,22 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
 
       timestamps(type: :utc_datetime)
     end
+
     create index(:comment_attachments, [:comment_id])
     create index(:comment_attachments, [:user_id])
 
     create table(:comment_votes, primary_key: false) do
       add :user_id, references(:users, on_delete: :delete_all), null: false, primary_key: true
-      add :comment_id, references(:comments, on_delete: :delete_all), null: false, primary_key: true
+
+      add :comment_id, references(:comments, on_delete: :delete_all),
+        null: false,
+        primary_key: true
+
       add :vote, :integer, null: false
 
       timestamps(type: :utc_datetime)
     end
+
     create index(:comment_votes, [:comment_id])
     create constraint(:comment_votes, :comment_votes_vote_value, check: "vote IN (-1, 1)")
 
@@ -233,6 +260,7 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
 
       timestamps(type: :utc_datetime)
     end
+
     create index(:notifications, [:recipient_id, :read_at])
     create index(:notifications, [:comment_id])
 
@@ -249,9 +277,44 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
 
       timestamps(type: :utc_datetime)
     end
+
     create index(:reports, [:status, :inserted_at])
     create index(:reports, [:chapter_id])
     create index(:reports, [:comment_id])
-    create constraint(:reports, :reports_single_target, check: "num_nonnulls(chapter_id, comment_id) = 1")
+
+    create constraint(:reports, :reports_single_target,
+             check: "num_nonnulls(chapter_id, comment_id) = 1"
+           )
+
+    create constraint(:series, :series_publication_status_check,
+             check: "publication_status IN ('ongoing', 'completed', 'hiatus', 'discontinued')"
+           )
+
+    create constraint(:series, :series_processing_status_check,
+             check:
+               "processing_status IN ('pending', 'processing', 'available', 'error', 'pending_deletion', 'deleting', 'deletion_failed')"
+           )
+
+    create constraint(:series_chapters, :series_chapters_status_check,
+             check: "status IN ('pending', 'processing', 'available', 'no_images_found', 'error')"
+           )
+
+    create constraint(:reports, :reports_reason_check,
+             check:
+               "reason IN ('broken_image', 'wrong_chapter', 'duplicated_chapter', 'missing_image', 'missing_chapter', 'slow_loading', 'broken_text', 'toxic', 'racist', 'spam', 'other')"
+           )
+
+    create constraint(:reports, :reports_status_check,
+             check: "status IN ('pending', 'resolved', 'rejected')"
+           )
+
+    create constraint(:notifications, :notifications_action_check,
+             check: "action IN ('comment_reply', 'comment_upvote')"
+           )
+
+    create index(:notifications, [:recipient_id, :inserted_at],
+             name: :notifications_unread_index,
+             where: "read_at IS NULL"
+           )
   end
 end

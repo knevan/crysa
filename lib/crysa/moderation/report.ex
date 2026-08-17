@@ -36,6 +36,7 @@ defmodule Crysa.Moderation.Report do
     |> validate_inclusion(:reason, Moderation.report_reasons())
     |> validate_length(:details, max: 4_000)
     |> validate_single_target()
+    |> check_constraint(:reason, name: :reports_reason_check)
     |> foreign_key_constraint(:reporter_id)
     |> foreign_key_constraint(:chapter_id)
     |> foreign_key_constraint(:comment_id)
@@ -49,6 +50,7 @@ defmodule Crysa.Moderation.Report do
     |> validate_required([:status, :resolved_by_id, :resolved_at])
     |> validate_inclusion(:status, Moderation.report_statuses())
     |> validate_length(:resolution_note, max: 2_000)
+    |> check_constraint(:status, name: :reports_status_check)
     |> foreign_key_constraint(:resolved_by_id)
   end
 

@@ -50,10 +50,18 @@ defmodule Crysa.Catalog.Chapter do
       :published_at
     ])
     |> normalize_text_fields()
-    |> validate_required([:series_id, :chapter_key, :display_number, :sort_key, :source_url, :status])
+    |> validate_required([
+      :series_id,
+      :chapter_key,
+      :display_number,
+      :sort_key,
+      :source_url,
+      :status
+    ])
     |> validate_inclusion(:status, Catalog.chapter_statuses())
     |> validate_number(:retry_count, greater_than_or_equal_to: 0)
     |> validate_length(:last_error, max: 2_000)
+    |> check_constraint(:status, name: :series_chapters_status_check)
     |> foreign_key_constraint(:series_id)
     |> unique_constraint([:series_id, :chapter_key])
     |> unique_constraint(:source_url)

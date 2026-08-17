@@ -29,6 +29,7 @@ defmodule Crysa.Notifications.Notification do
     |> cast(attrs, [:recipient_id, :actor_id, :comment_id, :action, :read_at])
     |> validate_required([:recipient_id, :action])
     |> validate_inclusion(:action, Notifications.actions())
+    |> check_constraint(:action, name: :notifications_action_check)
     |> foreign_key_constraint(:recipient_id)
     |> foreign_key_constraint(:actor_id)
     |> foreign_key_constraint(:comment_id)

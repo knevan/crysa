@@ -5,6 +5,7 @@
 /.expert
 /.fetch
 /.env.dev
+/.env.test
 erl_crash.dump
 *.ez
 /tmp/

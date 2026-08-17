@@ -26,7 +26,8 @@ defmodule Crysa.Catalog do
   def create_chapter(attrs), do: %Chapter{} |> Chapter.changeset(attrs) |> Repo.insert()
 
   @spec create_chapter_image(map()) :: {:ok, ChapterImage.t()} | {:error, Ecto.Changeset.t()}
-  def create_chapter_image(attrs), do: %ChapterImage{} |> ChapterImage.changeset(attrs) |> Repo.insert()
+  def create_chapter_image(attrs),
+    do: %ChapterImage{} |> ChapterImage.changeset(attrs) |> Repo.insert()
 
   @spec create_category(map()) :: {:ok, Category.t()} | {:error, Ecto.Changeset.t()}
   def create_category(attrs), do: %Category{} |> Category.changeset(attrs) |> Repo.insert()

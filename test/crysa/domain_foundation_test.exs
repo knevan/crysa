@@ -59,6 +59,7 @@ defmodule Crysa.DomainFoundationTest do
     changeset = Rating.changeset(%Rating{}, %{user_id: 1, series_id: 1, rating: 6})
 
     refute changeset.valid?
+
     assert {_, [validation: :number, kind: :less_than_or_equal_to, number: 5]} =
              changeset.errors[:rating]
   end
@@ -69,6 +70,7 @@ defmodule Crysa.DomainFoundationTest do
     refute Comment.create_changeset(%Comment{}, attrs).valid?
     assert Comment.create_changeset(%Comment{}, Map.put(attrs, :series_id, 1)).valid?
     assert Comment.create_changeset(%Comment{}, Map.put(attrs, :chapter_id, 1)).valid?
+
     refute Comment.create_changeset(%Comment{}, Map.merge(attrs, %{series_id: 1, chapter_id: 1})).valid?
   end
 
@@ -78,6 +80,7 @@ defmodule Crysa.DomainFoundationTest do
     refute Report.create_changeset(%Report{}, attrs).valid?
     assert Report.create_changeset(%Report{}, Map.put(attrs, :chapter_id, 1)).valid?
     assert Report.create_changeset(%Report{}, Map.put(attrs, :comment_id, 1)).valid?
+
     refute Report.create_changeset(%Report{}, Map.merge(attrs, %{chapter_id: 1, comment_id: 1})).valid?
   end
 end

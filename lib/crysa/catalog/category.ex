@@ -29,7 +29,11 @@ defmodule Crysa.Catalog.Category do
   end
 
   defp put_normalized_name(changeset) do
-    put_change(changeset, :normalized_name, Normalization.normalized_name(get_field(changeset, :name)))
+    put_change(
+      changeset,
+      :normalized_name,
+      Normalization.normalized_name(get_field(changeset, :name))
+    )
   end
 
   defp trim(value) when is_binary(value), do: String.trim(value)

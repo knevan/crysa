@@ -26,7 +26,15 @@ defmodule Crysa.Catalog.ChapterImage do
   @spec changeset(t(), map()) :: Ecto.Changeset.t()
   def changeset(image, attrs) do
     image
-    |> cast(attrs, [:chapter_id, :image_order, :source_url, :storage_key, :width, :height, :byte_size])
+    |> cast(attrs, [
+      :chapter_id,
+      :image_order,
+      :source_url,
+      :storage_key,
+      :width,
+      :height,
+      :byte_size
+    ])
     |> validate_required([:chapter_id, :image_order])
     |> validate_number(:image_order, greater_than_or_equal_to: 0)
     |> validate_number(:width, greater_than: 0)

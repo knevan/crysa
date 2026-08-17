@@ -59,7 +59,9 @@ defmodule Crysa.Accounts.User do
     |> update_change(:username, &normalize_username/1)
   end
 
-  defp normalize_email(value) when is_binary(value), do: value |> String.trim() |> String.downcase()
+  defp normalize_email(value) when is_binary(value),
+    do: value |> String.trim() |> String.downcase()
+
   defp normalize_email(value), do: value
 
   defp normalize_username(value) when is_binary(value), do: String.trim(value)
