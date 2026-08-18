@@ -1,0 +1,19 @@
+<Layouts.flash_group flash={@flash} />
+<div class="space-y-6">
+  <h1 class="text-2xl font-bold">Tags</h1>
+
+  <div :if={@categories == []} class="card bg-base-100 p-10 text-center shadow">
+    <p class="text-base-content/60">No tags yet.</p>
+  </div>
+
+  <div class="flex flex-wrap gap-2">
+    <a
+      :for={{category, count} <- @categories}
+      href={~p"/series?category=#{category.name}"}
+      class="badge badge-lg badge-outline gap-1"
+    >
+      {category.name}
+      <span class="text-xs opacity-60">{count}</span>
+    </a>
+  </div>
+</div>

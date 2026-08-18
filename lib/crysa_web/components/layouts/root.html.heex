@@ -51,6 +51,14 @@
           Crysa
         </a>
       </div>
+      <div class="navbar-center hidden lg:flex">
+        <ul class="menu menu-horizontal px-1 text-sm">
+          <li><a href={~p"/series"}>Browse</a></li>
+          <li><a href={~p"/popular"}>Popular</a></li>
+          <li><a href={~p"/updates"}>Updates</a></li>
+          <li><a href={~p"/tags"}>Tags</a></li>
+        </ul>
+      </div>
       <div class="navbar-end">
         <div :if={@current_user} class="flex items-center gap-2">
           <div class="dropdown dropdown-end">

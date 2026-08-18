@@ -261,7 +261,7 @@ defmodule Crysa.DbConstraintsTest do
       source_url: "https://example.test/chapter/#{unique()}"
     }
 
-    Repo.insert!(Chapter.changeset(%Chapter{}, Map.merge(defaults, attrs)))
+    Repo.insert!(Chapter.create_changeset(%Chapter{}, Map.merge(defaults, attrs)))
   end
 
   defp insert_image(chapter) do

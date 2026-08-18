@@ -105,6 +105,10 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
     create index(:series, [:processing_status])
     create index(:series, [:next_check_at])
 
+    create index(:series, ["last_chapter_at DESC NULLS LAST", "id DESC"],
+             name: :series_last_chapter_sort_index
+           )
+
     execute(
       "CREATE INDEX series_title_trgm_index ON series USING gin (title gin_trgm_ops)",
       "DROP INDEX IF EXISTS series_title_trgm_index"

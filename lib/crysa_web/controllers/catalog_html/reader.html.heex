@@ -1,0 +1,44 @@
+<Layouts.flash_group flash={@flash} />
+<div class="space-y-4">
+  <div class="card bg-base-100 shadow">
+    <div class="card-body gap-2">
+      <h1 class="text-xl font-bold">
+        <a href={~p"/series/#{@series.slug}"} class="link-hover">{@series.title}</a>
+        <span class="text-base-content/60"> - Chapter {@chapter.display_number}</span>
+      </h1>
+      <p :if={@chapter.title} class="text-sm text-base-content/70">{@chapter.title}</p>
+
+      <div class="flex items-center justify-between gap-2 pt-2">
+        <a
+          :if={@previous}
+          href={~p"/series/#{@series.slug}/#{@previous.chapter_key}"}
+          class="btn btn-outline btn-sm"
+        >
+          Previous
+        </a>
+        <a href={~p"/series/#{@series.slug}"} class="link text-sm">Chapter list</a>
+        <a
+          :if={@next}
+          href={~p"/series/#{@series.slug}/#{@next.chapter_key}"}
+          class="btn btn-primary btn-sm"
+        >
+          Next
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div :if={@chapter.images == []} class="card bg-base-100 p-10 text-center shadow">
+    <p class="text-base-content/60">No images available for this chapter yet.</p>
+  </div>
+
+  <div class="space-y-2">
+    <img
+      :for={image <- @chapter.images}
+      src={image.source_url}
+      alt="Page {image.image_order + 1}"
+      loading="lazy"
+      class="mx-auto w-full max-w-3xl rounded-box shadow"
+    />
+  </div>
+</div>

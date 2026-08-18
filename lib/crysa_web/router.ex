@@ -43,6 +43,13 @@ defmodule CrysaWeb.Router do
 
     get "/", PageController, :home
 
+    get "/series", CatalogController, :index
+    get "/series/:slug", CatalogController, :show
+    get "/series/:slug/:chapter_key", CatalogController, :reader
+    get "/popular", CatalogController, :popular
+    get "/updates", CatalogController, :updates
+    get "/tags", CatalogController, :tags
+
     post "/users/log-in", UserSessionController, :create
     delete "/users/log-out", UserSessionController, :delete
     post "/users/register", UserRegistrationController, :create

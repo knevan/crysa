@@ -1,8 +1,8 @@
 <Layouts.flash_group flash={@flash} />
 <div class="space-y-6">
   <div class="flex flex-wrap items-center justify-between gap-4">
-    <h1 class="text-2xl font-bold">New Series</h1>
-    <a href={~p"/series"} class="link">Browse all series</a>
+    <h1 class="text-2xl font-bold">Latest Updates</h1>
+    <a href={~p"/series"} class="link">Browse all</a>
   </div>
 
   <div :if={@series == []} class="card bg-base-100 p-10 text-center shadow">
@@ -13,5 +13,5 @@
     <.series_card :for={series <- @series} series={series} />
   </div>
 
-  <.pagination pagination={@pagination} path="/" params={@params} />
+  <.pagination pagination={@pagination} path="/updates" params={@params} />
 </div>

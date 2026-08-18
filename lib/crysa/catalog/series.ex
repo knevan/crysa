@@ -12,6 +12,26 @@ defmodule Crysa.Catalog.Series do
 
   @type t :: %__MODULE__{}
 
+  @editable_fields [
+    :title,
+    :slug,
+    :description,
+    :cover_url,
+    :source_url,
+    :publication_status,
+    :processing_status,
+    :chapter_count,
+    :bookmark_count,
+    :view_count,
+    :rating_count,
+    :rating_sum,
+    :next_check_at,
+    :last_checked_at,
+    :check_interval_minutes,
+    :last_chapter_at,
+    :last_error
+  ]
+
   schema "series" do
     field :title, :string
     field :slug, :string
@@ -32,8 +52,8 @@ defmodule Crysa.Catalog.Series do
     field :last_error, :string
 
     has_many :chapters, Chapter
-    many_to_many :categories, Category, join_through: "series_categories"
-    many_to_many :authors, Author, join_through: "series_authors"
+    many_to_many :categories, Category, join_through: "series_categories", on_replace: :delete
+    many_to_many :authors, Author, join_through: "series_authors", on_replace: :delete
 
     timestamps(type: :utc_datetime_usec)
   end
@@ -41,27 +61,23 @@ defmodule Crysa.Catalog.Series do
   @spec create_changeset(t(), map()) :: Ecto.Changeset.t()
   def create_changeset(series, attrs) do
     series
-    |> cast(attrs, [
-      :title,
-      :slug,
-      :description,
-      :cover_url,
-      :source_url,
-      :publication_status,
-      :processing_status,
-      :chapter_count,
-      :bookmark_count,
-      :view_count,
-      :rating_count,
-      :rating_sum,
-      :next_check_at,
-      :last_checked_at,
-      :check_interval_minutes,
-      :last_chapter_at,
-      :last_error
-    ])
+    |> cast(attrs, @editable_fields)
     |> normalize_text_fields()
     |> validate_required([:title, :slug, :source_url, :publication_status, :processing_status])
+    |> validate_and_constrain()
+  end
+
+  @spec update_changeset(t(), map()) :: Ecto.Changeset.t()
+  def update_changeset(series, attrs) do
+    series
+    |> cast(attrs, @editable_fields)
+    |> normalize_text_fields()
+    |> validate_required([:title])
+    |> validate_and_constrain()
+  end
+
+  defp validate_and_constrain(changeset) do
+    changeset
     |> validate_inclusion(:publication_status, Catalog.publication_statuses())
     |> validate_inclusion(:processing_status, Catalog.series_processing_statuses())
     |> validate_number(:chapter_count, greater_than_or_equal_to: 0)

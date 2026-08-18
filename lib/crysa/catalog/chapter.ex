@@ -11,6 +11,22 @@ defmodule Crysa.Catalog.Chapter do
 
   @type t :: %__MODULE__{}
 
+  @editable_fields [
+    :series_id,
+    :chapter_key,
+    :display_number,
+    :title,
+    :chapter_number,
+    :sort_key,
+    :source_url,
+    :status,
+    :retry_count,
+    :last_error,
+    :last_attempted_at,
+    :locked_at,
+    :published_at
+  ]
+
   schema "series_chapters" do
     field :chapter_key, :string
     field :display_number, :string
@@ -31,24 +47,10 @@ defmodule Crysa.Catalog.Chapter do
     timestamps(type: :utc_datetime_usec)
   end
 
-  @spec changeset(t(), map()) :: Ecto.Changeset.t()
-  def changeset(chapter, attrs) do
+  @spec create_changeset(t(), map()) :: Ecto.Changeset.t()
+  def create_changeset(chapter, attrs) do
     chapter
-    |> cast(attrs, [
-      :series_id,
-      :chapter_key,
-      :display_number,
-      :title,
-      :chapter_number,
-      :sort_key,
-      :source_url,
-      :status,
-      :retry_count,
-      :last_error,
-      :last_attempted_at,
-      :locked_at,
-      :published_at
-    ])
+    |> cast(attrs, @editable_fields)
     |> normalize_text_fields()
     |> validate_required([
       :series_id,
@@ -58,6 +60,19 @@ defmodule Crysa.Catalog.Chapter do
       :source_url,
       :status
     ])
+    |> validate_and_constrain()
+  end
+
+  @spec update_changeset(t(), map()) :: Ecto.Changeset.t()
+  def update_changeset(chapter, attrs) do
+    chapter
+    |> cast(attrs, @editable_fields)
+    |> normalize_text_fields()
+    |> validate_and_constrain()
+  end
+
+  defp validate_and_constrain(changeset) do
+    changeset
     |> validate_inclusion(:status, Catalog.chapter_statuses())
     |> validate_number(:retry_count, greater_than_or_equal_to: 0)
     |> validate_length(:last_error, max: 2_000)

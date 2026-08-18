@@ -45,7 +45,7 @@ defmodule Crysa.DomainFoundationTest do
 
   test "chapter changeset uses chapter_key as required identity" do
     changeset =
-      Chapter.changeset(%Chapter{}, %{
+      Chapter.create_changeset(%Chapter{}, %{
         series_id: 1,
         chapter_key: "10-2",
         display_number: "10 Part 2",

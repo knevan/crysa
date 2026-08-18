@@ -6,5 +6,7 @@ defmodule CrysaWeb.PageHTML do
   """
   use CrysaWeb, :html
 
+  import CrysaWeb.CatalogComponents
+
   embed_templates "page_html/*"
 end

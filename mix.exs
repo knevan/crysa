@@ -100,6 +100,7 @@ defmodule Crysa.MixProject do
         "esbuild crysa --minify",
         "phx.digest"
       ],
+      retest: ["format", "test"],
       precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"]
     ]
   end
