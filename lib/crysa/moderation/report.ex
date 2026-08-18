@@ -17,7 +17,7 @@ defmodule Crysa.Moderation.Report do
     field :reason, :string
     field :details, :string
     field :status, :string, default: "pending"
-    field :resolved_at, :utc_datetime
+    field :resolved_at, :utc_datetime_usec
     field :resolution_note, :string
 
     belongs_to :reporter, User
@@ -25,7 +25,7 @@ defmodule Crysa.Moderation.Report do
     belongs_to :comment, Comment
     belongs_to :resolved_by, User
 
-    timestamps(type: :utc_datetime)
+    timestamps(type: :utc_datetime_usec)
   end
 
   @spec create_changeset(t(), map()) :: Ecto.Changeset.t()

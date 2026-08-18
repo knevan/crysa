@@ -18,7 +18,7 @@ defmodule Crysa.Comments.Vote do
     belongs_to :user, User, primary_key: true
     belongs_to :comment, Comment, primary_key: true
 
-    timestamps(type: :utc_datetime)
+    timestamps(type: :utc_datetime_usec)
   end
 
   @spec changeset(t(), map()) :: Ecto.Changeset.t()

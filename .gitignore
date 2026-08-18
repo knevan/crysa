@@ -12,5 +12,6 @@ erl_crash.dump
 crysa-*.tar
 /priv/static/assets/
 /priv/static/cache_manifest.json
+/priv/static/uploads/
 npm-debug.log
 /assets/node_modules/

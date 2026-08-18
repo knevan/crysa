@@ -14,13 +14,13 @@ defmodule Crysa.Notifications.Notification do
 
   schema "notifications" do
     field :action, :string
-    field :read_at, :utc_datetime
+    field :read_at, :utc_datetime_usec
 
     belongs_to :recipient, User
     belongs_to :actor, User
     belongs_to :comment, Comment
 
-    timestamps(type: :utc_datetime)
+    timestamps(type: :utc_datetime_usec)
   end
 
   @spec changeset(t(), map()) :: Ecto.Changeset.t()

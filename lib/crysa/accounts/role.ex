@@ -15,7 +15,7 @@ defmodule Crysa.Accounts.Role do
     field :name, :string
     field :description, :string
 
-    timestamps(type: :utc_datetime)
+    timestamps(type: :utc_datetime_usec)
   end
 
   @spec changeset(t(), map()) :: Ecto.Changeset.t()

@@ -16,7 +16,7 @@ defmodule Crysa.Accounts.UserProfile do
 
     belongs_to :user, User
 
-    timestamps(type: :utc_datetime)
+    timestamps(type: :utc_datetime_usec)
   end
 
   @spec changeset(t(), map()) :: Ecto.Changeset.t()

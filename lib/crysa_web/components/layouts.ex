@@ -122,6 +122,46 @@ defmodule CrysaWeb.Layouts do
   end
 
   @doc """
+  Renders the current user's flash messages for both controller and LiveView pages.
+  """
+  attr :flash, :map, default: nil, doc: "the LiveView flash map"
+  attr :conn, :map, default: nil, doc: "the connection assigns for controller pages"
+
+  def flash_messages(assigns) do
+    ~H"""
+    <div class="fixed top-16 right-4 z-50 space-y-2">
+      <div :for={msg <- flash_entries(@flash, @conn)} :if={msg} class="alert shadow-lg">
+        {msg}
+      </div>
+    </div>
+    """
+  end
+
+  defp flash_entries(flash, conn) do
+    conn_flash = if is_map(conn), do: conn.assigns[:flash] || %{}, else: %{}
+    merged = Map.merge(conn_flash, flash || %{})
+
+    for {kind, msg} <- merged,
+        kind in [:info, :error, "info", "error"],
+        is_binary(msg) and msg != "" do
+      msg
+    end
+  end
+
+  @doc "Returns true when the user holds a moderator-level role."
+  def moderator?(%Crysa.Accounts.User{role: %{name: name}})
+      when name in ~w(superadmin admin moderator),
+      do: true
+
+  def moderator?(_user), do: false
+
+  @doc "Returns true when the user holds an admin-level role."
+  def admin?(%Crysa.Accounts.User{role: %{name: name}}) when name in ~w(superadmin admin),
+    do: true
+
+  def admin?(_user), do: false
+
+  @doc """
   Provides dark vs light theme toggle based on themes defined in app.css.
 
   See <head> in root.html.heex which applies the theme before page load.

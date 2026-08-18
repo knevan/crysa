@@ -1,7 +1,8 @@
 defmodule Crysa.DbConstraintsTest do
   use Crysa.DataCase, async: false
 
-  alias Crysa.Accounts.{Role, User}
+  alias Crysa.Accounts.Role
+  alias Crysa.AccountsFixtures
   alias Crysa.Catalog.{Chapter, ChapterImage, Series}
   alias Crysa.Comments.{Comment, Vote}
   alias Crysa.Library.{Bookmark, Rating}
@@ -16,28 +17,26 @@ defmodule Crysa.DbConstraintsTest do
   end
 
   describe "unique constraints" do
-    test "users.email is unique case-insensitively", %{role: role, user: user} do
+    test "users.email is unique case-insensitively", %{user: user} do
       attrs = %{
         email: String.upcase(user.email),
-        username: "other#{unique()}",
-        password_hash: String.duplicate("x", 40),
-        role_id: role.id
+        username: "other#{unique()}"
       }
 
-      assert {:error, changeset} = %User{} |> User.create_changeset(attrs) |> Repo.insert()
-      assert "has already been taken" in errors_on(changeset).email
+      assert_raise Ecto.ConstraintError, ~r/users_lower_email_index/, fn ->
+        AccountsFixtures.user_fixture(attrs)
+      end
     end
 
-    test "users.username is unique case-insensitively", %{role: role, user: user} do
+    test "users.username is unique case-insensitively", %{user: user} do
       attrs = %{
         email: "other#{unique()}@example.com",
-        username: String.upcase(user.username),
-        password_hash: String.duplicate("x", 40),
-        role_id: role.id
+        username: String.upcase(user.username)
       }
 
-      assert {:error, changeset} = %User{} |> User.create_changeset(attrs) |> Repo.insert()
-      assert "has already been taken" in errors_on(changeset).username
+      assert_raise Ecto.ConstraintError, ~r/users_lower_username_index/, fn ->
+        AccountsFixtures.user_fixture(attrs)
+      end
     end
   end
 
@@ -71,7 +70,7 @@ defmodule Crysa.DbConstraintsTest do
     end
 
     test "series publication status is enforced by the database" do
-      now = DateTime.utc_now() |> DateTime.truncate(:second)
+      now = DateTime.utc_now()
 
       assert_raise Postgrex.Error, ~r/check constraint.*series_publication_status_check/i, fn ->
         Repo.insert_all(Series, [
@@ -92,7 +91,7 @@ defmodule Crysa.DbConstraintsTest do
       chapter = insert_chapter(series, %{})
 
       assert_raise Postgrex.Error, ~r/check constraint.*reports_status_check/i, fn ->
-        now = DateTime.utc_now() |> DateTime.truncate(:second)
+        now = DateTime.utc_now()
 
         Repo.insert_all(Report, [
           %{
@@ -111,7 +110,7 @@ defmodule Crysa.DbConstraintsTest do
       comment = insert_comment(series, %{user_id: user.id})
 
       assert_raise Postgrex.Error, ~r/check constraint.*notifications_action_check/i, fn ->
-        now = DateTime.utc_now() |> DateTime.truncate(:second)
+        now = DateTime.utc_now()
 
         Repo.insert_all(Notification, [
           %{
@@ -235,11 +234,10 @@ defmodule Crysa.DbConstraintsTest do
     attrs = %{
       email: email,
       username: "user#{unique()}",
-      password_hash: String.duplicate("x", 40),
       role_id: role.id
     }
 
-    Repo.insert!(User.create_changeset(%User{}, attrs))
+    AccountsFixtures.user_fixture(attrs)
   end
 
   defp insert_series(attrs) do

@@ -15,7 +15,7 @@ defmodule Crysa.Comments.Comment do
   schema "comments" do
     field :body_markdown, :string
     field :body_html, :string
-    field :deleted_at, :utc_datetime
+    field :deleted_at, :utc_datetime_usec
     field :vote_score, :integer, default: 0
 
     belongs_to :user, User
@@ -26,7 +26,7 @@ defmodule Crysa.Comments.Comment do
     has_many :attachments, Attachment
     has_many :votes, Vote
 
-    timestamps(type: :utc_datetime)
+    timestamps(type: :utc_datetime_usec)
   end
 
   @spec create_changeset(t(), map()) :: Ecto.Changeset.t()

@@ -1,16 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme={assigns[:theme]}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content={get_csrf_token()} />
-    <.live_title default="Crysa" suffix=" · Phoenix Framework" phx-no-format>{assigns[:page_title]}</.live_title>
+    <.live_title default="Crysa" suffix=" · Crysa" phx-no-format>
+      {assigns[:page_title]}
+    </.live_title>
     <link phx-track-static rel="stylesheet" href={~p"/assets/css/app.css"} />
     <script defer phx-track-static type="text/javascript" src={~p"/assets/js/app.js"}>
     </script>
     <script>
       (() => {
-        const systemTheme = () => matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        const systemTheme = () =>
+          matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 
         const setTheme = (theme) => {
           if (theme === "system") {
@@ -26,7 +29,10 @@
         if (!document.documentElement.hasAttribute("data-theme")) {
           setTheme(localStorage.getItem("phx:theme") || "system");
         }
-        window.addEventListener("storage", (e) => e.key === "phx:theme" && setTheme(e.newValue || "system"));
+        window.addEventListener(
+          "storage",
+          (e) => e.key === "phx:theme" && setTheme(e.newValue || "system")
+        );
         window.addEventListener("phx:set-theme", (e) => setTheme(e.target.dataset.phxTheme));
 
         matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
@@ -37,7 +43,52 @@
       })();
     </script>
   </head>
-  <body>
-    {@inner_content}
+  <body class="min-h-screen bg-base-200">
+    <.flash_messages />
+    <nav class="navbar bg-base-100 shadow">
+      <div class="navbar-start">
+        <a href={~p"/"} class="btn btn-ghost text-xl">
+          Crysa
+        </a>
+      </div>
+      <div class="navbar-end">
+        <div :if={@current_user} class="flex items-center gap-2">
+          <div class="dropdown dropdown-end">
+            <div tabindex="0" role="button" class="btn btn-ghost">
+              @{@current_user.username}
+            </div>
+            <ul
+              tabindex="0"
+              class="dropdown-content menu bg-base-100 rounded-box z-10 w-52 p-2 shadow"
+            >
+              <li><a href={~p"/users/profile"}>Profile</a></li>
+              <li><a href={~p"/users/settings"}>Settings</a></li>
+              <li :if={moderator?(@current_user)}>
+                <a href={~p"/moderator"}>Moderator</a>
+              </li>
+              <li :if={admin?(@current_user)}>
+                <a href={~p"/admin"}>Admin</a>
+              </li>
+              <li>
+                <.form for={%{}} action={~p"/users/log-out"} method="delete" class="contents">
+                  <.button type="submit">Log out</.button>
+                </.form>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div :if={!@current_user} class="flex items-center gap-2">
+          <a href={~p"/users/log-in"} class="btn btn-ghost">
+            Log in
+          </a>
+          <a href={~p"/users/register"} class="btn btn-primary">
+            Sign up
+          </a>
+        </div>
+      </div>
+    </nav>
+    <main class="container mx-auto p-6">
+      {@inner_content}
+    </main>
   </body>
 </html>

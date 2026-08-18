@@ -12,12 +12,12 @@ defmodule Crysa.Accounts.PasswordResetToken do
 
   schema "password_reset_tokens" do
     field :token_digest, :binary
-    field :expires_at, :utc_datetime
-    field :used_at, :utc_datetime
+    field :expires_at, :utc_datetime_usec
+    field :used_at, :utc_datetime_usec
 
     belongs_to :user, User
 
-    timestamps(type: :utc_datetime, updated_at: false)
+    timestamps(type: :utc_datetime_usec, updated_at: false)
   end
 
   @spec changeset(t(), map()) :: Ecto.Changeset.t()

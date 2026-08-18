@@ -7,18 +7,19 @@ defmodule Crysa.DomainFoundationTest do
   alias Crysa.Library.Rating
   alias Crysa.Moderation.Report
 
-  test "user create changeset normalizes email and enforces required account fields" do
+  test "user registration changeset normalizes email and username" do
     changeset =
-      User.create_changeset(%User{}, %{
+      User.registration_changeset(%User{}, %{
         email: " Admin@Example.COM ",
-        username: " admin ",
-        password_hash: String.duplicate("x", 40),
-        role_id: 1
+        username: " admin1 ",
+        password: "password1234",
+        password_confirmation: "password1234"
       })
 
     assert changeset.valid?
     assert Ecto.Changeset.get_change(changeset, :email) == "admin@example.com"
-    assert Ecto.Changeset.get_change(changeset, :username) == "admin"
+    assert Ecto.Changeset.get_change(changeset, :username) == "admin1"
+    assert changeset.changes.password_hash
   end
 
   test "category changeset stores normalized uniqueness key" do

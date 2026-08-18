@@ -14,10 +14,62 @@ defmodule CrysaWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :auth do
+    plug :plug_fetch_current_user
+  end
+
+  pipeline :require_authenticated_user do
+    plug :plug_require_authenticated_user
+  end
+
+  pipeline :moderator do
+    plug :plug_require_moderator
+  end
+
+  pipeline :admin do
+    plug :plug_require_admin
+  end
+
+  defp plug_fetch_current_user(conn, _opts), do: CrysaWeb.UserAuth.fetch_current_user(conn, [])
+
+  defp plug_require_authenticated_user(conn, _opts),
+    do: CrysaWeb.UserAuth.require_authenticated_user(conn, [])
+
+  defp plug_require_moderator(conn, _opts), do: CrysaWeb.UserAuth.require_moderator(conn, [])
+  defp plug_require_admin(conn, _opts), do: CrysaWeb.UserAuth.require_admin(conn, [])
+
   scope "/", CrysaWeb do
-    pipe_through :browser
+    pipe_through [:browser, :auth]
 
     get "/", PageController, :home
+
+    post "/users/log-in", UserSessionController, :create
+    delete "/users/log-out", UserSessionController, :delete
+    post "/users/register", UserRegistrationController, :create
+    post "/users/reset_password", UserForgotPasswordController, :create
+    post "/users/reset_password/:token", UserResetPasswordController, :update
+    post "/users/profile/avatar", ProfileController, :update_avatar
+
+    live_session :current_user, on_mount: [{CrysaWeb.UserAuth, :mount_current_user}] do
+      live "/users/log-in", UserLoginLive, :new
+      live "/users/register", UserRegistrationLive, :new
+      live "/users/reset_password", UserForgotPasswordLive, :new
+      live "/users/reset_password/:token", UserResetPasswordLive, :edit
+      live "/users/settings", UserSettingsLive, :edit
+      live "/users/profile", ProfileLive, :edit
+    end
+  end
+
+  scope "/moderator", CrysaWeb, as: :moderator do
+    pipe_through [:browser, :auth, :moderator]
+
+    get "/", ModeratorDashboardController, :index
+  end
+
+  scope "/admin", CrysaWeb, as: :admin do
+    pipe_through [:browser, :auth, :admin]
+
+    get "/", AdminDashboardController, :index
   end
 
   # Other scopes may use custom stacks.

@@ -25,17 +25,17 @@ defmodule Crysa.Catalog.Series do
     field :view_count, :integer, default: 0
     field :rating_count, :integer, default: 0
     field :rating_sum, :integer, default: 0
-    field :next_check_at, :utc_datetime
-    field :last_checked_at, :utc_datetime
+    field :next_check_at, :utc_datetime_usec
+    field :last_checked_at, :utc_datetime_usec
     field :check_interval_minutes, :integer, default: 60
-    field :last_chapter_at, :utc_datetime
+    field :last_chapter_at, :utc_datetime_usec
     field :last_error, :string
 
     has_many :chapters, Chapter
     many_to_many :categories, Category, join_through: "series_categories"
     many_to_many :authors, Author, join_through: "series_authors"
 
-    timestamps(type: :utc_datetime)
+    timestamps(type: :utc_datetime_usec)
   end
 
   @spec create_changeset(t(), map()) :: Ecto.Changeset.t()

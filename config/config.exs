@@ -2,7 +2,7 @@ import Config
 
 config :crysa,
   ecto_repos: [Crysa.Repo],
-  generators: [timestamp_type: :utc_datetime]
+  generators: [timestamp_type: :utc_datetime_usec]
 
 # Configure the endpoint
 config :crysa, CrysaWeb.Endpoint,
@@ -21,7 +21,9 @@ config :phoenix_live_view,
   root_tag_attribute: "phx-r"
 
 # Configure the mailer
-config :crysa, Crysa.Mailer, adapter: Swoosh.Adapters.Local
+config :crysa, Crysa.Mailer,
+  adapter: Swoosh.Adapters.Local,
+  from: {"CrysA", "noreply@crysa.example"}
 
 # Configure esbuild (the version is required)
 config :esbuild,

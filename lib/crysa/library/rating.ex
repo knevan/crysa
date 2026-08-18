@@ -17,7 +17,7 @@ defmodule Crysa.Library.Rating do
     belongs_to :user, User
     belongs_to :series, Series
 
-    timestamps(type: :utc_datetime)
+    timestamps(type: :utc_datetime_usec)
   end
 
   @spec changeset(t(), map()) :: Ecto.Changeset.t()

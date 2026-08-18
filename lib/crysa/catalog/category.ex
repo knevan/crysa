@@ -14,7 +14,7 @@ defmodule Crysa.Catalog.Category do
     field :name, :string
     field :normalized_name, :string
 
-    timestamps(type: :utc_datetime)
+    timestamps(type: :utc_datetime_usec)
   end
 
   @spec changeset(t(), map()) :: Ecto.Changeset.t()

@@ -18,7 +18,7 @@ defmodule Crysa.Library.SeriesViewLog do
     belongs_to :series, Series
     belongs_to :user, User
 
-    timestamps(type: :utc_datetime, updated_at: false)
+    timestamps(type: :utc_datetime_usec, updated_at: false)
   end
 
   @spec changeset(t(), map()) :: Ecto.Changeset.t()

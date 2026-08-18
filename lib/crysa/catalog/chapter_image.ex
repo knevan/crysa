@@ -20,7 +20,7 @@ defmodule Crysa.Catalog.ChapterImage do
 
     belongs_to :chapter, Chapter
 
-    timestamps(type: :utc_datetime)
+    timestamps(type: :utc_datetime_usec)
   end
 
   @spec changeset(t(), map()) :: Ecto.Changeset.t()

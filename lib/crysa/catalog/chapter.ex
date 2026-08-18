@@ -21,14 +21,14 @@ defmodule Crysa.Catalog.Chapter do
     field :status, :string, default: "pending"
     field :retry_count, :integer, default: 0
     field :last_error, :string
-    field :last_attempted_at, :utc_datetime
-    field :locked_at, :utc_datetime
-    field :published_at, :utc_datetime
+    field :last_attempted_at, :utc_datetime_usec
+    field :locked_at, :utc_datetime_usec
+    field :published_at, :utc_datetime_usec
 
     belongs_to :series, Series
     has_many :images, ChapterImage
 
-    timestamps(type: :utc_datetime)
+    timestamps(type: :utc_datetime_usec)
   end
 
   @spec changeset(t(), map()) :: Ecto.Changeset.t()

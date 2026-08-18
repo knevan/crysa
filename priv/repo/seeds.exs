@@ -18,7 +18,7 @@ admin_password_hash = System.get_env("CRYSA_BOOTSTRAP_ADMIN_PASSWORD_HASH")
 if admin_email && admin_username && admin_password_hash do
   superadmin_role = Accounts.get_role_by_name("superadmin")
 
-  case Accounts.create_user(%{
+  case Accounts.create_bootstrap_user(%{
          email: admin_email,
          username: admin_username,
          password_hash: admin_password_hash,

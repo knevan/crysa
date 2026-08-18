@@ -87,6 +87,43 @@ defmodule CrysaWeb.CoreComponents do
   end
 
   @doc """
+  Renders a simple form wrapper that renders the inner block and error alerts.
+
+  ## Examples
+
+      <.simple_form for={@form} phx-submit="save">
+        <.input field={@form[:email]} label="Email" />
+        <.input field={@form[:password]} type="password" label="Password" />
+        <:actions>
+          <.button>Save</.button>
+        </:actions>
+      </.simple_form>
+  """
+  attr :for, :any, default: nil, doc: "the datastructure for the form"
+  attr :as, :any, default: nil, doc: "the server side parameter to collect all input under"
+
+  attr :rest, :global,
+    include: ~w(autocomplete name rel action enctype method novalidate target multipart)
+
+  slot :inner_block, required: true
+  slot :actions, doc: "the slot for form actions, such as a submit button"
+
+  def simple_form(assigns) do
+    ~H"""
+    <.form :let={f} for={@for} as={@as} {@rest}>
+      <div class="card w-full max-w-md bg-base-100 shadow-xl mx-auto">
+        <div class="card-body">
+          {render_slot(@inner_block, f)}
+          <div :for={action <- @actions} class="card-actions justify-end mt-4">
+            {render_slot(action, f)}
+          </div>
+        </div>
+      </div>
+    </.form>
+    """
+  end
+
+  @doc """
   Renders a button with navigation support.
 
   ## Examples
@@ -95,7 +132,7 @@ defmodule CrysaWeb.CoreComponents do
       <.button phx-click="go" variant="primary">Send!</.button>
       <.button navigate={~p"/"}>Home</.button>
   """
-  attr :rest, :global, include: ~w(href navigate patch method download name value disabled)
+  attr :rest, :global, include: ~w(href navigate patch method download name value disabled type)
   attr :class, :any
   attr :variant, :string, values: ~w(primary)
   slot :inner_block, required: true
