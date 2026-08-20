@@ -20,7 +20,8 @@ defmodule Crysa.MixProject do
           {:phoenix, link: :markdown},
           {"phoenix:all", link: :markdown},
           {:phoenix, link: :markdown},
-          {:live_vue, link: :markdown}
+          {:live_vue, link: :markdown},
+          {:jason, link: :at}
         ]
       ]
     ]
@@ -29,7 +30,7 @@ defmodule Crysa.MixProject do
   def application do
     [
       mod: {Crysa.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :crypto]
     ]
   end
 
