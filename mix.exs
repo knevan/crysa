@@ -45,6 +45,7 @@ defmodule Crysa.MixProject do
 
   defp deps do
     [
+      {:quickbeam, "~> 0.8"},
       {:live_vue, "~> 1.0"},
       {:igniter, "~> 0.6", only: [:dev, :test]},
       {:phoenix, "~> 1.8.9"},
@@ -81,6 +82,7 @@ defmodule Crysa.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
+      {:bun, "~> 2.0", runtime: Mix.env() == :dev},
       {:nvir, "~> 0.16"},
       {:ex_slop, "~> 0.1", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
@@ -94,12 +96,10 @@ defmodule Crysa.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
-      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["compile", "tailwind crysa", "esbuild crysa"],
+      "assets.setup": ["bun.install --if-missing", "bun assets install"],
+      "assets.build": ["bun vite build"],
       "assets.deploy": [
-        "tailwind crysa --minify",
-        "esbuild crysa --minify",
-        "phx.digest"
+        "assets.build"
       ],
       retest: ["format", "test"],
       precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"]

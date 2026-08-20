@@ -1,10 +1,11 @@
 /* See the Tailwind configuration guide for advanced usage
    https://tailwindcss.com/docs/configuration */
 
-@import "tailwindcss" source(none);
+@import "tailwindcss";
 @import "phoenix-colocated/crysa/colocated.css";
 @source "../css";
 @source "../js";
+@source "../vue";
 @source "../../lib/crysa_web";
 /* Required for Tailwind to automatically pick up changes in colocated CSS files in dev */
 @source "../../_build/dev/phoenix-colocated/crysa/*/";
@@ -14,14 +15,14 @@
 @plugin "../vendor/heroicons";
 
 /* daisyUI Tailwind Plugin. */
-@plugin "daisyui/packages/bundle/daisyui" {
+@plugin "daisyui/index.js" {
   themes: false;
 }
 
 /* daisyUI theme plugin.
   We ship with two themes, a light one inspired on Phoenix colors and a dark one inspired
   on Elixir colors. Build your own at: https://daisyui.com/theme-generator/ */
-@plugin "daisyui/packages/bundle/daisyui-theme" {
+@plugin "daisyui/theme" {
   name: "dark";
   default: false;
   prefersdark: true;
@@ -56,7 +57,7 @@
   --noise: 0;
 }
 
-@plugin "daisyui/packages/bundle/daisyui-theme" {
+@plugin "daisyui/theme" {
   name: "light";
   default: true;
   prefersdark: false;

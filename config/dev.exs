@@ -24,10 +24,13 @@ config :crysa, CrysaWeb.Endpoint,
   code_reloader: true,
   debug_errors: true,
   secret_key_base: "hOft9aLmnVx0Gd1JKJ7ioPjHQlwEXQBuUahdxYgaGYWJVHCs4lpd0WKBwRpMwNIZ",
-  watchers: [
-    esbuild: {Esbuild, :install_and_run, [:crysa, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:crysa, ~w(--watch)]}
-  ]
+  watchers: [vite: {Bun, :install_and_run, [:vite, ~w(dev)]}],
+  static_url: [host: "localhost", port: 5173]
+
+# watchers: [
+#   esbuild: {Esbuild, :install_and_run, [:crysa, ~w(--sourcemap=inline --watch)]},
+#   tailwind: {Tailwind, :install_and_run, [:crysa, ~w(--watch)]}
+# ]
 
 # ## SSL Support
 # mix phx.gen.cert

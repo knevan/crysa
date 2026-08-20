@@ -82,6 +82,18 @@ defmodule CrysaWeb do
       # Translation
       use Gettext, backend: CrysaWeb.Gettext
 
+      # Add support for Vue components
+      use LiveVue
+
+      # Generate component for each vue file, so you can use <.ComponentName> syntax
+      # instead of <.vue v-component="ComponentName">
+      use LiveVue.Components, vue_root: ["./assets/vue", "./lib/crysa_web"]
+
+      # Override ~H sigil to inject shared props into <.vue> tags
+      # Configure shared props in config :live_vue, :shared_props
+      import Phoenix.Component, except: [sigil_H: 2]
+      import LiveVue.SharedPropsView, only: [sigil_H: 2]
+
       # HTML escaping functionality
       import Phoenix.HTML
       # Core UI components

@@ -97,6 +97,7 @@ defmodule CrysaWeb.Router do
       pipe_through :browser
 
       live_dashboard "/dashboard", metrics: CrysaWeb.Telemetry
+      live "/vue_demo", CrysaWeb.VueDemoLive
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end

@@ -2,6 +2,7 @@
 /cover/
 /deps/
 /doc/
+node_modules/
 /.expert
 /.fetch
 /.env.dev
