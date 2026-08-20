@@ -34,3 +34,11 @@ config :phoenix_live_view,
 # Sort query params output of verified routes for robust url comparisons
 config :phoenix,
   sort_verified_routes_query_params: true
+
+# Storage: isolated temp directory so tests never pollute priv/static/uploads
+config :crysa, Crysa.Storage,
+  adapter: Crysa.Storage.Local,
+  storage_root: Path.expand("../tmp/test_uploads", __DIR__),
+  url_prefix: "/uploads",
+  cdn_base_url: nil,
+  trusted_cdn_urls: []

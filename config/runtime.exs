@@ -123,3 +123,69 @@ if config_env() == :prod do
   #
   # See https://swoosh.hexdocs.pm/Swoosh.html#module-installation for details.
 end
+
+# Storage configuration (Phase 6)
+# In dev/test the Local adapter is used via config/config.exs and config/test.exs.
+# In prod, when R2/S3 env vars are present, the S3 adapter is enabled.
+if config_env() == :prod do
+  r2_bucket = env!("R2_BUCKET_NAME", :string, nil)
+  r2_account_id = env!("R2_ACCOUNT_ID", :string, nil)
+  r2_access_key_id = env!("R2_ACCESS_KEY_ID", :string, nil)
+  r2_secret_access_key = env!("R2_SECRET_ACCESS_KEY", :string, nil)
+  r2_cdn_url = env!("R2_DOMAIN_CDN_URL", :string, nil)
+
+  if r2_bucket && r2_access_key_id && r2_secret_access_key do
+    endpoint =
+      cond do
+        r2_account_id && r2_account_id != "" ->
+          "https://#{r2_account_id}.r2.cloudflarestorage.com"
+
+        true ->
+          env!("R2_ENDPOINT_URL", :string, nil)
+      end
+
+    config :crysa, Crysa.Storage,
+      adapter: Crysa.Storage.S3,
+      bucket: r2_bucket,
+      account_id: r2_account_id,
+      access_key_id: r2_access_key_id,
+      secret_access_key: r2_secret_access_key,
+      cdn_base_url: r2_cdn_url,
+      endpoint_url: endpoint,
+      region: env!("R2_REGION", :string, "auto"),
+      trusted_cdn_urls:
+        if(r2_cdn_url && r2_cdn_url != "", do: [String.trim_trailing(r2_cdn_url, "/")], else: [])
+  else
+    explicit_local = System.get_env("STORAGE_ADAPTER") == "local"
+
+    unless explicit_local do
+      raise """
+      R2 storage not configured in prod: set R2_BUCKET_NAME, R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY,
+      or explicitly set STORAGE_ADAPTER=local to allow ephemeral local storage (data will be lost on redeploy).
+      """
+    end
+
+    # Explicit local in prod — keep Local adapter but warn; data is ephemeral.
+    require Logger
+
+    Logger.warning(
+      "storage using Local adapter in prod (STORAGE_ADAPTER=local) — uploads are ephemeral"
+    )
+  end
+end
+
+# Allow explicit CDN base URL in non-prod via env for manual testing
+if config_env() in [:dev, :test] do
+  cdn_url = System.get_env("CDN_BASE_URL")
+
+  if cdn_url && cdn_url != "" do
+    trimmed = String.trim_trailing(cdn_url, "/")
+
+    config :crysa, Crysa.Storage,
+      adapter: Crysa.Storage.Local,
+      storage_root: Path.expand("../priv/static/uploads", __DIR__),
+      url_prefix: "/uploads",
+      cdn_base_url: trimmed,
+      trusted_cdn_urls: [trimmed]
+  end
+end
