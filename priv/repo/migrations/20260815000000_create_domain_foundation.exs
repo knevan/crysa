@@ -8,7 +8,7 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
       add :name, :string, null: false
       add :description, :text
 
-      timestamps(type: :utc_datetime)
+      timestamps(type: :utc_datetime_usec)
     end
 
     create unique_index(:roles, [:name])
@@ -19,9 +19,9 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
       add :password_hash, :string, null: false
       add :role_id, references(:roles, on_delete: :restrict), null: false
       add :active, :boolean, null: false, default: true
-      add :confirmed_at, :utc_datetime
+      add :confirmed_at, :utc_datetime_usec
 
-      timestamps(type: :utc_datetime)
+      timestamps(type: :utc_datetime_usec)
     end
 
     execute(
@@ -41,7 +41,7 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
       add :display_name, :string
       add :avatar_url, :text
 
-      timestamps(type: :utc_datetime)
+      timestamps(type: :utc_datetime_usec)
     end
 
     create unique_index(:user_profiles, [:user_id])
@@ -49,10 +49,10 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
     create table(:password_reset_tokens) do
       add :user_id, references(:users, on_delete: :delete_all), null: false
       add :token_digest, :binary, null: false
-      add :expires_at, :utc_datetime, null: false
-      add :used_at, :utc_datetime
+      add :expires_at, :utc_datetime_usec, null: false
+      add :used_at, :utc_datetime_usec
 
-      timestamps(type: :utc_datetime, updated_at: false)
+      timestamps(type: :utc_datetime_usec, updated_at: false)
     end
 
     create unique_index(:password_reset_tokens, [:token_digest])
@@ -63,7 +63,7 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
       add :name, :string, null: false
       add :normalized_name, :string, null: false
 
-      timestamps(type: :utc_datetime)
+      timestamps(type: :utc_datetime_usec)
     end
 
     create unique_index(:categories, [:normalized_name])
@@ -72,7 +72,7 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
       add :name, :string, null: false
       add :normalized_name, :string, null: false
 
-      timestamps(type: :utc_datetime)
+      timestamps(type: :utc_datetime_usec)
     end
 
     create unique_index(:authors, [:normalized_name])
@@ -90,13 +90,13 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
       add :view_count, :integer, null: false, default: 0
       add :rating_count, :integer, null: false, default: 0
       add :rating_sum, :integer, null: false, default: 0
-      add :next_check_at, :utc_datetime
-      add :last_checked_at, :utc_datetime
+      add :next_check_at, :utc_datetime_usec
+      add :last_checked_at, :utc_datetime_usec
       add :check_interval_minutes, :integer, null: false, default: 60
-      add :last_chapter_at, :utc_datetime
+      add :last_chapter_at, :utc_datetime_usec
       add :last_error, :text
 
-      timestamps(type: :utc_datetime)
+      timestamps(type: :utc_datetime_usec)
     end
 
     create unique_index(:series, [:slug])
@@ -142,11 +142,11 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
       add :status, :string, null: false, default: "pending"
       add :retry_count, :integer, null: false, default: 0
       add :last_error, :text
-      add :last_attempted_at, :utc_datetime
-      add :locked_at, :utc_datetime
-      add :published_at, :utc_datetime
+      add :last_attempted_at, :utc_datetime_usec
+      add :locked_at, :utc_datetime_usec
+      add :published_at, :utc_datetime_usec
 
-      timestamps(type: :utc_datetime)
+      timestamps(type: :utc_datetime_usec)
     end
 
     create unique_index(:series_chapters, [:series_id, :chapter_key])
@@ -163,7 +163,7 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
       add :height, :integer
       add :byte_size, :integer
 
-      timestamps(type: :utc_datetime)
+      timestamps(type: :utc_datetime_usec)
     end
 
     create unique_index(:chapter_images, [:chapter_id, :image_order])
@@ -172,7 +172,7 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
       add :user_id, references(:users, on_delete: :delete_all), null: false
       add :series_id, references(:series, on_delete: :delete_all), null: false
 
-      timestamps(type: :utc_datetime, updated_at: false)
+      timestamps(type: :utc_datetime_usec, updated_at: false)
     end
 
     create unique_index(:user_bookmarks, [:user_id, :series_id])
@@ -183,7 +183,7 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
       add :series_id, references(:series, on_delete: :delete_all), null: false
       add :rating, :integer, null: false
 
-      timestamps(type: :utc_datetime)
+      timestamps(type: :utc_datetime_usec)
     end
 
     create unique_index(:series_ratings, [:user_id, :series_id])
@@ -199,7 +199,7 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
       add :ip_hash, :binary
       add :user_agent_hash, :binary
 
-      timestamps(type: :utc_datetime, updated_at: false)
+      timestamps(type: :utc_datetime_usec, updated_at: false)
     end
 
     create index(:series_view_log, [:series_id, :inserted_at])
@@ -212,11 +212,11 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
       add :parent_id, references(:comments, on_delete: :restrict)
       add :body_markdown, :text, null: false
       add :body_html, :text, null: false
-      add :deleted_at, :utc_datetime
+      add :deleted_at, :utc_datetime_usec
       add :deleted_by_id, references(:users, on_delete: :nilify_all)
       add :vote_score, :integer, null: false, default: 0
 
-      timestamps(type: :utc_datetime)
+      timestamps(type: :utc_datetime_usec)
     end
 
     create index(:comments, [:series_id, :inserted_at])
@@ -234,7 +234,7 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
       add :content_type, :string, null: false
       add :byte_size, :integer, null: false
 
-      timestamps(type: :utc_datetime)
+      timestamps(type: :utc_datetime_usec)
     end
 
     create index(:comment_attachments, [:comment_id])
@@ -249,7 +249,7 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
 
       add :vote, :integer, null: false
 
-      timestamps(type: :utc_datetime)
+      timestamps(type: :utc_datetime_usec)
     end
 
     create index(:comment_votes, [:comment_id])
@@ -260,9 +260,9 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
       add :actor_id, references(:users, on_delete: :nilify_all)
       add :comment_id, references(:comments, on_delete: :delete_all)
       add :action, :string, null: false
-      add :read_at, :utc_datetime
+      add :read_at, :utc_datetime_usec
 
-      timestamps(type: :utc_datetime)
+      timestamps(type: :utc_datetime_usec)
     end
 
     create index(:notifications, [:recipient_id, :read_at])
@@ -276,10 +276,10 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
       add :details, :text
       add :status, :string, null: false, default: "pending"
       add :resolved_by_id, references(:users, on_delete: :nilify_all)
-      add :resolved_at, :utc_datetime
+      add :resolved_at, :utc_datetime_usec
       add :resolution_note, :text
 
-      timestamps(type: :utc_datetime)
+      timestamps(type: :utc_datetime_usec)
     end
 
     create index(:reports, [:status, :inserted_at])

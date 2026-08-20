@@ -227,7 +227,10 @@ defmodule Crysa.DbConstraintsTest do
   end
 
   defp insert_role(name) do
-    Repo.insert!(%Role{} |> Ecto.Changeset.change(%{name: name}))
+    case Repo.get_by(Role, name: name) do
+      nil -> Repo.insert!(%Role{} |> Ecto.Changeset.change(%{name: name}))
+      role -> role
+    end
   end
 
   defp insert_user(role, email) do

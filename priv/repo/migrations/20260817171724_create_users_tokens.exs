@@ -7,9 +7,9 @@ defmodule Crysa.Repo.Migrations.CreateUsersTokens do
       add :token, :binary, null: false
       add :context, :string, null: false
       add :sent_to, :string
-      add :authenticated_at, :utc_datetime
+      add :authenticated_at, :utc_datetime_usec
 
-      timestamps(type: :utc_datetime, updated_at: false)
+      timestamps(type: :utc_datetime_usec, updated_at: false)
     end
 
     create index(:users_tokens, [:user_id])

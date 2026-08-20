@@ -12,7 +12,6 @@ defmodule Crysa.LibraryConcurrencyTest do
 
   import Ecto.Query
 
-  alias Crysa.Accounts.Role
   alias Crysa.Accounts.User
   alias Crysa.AccountsFixtures
   alias Crysa.Catalog.Series
@@ -25,18 +24,8 @@ defmodule Crysa.LibraryConcurrencyTest do
 
   setup_all do
     # Pre-create every role serially so concurrent user_fixture calls never
-    # race to insert the same role row. Roles are removed when this module
-    # finishes because they live outside the SQL sandbox and would otherwise
-    # pollute the shared test database for sandboxed tests that insert roles
-    # blindly.
+    # race to insert the same role row.
     unboxed(fn -> Enum.each(~w(superadmin admin moderator user), &AccountsFixtures.role/1) end)
-
-    on_exit(fn ->
-      unboxed(fn ->
-        Repo.delete_all(from(r in Role, where: r.name in ^~w(superadmin admin moderator user)))
-      end)
-    end)
-
     :ok
   end
 
