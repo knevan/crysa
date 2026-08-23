@@ -27,7 +27,8 @@ defmodule Crysa.Catalog.Series do
     :rating_sum,
     :next_check_at,
     :last_checked_at,
-    :check_interval_minutes,
+    :manual_check_interval_minutes,
+    :check_retry_count,
     :last_chapter_at,
     :last_error
   ]
@@ -47,7 +48,12 @@ defmodule Crysa.Catalog.Series do
     field :rating_sum, :integer, default: 0
     field :next_check_at, :utc_datetime_usec
     field :last_checked_at, :utc_datetime_usec
-    field :check_interval_minutes, :integer, default: 60
+
+    # Nullable manual override; nil means derive from publication_status.
+    field :manual_check_interval_minutes, :integer
+
+    # Consecutive check failures; drives the backoff multiplier and resets on success.
+    field :check_retry_count, :integer, default: 0
     field :last_chapter_at, :utc_datetime_usec
     field :last_error, :string
 
@@ -85,10 +91,11 @@ defmodule Crysa.Catalog.Series do
     |> validate_number(:view_count, greater_than_or_equal_to: 0)
     |> validate_number(:rating_count, greater_than_or_equal_to: 0)
     |> validate_number(:rating_sum, greater_than_or_equal_to: 0)
-    |> validate_number(:check_interval_minutes,
+    |> validate_number(:manual_check_interval_minutes,
       greater_than_or_equal_to: 15,
       less_than_or_equal_to: 10_080
     )
+    |> validate_number(:check_retry_count, greater_than_or_equal_to: 0)
     |> validate_length(:last_error, max: 2_000)
     |> check_constraint(:publication_status, name: :series_publication_status_check)
     |> check_constraint(:processing_status, name: :series_processing_status_check)

@@ -8,6 +8,10 @@ config :crysa, Crysa.Repo,
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
+# Oban: manual testing mode — jobs are only executed when explicitly
+# performed in tests (Oban.Testing.perform_job/3).
+config :crysa, Oban, testing: :manual
+
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
 config :crysa, CrysaWeb.Endpoint,

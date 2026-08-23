@@ -73,7 +73,12 @@ config :logger, :default_formatter,
     :adapter,
     :url,
     :body,
-    :sample
+    :sample,
+    :attempt,
+    :series_id,
+    :chapter_id,
+    :objects,
+    :operation
   ]
 
 # Use Jason for JSON parsing in Phoenix
@@ -87,6 +92,25 @@ config :crysa, Crysa.Storage,
   url_prefix: "/uploads",
   cdn_base_url: nil,
   trusted_cdn_urls: []
+
+# Oban: durable background jobs (scraping checks, chapter downloads,
+# repairs, deletions, cleanups). Queue concurrency is deliberately
+# conservative; size from DB pool, target-host capacity and CPU budget.
+config :crysa, Oban,
+  repo: Crysa.Repo,
+  queues: [series_checks: 4, chapter_downloads: 2, deletions: 1, maintenance: 1],
+  plugins: [
+    {Oban.Plugins.Cron,
+     crontab: [
+       {"* * * * *", Crysa.Processing.Jobs.SeriesCheckScheduler},
+       {"17 */6 * * *", Crysa.Processing.Jobs.PasswordResetTokenCleanup},
+       {"43 4 * * *", Crysa.Processing.Jobs.ViewLogCleanup}
+     ]},
+    {Oban.Plugins.Pruner, max_age: 7 * 24 * 60 * 60}
+  ]
+
+# Image encoding adapter (libvips via Vix, precompiled NIF + bundled libvips).
+config :crysa, Crysa.Images, encoder: Crysa.Images.Encoder.Vix
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

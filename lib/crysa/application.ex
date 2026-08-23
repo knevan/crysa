@@ -10,9 +10,12 @@ defmodule Crysa.Application do
       Crysa.Repo,
       {DNSCluster, query: Application.get_env(:crysa, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Crysa.PubSub},
-      # Start a worker by calling: Crysa.Worker.start_link(arg)
-      # {Crysa.Worker, arg},
-      # Start to serve requests, typically the last entry
+      # Per-host outbound rate gate shared by all scraping jobs.
+      Crysa.Scraping.Throttle,
+      # ETS owner for the published-config read-through cache.
+      Crysa.Scraping.ConfigCache,
+      # Durable background job processing.
+      {Oban, Application.fetch_env!(:crysa, Oban)},
       CrysaWeb.Endpoint
     ]
 

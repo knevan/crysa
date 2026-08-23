@@ -20,8 +20,7 @@ defmodule Crysa.MixProject do
           {:phoenix, link: :markdown},
           {"phoenix:all", link: :markdown},
           {:phoenix, link: :markdown},
-          {:live_vue, link: :markdown},
-          {:jason, link: :at}
+          {:live_vue, link: :markdown}
         ]
       ]
     ]
@@ -76,6 +75,9 @@ defmodule Crysa.MixProject do
       {:swoosh, "~> 1.16"},
       {:argon2_elixir, "~> 4.1"},
       {:req, "~> 0.5"},
+      {:floki, "~> 0.37"},
+      {:oban, "~> 2.19"},
+      {:vix, "~> 0.41"},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 1.0"},

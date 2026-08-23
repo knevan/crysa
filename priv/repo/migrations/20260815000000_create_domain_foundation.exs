@@ -92,7 +92,12 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
       add :rating_sum, :integer, null: false, default: 0
       add :next_check_at, :utc_datetime_usec
       add :last_checked_at, :utc_datetime_usec
-      add :check_interval_minutes, :integer, null: false, default: 60
+      # Nullable manual override: NULL means derive the interval from the
+      # publication status; a non-null value is a manual override in minutes.
+      add :manual_check_interval_minutes, :integer
+      # Consecutive-failure counter driving the check backoff multiplier;
+      # reset to zero on every successful check.
+      add :check_retry_count, :integer, null: false, default: 0
       add :last_chapter_at, :utc_datetime_usec
       add :last_error, :text
 
@@ -104,6 +109,17 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
     create index(:series, [:publication_status])
     create index(:series, [:processing_status])
     create index(:series, [:next_check_at])
+
+    # Partial index for the series-check scheduler: only rows that are due and
+    # eligible (publication status schedulable, not in a deletion lifecycle).
+    create index(:series, [:next_check_at],
+             name: :series_due_check_index,
+             where: """
+             next_check_at IS NOT NULL
+             AND publication_status IN ('ongoing', 'hiatus', 'completed')
+             AND processing_status NOT IN ('pending_deletion', 'deleting', 'deletion_failed')
+             """
+           )
 
     create index(:series, ["last_chapter_at DESC NULLS LAST", "id DESC"],
              name: :series_last_chapter_sort_index
