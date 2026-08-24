@@ -1,6 +1,11 @@
 defmodule CrysaWeb.UserLoginLive do
   @moduledoc """
-  Login page.
+  Login page — shadcn-vue skin over native POST to `UserSessionController`.
+
+  The form is a LiveVue island (`LoginForm.vue`) that renders `Card`/`Input`/`Button`
+  but submits via a standard `<form method=\"post\">` so the session cookie is set
+  via an HTTP response (`HttpOnly`, `Secure`, `SameSite`). The LiveView never
+  handles the credentials itself and never calls `put_session`.
   """
 
   use CrysaWeb, :live_view
@@ -11,70 +16,23 @@ defmodule CrysaWeb.UserLoginLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="mx-auto max-w-md space-y-6">
-      <div class="text-center">
-        <.header>
-          <p>Log in</p>
-          <:subtitle>
-            Don't have an account? <.link
-              navigate={~p"/users/register"}
-              class="font-semibold text-primary hover:underline"
-              phx-no-format
-            >
-              Sign up
-            </.link> for an account now.
-          </:subtitle>
-        </.header>
-      </div>
-
-      <.simple_form
-        for={@form}
-        id="login_form"
-        action={~p"/users/log-in"}
-        phx-submit="submit"
-        phx-trigger-action={@trigger_submit}
-      >
-        <.input
-          field={@form[:login]}
-          label="Email or username"
-          autocomplete="username"
-          required
-        />
-        <.input
-          field={@form[:password]}
-          type="password"
-          label="Password"
-          autocomplete="current-password"
-          required
-        />
-
-        <div class="text-sm">
-          <.link href={~p"/users/reset_password"} class="link link-primary">
-            Forgot your password?
-          </.link>
-        </div>
-
-        <:actions>
-          <.button class="w-full">Log in</.button>
-        </:actions>
-      </.simple_form>
-    </div>
+    <.vue
+      v-component="LoginForm"
+      v-ssr={false}
+      action={@action}
+      csrfToken={@csrf_token}
+      login={@login}
+    />
     """
   end
 
   @impl true
   def mount(_params, _session, socket) do
-    login = Phoenix.Flash.get(socket.assigns.flash, :login)
-
     {:ok,
      assign(socket,
-       form: to_form(%{"login" => login}, as: "user"),
-       trigger_submit: false
+       action: ~p"/users/log-in",
+       csrf_token: Phoenix.Controller.get_csrf_token(),
+       login: Phoenix.Flash.get(socket.assigns.flash, :login)
      )}
-  end
-
-  @impl true
-  def handle_event("submit", _params, socket) do
-    {:noreply, assign(socket, :trigger_submit, true)}
   end
 end

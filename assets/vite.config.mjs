@@ -1,3 +1,5 @@
+import path from "path"
+import { fileURLToPath } from "url"
 import { defineConfig } from 'vite'
 import vue from "@vitejs/plugin-vue";
 import liveVuePlugin from "live_vue/vitePlugin";
@@ -28,9 +30,17 @@ export default defineConfig({
   },
   // LV Colocated JS and Hooks
   // https://hexdocs.pm/phoenix_live_view/Phoenix.LiveView.ColocatedJS.html#module-internals
+  // Resolve "@" to project root (crysa/) so that imports like "@/assets/vue/lib/utils"
+  // match both Vite and tsconfig "@/*": ["./*"] and components.json aliases.
+  // Use import.meta.dirname when available (Vite native loader), fallback to fileURLToPath.
   resolve: {
     alias: {
-      "@": ".",
+      "@": path.resolve(
+        typeof import.meta.dirname !== "undefined"
+          ? import.meta.dirname
+          : path.dirname(fileURLToPath(import.meta.url)),
+        ".."
+      ),
       "phoenix-colocated": `${process.env.MIX_BUILD_PATH}/phoenix-colocated`,
     },
   },

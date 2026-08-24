@@ -44,8 +44,8 @@ defmodule Crysa.DataCase do
   A helper that transforms changeset errors into a map of messages.
 
       assert {:error, changeset} = Accounts.register_user(%{password: "short"})
-      assert "should be at least 12 character(s)" in errors_on(changeset).password
-      assert %{password: ["should be at least 12 character(s)"]} = errors_on(changeset)
+      assert "should be at least 8 character(s)" in errors_on(changeset).password
+      assert %{password: ["should be at least 8 character(s)"]} = errors_on(changeset)
 
   """
   def errors_on(changeset) do

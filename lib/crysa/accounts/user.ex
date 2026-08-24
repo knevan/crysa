@@ -9,7 +9,7 @@ defmodule Crysa.Accounts.User do
 
   alias Crysa.Accounts.{Role, UserProfile, UsersToken}
 
-  @password_min_length 12
+  @password_min_length 8
   @password_max_length 72
 
   @type t :: %__MODULE__{}
@@ -94,7 +94,7 @@ defmodule Crysa.Accounts.User do
     changeset
     |> normalize_email_and_username()
     |> validate_email_format()
-    |> validate_username()
+    |> validate_username_for_registration()
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_password_policy()
     |> unique_constraint(:email, name: :users_lower_email_index)
@@ -104,8 +104,7 @@ defmodule Crysa.Accounts.User do
   defp validate_password_policy(changeset) do
     changeset
     |> validate_length(:password, min: @password_min_length, max: @password_max_length)
-    |> validate_format(:password, ~r/[a-zA-Z]/, message: "must contain at least one letter")
-    |> validate_format(:password, ~r/\d/, message: "must contain at least one digit")
+    |> validate_format(:password, ~r/[a-z]/, message: "must contain at least one lowercase letter")
   end
 
   defp put_password_hash(changeset) do
@@ -159,9 +158,14 @@ defmodule Crysa.Accounts.User do
 
   defp validate_username(changeset) do
     changeset
-    |> validate_format(:username, ~r/^[a-zA-Z0-9_]+$/,
-      message: "may only contain letters, numbers, and underscores"
+    |> validate_format(:username, ~r/^[a-zA-Z0-9]+$/,
+      message: "may only contain letters and numbers"
     )
     |> validate_length(:username, min: 3, max: 40)
+  end
+
+  defp validate_username_for_registration(changeset) do
+    changeset
+    |> validate_username()
   end
 end

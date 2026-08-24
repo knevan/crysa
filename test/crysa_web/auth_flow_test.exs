@@ -13,14 +13,16 @@ defmodule CrysaWeb.AuthFlowTest do
 
   describe "registration" do
     test "renders the registration page", %{conn: conn} do
-      conn = get(conn, ~p"/users/register")
-      assert html_response(conn, 200) =~ "Create your account"
+      {:ok, view, _html} = live(conn, ~p"/users/register")
+      vue = LiveVue.Test.get_vue(view)
+      assert vue.component == "RegistrationForm"
+      assert vue.props["action"] == "/users/register"
     end
 
     test "creates an account and logs in", %{conn: conn} do
       params = %{
         email: "new@example.com",
-        username: "newuser",
+        username: "newuser1",
         password: "password1234",
         password_confirmation: "password1234"
       }

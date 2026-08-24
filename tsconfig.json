@@ -1,16 +1,24 @@
 {
   "compilerOptions": {
-    "allowJs": true,
-    "lib": ["ES2015", "DOM"],
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "jsx": "preserve",
+    "strict": true,
     "noEmit": true,
     "skipLibCheck": true,
+    "allowJs": true,
+    "types": ["vite/client", "node"],
     "paths": {
-      "*": [ "./deps/*", "./node_modules/*" ]
-    },
-    "strict": true,
-    "types": [ "vite/client" ]
+      "@/*": ["./*"],
+      "*": ["./deps/*", "./node_modules/*"]
+    }
   },
   "include": [
     "./assets/js/**/*",
@@ -18,6 +26,7 @@
     "./lib/crysa_web/**/*"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "deps"
   ]
 }

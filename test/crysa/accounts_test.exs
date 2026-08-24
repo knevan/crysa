@@ -33,9 +33,11 @@ defmodule Crysa.AccountsTest do
       assert changeset.errors[:password]
     end
 
-    test "rejects a password without a digit" do
+    test "rejects a password without a lowercase letter" do
       {:error, changeset} =
-        Accounts.register_user(register_params(%{password: "onlyletters"}))
+        Accounts.register_user(
+          register_params(%{password: "12345678", password_confirmation: "12345678"})
+        )
 
       refute changeset.valid?
       assert changeset.errors[:password]
