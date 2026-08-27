@@ -20,7 +20,7 @@ defmodule CrysaWeb.UserAuthTest do
     test "stores a session token and redirects", %{conn: conn, user: user} do
       conn = UserAuth.log_in_user(conn, user)
 
-      assert redirected_to(conn) == ~p"/users/settings"
+      assert redirected_to(conn) == ~p"/"
       assert get_session(conn, :user_token)
       assert get_session(conn, :live_socket_id)
       assert Repo.one(from t in UsersToken, where: t.user_id == ^user.id)
@@ -72,7 +72,7 @@ defmodule CrysaWeb.UserAuthTest do
       conn = UserAuth.require_authenticated_user(conn, [])
 
       assert conn.halted
-      assert redirected_to(conn) == ~p"/users/log-in"
+      assert redirected_to(conn) == ~p"/auth/login"
 
       assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
                "You must log in to access this page."

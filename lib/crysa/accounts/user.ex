@@ -104,7 +104,9 @@ defmodule Crysa.Accounts.User do
   defp validate_password_policy(changeset) do
     changeset
     |> validate_length(:password, min: @password_min_length, max: @password_max_length)
-    |> validate_format(:password, ~r/[a-z]/, message: "must contain at least one lowercase letter")
+    |> validate_format(:password, ~r/[a-z]/,
+      message: "must contain at least one lowercase letter"
+    )
   end
 
   defp put_password_hash(changeset) do

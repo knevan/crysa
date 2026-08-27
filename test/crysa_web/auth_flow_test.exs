@@ -13,10 +13,10 @@ defmodule CrysaWeb.AuthFlowTest do
 
   describe "registration" do
     test "renders the registration page", %{conn: conn} do
-      {:ok, view, _html} = live(conn, ~p"/users/register")
+      {:ok, view, _html} = live(conn, ~p"/auth/register")
       vue = LiveVue.Test.get_vue(view)
       assert vue.component == "RegistrationForm"
-      assert vue.props["action"] == "/users/register"
+      assert vue.props["action"] == "/auth/register"
     end
 
     test "creates an account and logs in", %{conn: conn} do
@@ -27,9 +27,9 @@ defmodule CrysaWeb.AuthFlowTest do
         password_confirmation: "password1234"
       }
 
-      conn = post(conn, ~p"/users/register", user: params)
+      conn = post(conn, ~p"/auth/register", user: params)
 
-      assert redirected_to(conn) == ~p"/users/settings"
+      assert redirected_to(conn) == ~p"/"
       assert get_session(conn, :user_token)
 
       user = Accounts.get_user_by_email("new@example.com")
@@ -44,9 +44,9 @@ defmodule CrysaWeb.AuthFlowTest do
         password_confirmation: "short"
       }
 
-      conn = post(conn, ~p"/users/register", user: params)
+      conn = post(conn, ~p"/auth/register", user: params)
 
-      assert redirected_to(conn) == ~p"/users/register"
+      assert redirected_to(conn) == ~p"/auth/register"
       assert Phoenix.Flash.get(conn.assigns.flash, :error)
       refute get_session(conn, :user_token)
     end
@@ -59,31 +59,31 @@ defmodule CrysaWeb.AuthFlowTest do
 
     test "logs in with an email", %{conn: conn, user: user} do
       conn =
-        post(conn, ~p"/users/log-in", %{
+        post(conn, ~p"/auth/login", %{
           user: %{login: user.email, password: AccountsFixtures.password()}
         })
 
-      assert redirected_to(conn) == ~p"/users/settings"
+      assert redirected_to(conn) == ~p"/"
       assert get_session(conn, :user_token)
     end
 
     test "logs in with a username", %{conn: conn, user: user} do
       conn =
-        post(conn, ~p"/users/log-in", %{
+        post(conn, ~p"/auth/login", %{
           user: %{login: user.username, password: AccountsFixtures.password()}
         })
 
-      assert redirected_to(conn) == ~p"/users/settings"
+      assert redirected_to(conn) == ~p"/"
       assert get_session(conn, :user_token)
     end
 
     test "rejects a wrong password", %{conn: conn, user: user} do
       conn =
-        post(conn, ~p"/users/log-in", %{
+        post(conn, ~p"/auth/login", %{
           user: %{login: user.email, password: "wrongpassword"}
         })
 
-      assert redirected_to(conn) == ~p"/users/log-in"
+      assert redirected_to(conn) == ~p"/auth/login"
       assert Phoenix.Flash.get(conn.assigns.flash, :error) =~ "Invalid"
     end
 
@@ -91,11 +91,11 @@ defmodule CrysaWeb.AuthFlowTest do
       inactive = AccountsFixtures.user_fixture(%{active: false})
 
       conn =
-        post(conn, ~p"/users/log-in", %{
+        post(conn, ~p"/auth/login", %{
           user: %{login: inactive.email, password: AccountsFixtures.password()}
         })
 
-      assert redirected_to(conn) == ~p"/users/log-in"
+      assert redirected_to(conn) == ~p"/auth/login"
       assert Phoenix.Flash.get(conn.assigns.flash, :error) =~ "disabled"
     end
 
@@ -106,7 +106,7 @@ defmodule CrysaWeb.AuthFlowTest do
         conn
         |> Plug.Test.init_test_session(%{})
         |> put_session(:user_token, token)
-        |> delete(~p"/users/log-out")
+        |> delete(~p"/auth/logout")
 
       assert redirected_to(conn) == ~p"/"
       assert get_session(conn, :user_token) == nil
@@ -117,7 +117,7 @@ defmodule CrysaWeb.AuthFlowTest do
   describe "protected pages" do
     test "redirects unauthenticated users away from settings", %{conn: conn} do
       conn = get(conn, ~p"/users/settings")
-      assert redirected_to(conn) == ~p"/users/log-in"
+      assert redirected_to(conn) == ~p"/auth/login"
     end
 
     test "renders settings for an authenticated user", %{conn: conn} do
@@ -181,11 +181,11 @@ defmodule CrysaWeb.AuthFlowTest do
       user = AccountsFixtures.user_fixture()
 
       conn =
-        post(conn, ~p"/users/reset_password", %{
+        post(conn, ~p"/auth/reset-password", %{
           user: %{email: user.email}
         })
 
-      assert redirected_to(conn) == ~p"/users/log-in"
+      assert redirected_to(conn) == ~p"/auth/login"
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "If your email is in our system"
 
       assert_email_sent(fn email ->
@@ -196,11 +196,11 @@ defmodule CrysaWeb.AuthFlowTest do
 
     test "does not leak whether an email exists", %{conn: conn} do
       conn =
-        post(conn, ~p"/users/reset_password", %{
+        post(conn, ~p"/auth/reset-password", %{
           user: %{email: "nobody@example.com"}
         })
 
-      assert redirected_to(conn) == ~p"/users/log-in"
+      assert redirected_to(conn) == ~p"/auth/login"
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "If your email is in our system"
     end
 
@@ -209,11 +209,11 @@ defmodule CrysaWeb.AuthFlowTest do
       {:ok, token} = Accounts.create_reset_token(user)
 
       conn =
-        post(conn, ~p"/users/reset_password/#{token}", %{
+        post(conn, ~p"/users/reset-password/#{token}", %{
           user: %{password: "brandnewpassword9", password_confirmation: "brandnewpassword9"}
         })
 
-      assert redirected_to(conn) == ~p"/users/log-in"
+      assert redirected_to(conn) == ~p"/auth/login"
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "password has been reset"
 
       assert {:ok, authenticated} =
@@ -235,11 +235,11 @@ defmodule CrysaWeb.AuthFlowTest do
       })
 
       conn =
-        post(conn, ~p"/users/reset_password/#{token}", %{
+        post(conn, ~p"/users/reset-password/#{token}", %{
           user: %{password: "brandnewpassword9", password_confirmation: "brandnewpassword9"}
         })
 
-      assert redirected_to(conn) == ~p"/users/reset_password"
+      assert redirected_to(conn) == ~p"/auth/reset-password"
       assert Phoenix.Flash.get(conn.assigns.flash, :error) =~ "invalid or has expired"
 
       assert {:error, :invalid_credentials} =
@@ -247,7 +247,7 @@ defmodule CrysaWeb.AuthFlowTest do
     end
 
     test "renders the invalid token page", %{conn: conn} do
-      conn = get(conn, ~p"/users/reset_password/invalid-token")
+      conn = get(conn, ~p"/users/reset-password/invalid-token")
       assert html_response(conn, 200) =~ "Reset link invalid or expired"
     end
   end
@@ -337,7 +337,7 @@ defmodule CrysaWeb.AuthFlowTest do
 
     test "requires authentication", %{conn: conn} do
       conn = post(conn, ~p"/users/profile/avatar")
-      assert redirected_to(conn) == ~p"/users/log-in"
+      assert redirected_to(conn) == ~p"/auth/login"
     end
   end
 

@@ -26,13 +26,13 @@ defmodule CrysaWeb.UserRegistrationController do
         |> put_flash(:error, "Could not create the account. Please fix the errors and try again.")
         |> put_flash(:email, user_params["email"])
         |> put_flash(:username, user_params["username"])
-        |> redirect(to: ~p"/users/register")
+        |> redirect(to: ~p"/auth/register")
     end
   end
 
   def create(conn, _params) do
     conn
     |> put_flash(:error, "Could not create the account. Please fill in all fields.")
-    |> redirect(to: ~p"/users/register")
+    |> redirect(to: ~p"/auth/register")
   end
 end

@@ -30,7 +30,7 @@ defmodule CrysaWeb.UserRegistrationLive do
   def mount(_params, _session, socket) do
     {:ok,
      assign(socket,
-       action: ~p"/users/register",
+       action: ~p"/auth/register",
        csrf_token: Phoenix.Controller.get_csrf_token(),
        email: Phoenix.Flash.get(socket.assigns.flash, :email),
        username: Phoenix.Flash.get(socket.assigns.flash, :username)

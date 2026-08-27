@@ -43,6 +43,7 @@ defmodule CrysaWeb.Router do
 
     get "/", PageController, :home
 
+    # Series
     get "/series", CatalogController, :index
     get "/series/:slug", CatalogController, :show
     get "/series/:slug/:chapter_key", CatalogController, :reader
@@ -50,20 +51,33 @@ defmodule CrysaWeb.Router do
     get "/updates", CatalogController, :updates
     get "/tags", CatalogController, :tags
 
-    post "/users/log-in", UserSessionController, :create
-    delete "/users/log-out", UserSessionController, :delete
-    post "/users/register", UserRegistrationController, :create
-    post "/users/reset_password", UserForgotPasswordController, :create
-    post "/users/reset_password/:token", UserResetPasswordController, :update
-    post "/users/profile/avatar", ProfileController, :update_avatar
+    # Authentication
+    scope "/auth" do
+      post "/login", UserSessionController, :create
+      delete "/logout", UserSessionController, :delete
+      post "/register", UserRegistrationController, :create
+      post "/reset-password", UserForgotPasswordController, :create
+    end
 
+    # User Profile & Settings
+    scope "/users" do
+      post "/reset-password/:token", UserResetPasswordController, :update
+      post "/profile/avatar", ProfileController, :update_avatar
+    end
+
+    # Websocket
     live_session :current_user, on_mount: [{CrysaWeb.UserAuth, :mount_current_user}] do
-      live "/users/log-in", UserLoginLive, :new
-      live "/users/register", UserRegistrationLive, :new
-      live "/users/reset_password", UserForgotPasswordLive, :new
-      live "/users/reset_password/:token", UserResetPasswordLive, :edit
-      live "/users/settings", UserSettingsLive, :edit
-      live "/users/profile", ProfileLive, :edit
+      scope "/auth" do
+        live "/login", UserLoginLive, :new
+        live "/register", UserRegistrationLive, :new
+        live "/reset-password", UserForgotPasswordLive, :new
+      end
+
+      scope "/users" do
+        live "/reset-password/:token", UserResetPasswordLive, :edit
+        live "/settings", UserSettingsLive, :edit
+        live "/profile", ProfileLive, :edit
+      end
     end
   end
 
@@ -94,10 +108,10 @@ defmodule CrysaWeb.Router do
     import Phoenix.LiveDashboard.Router
 
     scope "/dev" do
-      pipe_through :browser
+      pipe_through [:browser, :auth, :admin]
 
       live_dashboard "/dashboard", metrics: CrysaWeb.Telemetry
-      live "/vue_demo", CrysaWeb.VueDemoLive
+      live "/vue-demo", CrysaWeb.VueDemoLive
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end

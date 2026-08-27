@@ -82,7 +82,7 @@ defmodule CrysaWeb.UserAuth do
       conn
       |> put_flash(:error, "You must log in to access this page.")
       |> maybe_store_return_to()
-      |> redirect(to: ~p"/users/log-in")
+      |> redirect(to: ~p"/auth/login")
       |> halt()
     end
   end
@@ -143,7 +143,7 @@ defmodule CrysaWeb.UserAuth do
       socket =
         socket
         |> Phoenix.LiveView.put_flash(:error, "You must log in to access this page.")
-        |> Phoenix.LiveView.redirect(to: ~p"/users/log-in")
+        |> Phoenix.LiveView.redirect(to: ~p"/auth/login")
 
       {:halt, socket}
     end
@@ -196,11 +196,11 @@ defmodule CrysaWeb.UserAuth do
   defp role_name(_), do: nil
 
   @doc "Returns the path to redirect to after log in."
-  def signed_in_path(%Crysa.Accounts.User{}), do: ~p"/users/settings"
+  def signed_in_path(%Crysa.Accounts.User{}), do: ~p"/"
 
   def signed_in_path(assigns) do
     case current_user(assigns) do
-      %Crysa.Accounts.User{} -> ~p"/users/settings"
+      %Crysa.Accounts.User{} -> ~p"/"
       nil -> ~p"/"
     end
   end

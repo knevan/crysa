@@ -121,6 +121,11 @@ defmodule Crysa.Scraping.SitesTest do
     end
   end
 
+  setup do
+    Crysa.Scraping.ConfigCache.invalidate_all()
+    :ok
+  end
+
   describe "published_config_for_host/1" do
     test "resolves the typed snapshot for the current published version" do
       %{site: site} = published_site_fixture()
@@ -138,7 +143,8 @@ defmodule Crysa.Scraping.SitesTest do
     end
 
     test "errors for unknown hosts and unpublished sites" do
-      assert {:error, :unknown_host} = Scraping.published_config_for_host("missing.example.test")
+      missing = "missing-#{System.unique_integer([:positive])}.example.test"
+      assert {:error, :unknown_host} = Scraping.published_config_for_host(missing)
 
       site = site_fixture()
       _draft = draft_version_fixture(site)

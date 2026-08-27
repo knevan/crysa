@@ -26,20 +26,20 @@ defmodule CrysaWeb.UserSessionController do
         conn
         |> put_flash(:error, "This account has been disabled.")
         |> put_flash(:login, login)
-        |> redirect(to: ~p"/users/log-in")
+        |> redirect(to: ~p"/auth/login")
 
       {:error, :invalid_credentials} ->
         conn
-        |> put_flash(:error, "Invalid email/username or password.")
+        |> put_flash(:error, "Invalid credential")
         |> put_flash(:login, login)
-        |> redirect(to: ~p"/users/log-in")
+        |> redirect(to: ~p"/auth/login")
     end
   end
 
   def create(conn, _params) do
     conn
     |> put_flash(:error, "Please enter your email/username and password.")
-    |> redirect(to: ~p"/users/log-in")
+    |> redirect(to: ~p"/auth/login")
   end
 
   @spec delete(Plug.Conn.t(), map()) :: Plug.Conn.t()

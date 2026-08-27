@@ -22,17 +22,28 @@ defmodule CrysaWeb.UserLoginLive do
       action={@action}
       csrfToken={@csrf_token}
       login={@login}
+      error={@error}
     />
     """
   end
 
   @impl true
   def mount(_params, _session, socket) do
+    error =
+      case Phoenix.Flash.get(socket.assigns.flash, :error) do
+        msg when msg in ["Invalid email/username or password.", "Invalid credential"] ->
+          "Invalid credential"
+
+        other ->
+          other
+      end
+
     {:ok,
      assign(socket,
-       action: ~p"/users/log-in",
+       action: ~p"/auth/login",
        csrf_token: Phoenix.Controller.get_csrf_token(),
-       login: Phoenix.Flash.get(socket.assigns.flash, :login)
+       login: Phoenix.Flash.get(socket.assigns.flash, :login),
+       error: error
      )}
   end
 end

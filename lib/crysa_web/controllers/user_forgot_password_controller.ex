@@ -16,7 +16,7 @@ defmodule CrysaWeb.UserForgotPasswordController do
       with {:ok, token} <- Accounts.create_reset_token(user) do
         UserEmail.deliver_reset_password_instructions(
           user,
-          url(~p"/users/reset_password/#{token}")
+          url(~p"/users/reset-password/#{token}")
         )
       end
     end
@@ -26,7 +26,7 @@ defmodule CrysaWeb.UserForgotPasswordController do
       :info,
       "If your email is in our system, you will receive reset instructions shortly."
     )
-    |> redirect(to: ~p"/users/log-in")
+    |> redirect(to: ~p"/auth/login")
   end
 
   def create(conn, _params) do
@@ -35,6 +35,6 @@ defmodule CrysaWeb.UserForgotPasswordController do
       :info,
       "If your email is in our system, you will receive reset instructions shortly."
     )
-    |> redirect(to: ~p"/users/log-in")
+    |> redirect(to: ~p"/auth/login")
   end
 end

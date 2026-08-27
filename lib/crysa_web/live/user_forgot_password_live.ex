@@ -21,7 +21,7 @@ defmodule CrysaWeb.UserForgotPasswordLive do
   def mount(_params, _session, socket) do
     {:ok,
      assign(socket,
-       action: ~p"/users/reset_password",
+       action: ~p"/auth/reset-password",
        csrf_token: Phoenix.Controller.get_csrf_token()
      )}
   end

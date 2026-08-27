@@ -129,7 +129,7 @@ defmodule CrysaWeb.CoreComponents do
   """
   attr :rest, :global, include: ~w(href navigate patch method download name value disabled type)
   attr :class, :any
-  attr :variant, :string, values: ~w(primary)
+  attr :variant, :string, values: ~w(primary ghost)
   slot :inner_block, required: true
 
   def button(%{rest: rest} = assigns) do
@@ -140,6 +140,7 @@ defmodule CrysaWeb.CoreComponents do
 
     variants = %{
       "primary" => "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+      "ghost" => "hover:bg-accent hover:text-accent-foreground",
       nil => "bg-primary text-primary-foreground shadow hover:bg-primary/90"
     }
 

@@ -22,7 +22,7 @@ defmodule CrysaWeb.UserResetPasswordLive do
         </:subtitle>
       </.header>
 
-      <.link navigate={~p"/users/reset_password"} class="btn btn-primary">
+      <.link navigate={~p"/auth/reset-password"} class="btn btn-primary">
         Request a new link
       </.link>
     </div>
@@ -48,7 +48,7 @@ defmodule CrysaWeb.UserResetPasswordLive do
        assign(socket,
          token: token,
          invalid_token: false,
-         action: ~p"/users/reset_password/#{token}",
+         action: ~p"/users/reset-password/#{token}",
          csrf_token: Phoenix.Controller.get_csrf_token()
        )}
     else

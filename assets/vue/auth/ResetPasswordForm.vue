@@ -12,7 +12,8 @@ defineProps<{
 </script>
 
 <template>
-  <div class="mx-auto max-w-md space-y-6">
+  <div class="flex min-h-[calc(100vh-12rem)] items-center justify-center py-8 px-4">
+    <div class="w-full max-w-md space-y-6">
     <Card>
       <CardHeader class="space-y-1 text-center">
         <CardTitle class="text-2xl font-semibold tracking-tight">Choose a new password</CardTitle>
@@ -43,9 +44,10 @@ defineProps<{
             />
           </div>
 
-          <Button type="submit" class="w-full">Reset password</Button>
+          <Button type="submit" variant="outline" class="w-full bg-white hover:bg-zinc-50 text-zinc-900 border-zinc-200 shadow-sm dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:text-white dark:border-zinc-800">Reset password</Button>
         </form>
       </CardContent>
     </Card>
+    </div>
   </div>
 </template>

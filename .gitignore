@@ -1,18 +1,24 @@
+# Artifact build
+/.expert
+/.fetch
 /_build/
 /cover/
 /deps/
 /doc/
-node_modules/
-/.expert
-/.fetch
-/.env.dev
-/.env.test
-erl_crash.dump
-*.ez
 /tmp/
-crysa-*.tar
+node_modules/
+/assets/node_modules/
 /priv/static/assets/
+/priv/static/.vite/
 /priv/static/cache_manifest.json
 /priv/static/uploads/
+
+# Secret ENV
+/.env.dev
+/.env.test
+
+# Logs
+erl_crash.dump
+*.ez
+crysa-*.
 npm-debug.log
-/assets/node_modules/

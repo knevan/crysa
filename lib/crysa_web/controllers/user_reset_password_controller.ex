@@ -13,19 +13,19 @@ defmodule CrysaWeb.UserResetPasswordController do
       nil ->
         conn
         |> put_flash(:error, "Reset link is invalid or has expired.")
-        |> redirect(to: ~p"/users/reset_password")
+        |> redirect(to: ~p"/auth/reset-password")
 
       user ->
         case Accounts.reset_user_password(user, user_params, token) do
           {:ok, _user} ->
             conn
             |> put_flash(:info, "Your password has been reset. You can now log in.")
-            |> redirect(to: ~p"/users/log-in")
+            |> redirect(to: ~p"/auth/login")
 
           {:error, _changeset} ->
             conn
             |> put_flash(:error, "Could not reset the password. Please try again.")
-            |> redirect(to: ~p"/users/reset_password/#{token}")
+            |> redirect(to: ~p"/users/reset-password/#{token}")
         end
     end
   end
@@ -33,6 +33,6 @@ defmodule CrysaWeb.UserResetPasswordController do
   def update(conn, _params) do
     conn
     |> put_flash(:error, "Reset link is invalid or has expired.")
-    |> redirect(to: ~p"/users/reset_password")
+    |> redirect(to: ~p"/auth/reset-password")
   end
 end
