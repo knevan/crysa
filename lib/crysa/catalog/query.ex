@@ -20,6 +20,8 @@ defmodule Crysa.Catalog.Query do
   @default_chapter_page_size 50
   @max_chapter_page_size 100
   @max_search_length 100
+  @admin_default_page_size 25
+  @admin_max_page_size 100
 
   @sort_options ~w(new most_viewed latest_updates title)
   @publication_statuses Catalog.publication_statuses()
@@ -123,6 +125,47 @@ defmodule Crysa.Catalog.Query do
       limit: 1
     )
     |> Repo.one()
+  end
+
+  @doc """
+  Admin series table listing with search and bounded pagination.
+
+  Designed for the TanStack-backed admin data grid: server-side pagination
+  with client-side rendering. Search is filtered via `ILIKE` on `title` and
+  `slug` (wildcard-escaped), ordering is stable `updated_at DESC, id DESC`
+  for the `Last Updated` column. Authors are preloaded for the `Authors`
+  column. Page size defaults to 25 (matching the admin UI) and is clamped to
+  `1..50` to bound offsets and payload size.
+  """
+  @spec admin_list_series(map()) :: {[Series.t()], Pagination.t()}
+  def admin_list_series(params \\ %{}) when is_map(params) do
+    q = parse_search(params)
+    page = parse_page(params)
+    page_size = parse_page_size(params, @admin_default_page_size, @admin_max_page_size)
+
+    base =
+      from(s in Series, as: :series)
+      |> filter_admin_search(q)
+      |> order_by([s], desc: s.updated_at, desc: s.id)
+
+    total = Repo.aggregate(base, :count, :id)
+    page = clamp_page(page, page_size, total)
+
+    series =
+      base
+      |> preload([:authors])
+      |> limit(^page_size)
+      |> offset(^((page - 1) * page_size))
+      |> Repo.all()
+
+    {series, Pagination.build(page, page_size, total)}
+  end
+
+  defp filter_admin_search(query, nil), do: query
+
+  defp filter_admin_search(query, term) do
+    pattern = "%#{escape_like(term)}%"
+    where(query, [s], ilike(s.title, ^pattern) or ilike(s.slug, ^pattern))
   end
 
   @spec chapter_navigation(integer(), String.t()) :: {map() | nil, map() | nil}

@@ -138,16 +138,24 @@ defmodule CrysaWeb.AuthFlowTest do
 
     test "denies regular users from the admin area", %{conn: conn} do
       user = AccountsFixtures.user_fixture()
-      conn = conn |> log_in(user) |> get(~p"/admin")
+      conn = log_in(conn, user)
 
-      assert response(conn, 403)
+      # Admin dashboard is now LiveView at /admin — non-admin is redirected, not 403
+      assert {:error, {:redirect, %{to: "/"}}} = live(conn, ~p"/admin")
+      # Legacy controller route still enforces 403 via plug
+      assert conn |> get(~p"/admin/legacy") |> response(403)
     end
 
     test "allows admins into the admin area", %{conn: conn} do
       admin = AccountsFixtures.user_fixture(%{role_name: "admin"})
-      conn = conn |> log_in(admin) |> get(~p"/admin")
+      conn = log_in(conn, admin)
 
-      assert html_response(conn, 200) =~ "Admin dashboard"
+      # LiveView dead render contains fallback title for html_response compatibility
+      assert conn |> get(~p"/admin") |> html_response(200) =~ "Admin dashboard"
+
+      {:ok, view, _html} = live(conn, ~p"/admin")
+      vue = LiveVue.Test.get_vue(view)
+      assert vue.component == "AdminDashboard"
     end
 
     test "denies regular users from the moderator area", %{conn: conn} do
@@ -166,9 +174,10 @@ defmodule CrysaWeb.AuthFlowTest do
 
     test "denies moderators from the admin area", %{conn: conn} do
       moderator = AccountsFixtures.user_fixture(%{role_name: "moderator"})
-      conn = conn |> log_in(moderator) |> get(~p"/admin")
+      conn = log_in(conn, moderator)
 
-      assert response(conn, 403)
+      assert {:error, {:redirect, %{to: "/"}}} = live(conn, ~p"/admin")
+      assert conn |> get(~p"/admin/legacy") |> response(403)
     end
   end
 

@@ -87,10 +87,22 @@ defmodule CrysaWeb.Router do
     get "/", ModeratorDashboardController, :index
   end
 
+  # Admin dashboard LiveView.
+  # Primary route is GET /admin. The legacy controller remains
+  # at /admin/legacy for manual fallback and is not used by navigation.
+  live_session :admin_dashboard,
+    on_mount: [{CrysaWeb.UserAuth, :mount_current_user}] do
+    scope "/admin", CrysaWeb do
+      pipe_through [:browser, :auth]
+
+      live "/", Live.AdminDashboardLive, :index
+    end
+  end
+
   scope "/admin", CrysaWeb, as: :admin do
     pipe_through [:browser, :auth, :admin]
 
-    get "/", AdminDashboardController, :index
+    get "/legacy", AdminDashboardController, :index
   end
 
   # Other scopes may use custom stacks.

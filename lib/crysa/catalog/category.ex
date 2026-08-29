@@ -21,7 +21,7 @@ defmodule Crysa.Catalog.Category do
   def changeset(category, attrs) do
     category
     |> cast(attrs, [:name])
-    |> update_change(:name, &trim/1)
+    |> update_change(:name, &normalize_display_name/1)
     |> put_normalized_name()
     |> validate_required([:name, :normalized_name])
     |> validate_length(:name, min: 1, max: 80)
@@ -36,6 +36,16 @@ defmodule Crysa.Catalog.Category do
     )
   end
 
-  defp trim(value) when is_binary(value), do: String.trim(value)
-  defp trim(value), do: value
+  # Normalizes to capitalized form per spec: "action" -> "Action", "action hero" -> "Action Hero".
+  # Preserves internal whitespace exactly (so "Action   Comedy" stays with
+  # 3 spaces) while capitalizing each word. Trims leading/trailing first.
+  defp normalize_display_name(value) when is_binary(value) do
+    value
+    |> String.trim()
+    |> String.replace(~r/\S+/u, fn word ->
+      word |> String.downcase() |> String.capitalize()
+    end)
+  end
+
+  defp normalize_display_name(value), do: value
 end

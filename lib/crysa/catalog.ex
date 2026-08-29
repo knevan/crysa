@@ -196,6 +196,17 @@ defmodule Crysa.Catalog do
     :ok
   end
 
+  @doc """
+  Admin series listing for the dashboard TanStack table.
+
+  Thin wrapper over `Crysa.Catalog.Query.admin_list_series/1` so the LiveView
+  depends only on the context boundary. Returns preloaded `:authors` for each
+  series row.
+  """
+  @spec admin_list_series(map()) :: {[Series.t()], Pagination.t()}
+  def admin_list_series(params \\ %{}) when is_map(params),
+    do: Query.admin_list_series(params)
+
   @spec browse_series(map()) :: {[Series.t()], Pagination.t()}
   def browse_series(params \\ %{}) when is_map(params), do: Query.browse_series(params)
 
@@ -212,6 +223,12 @@ defmodule Crysa.Catalog do
   @spec list_chapters(integer(), map()) :: {[Chapter.t()], Pagination.t()}
   def list_chapters(series_id, params \\ %{}) when is_integer(series_id),
     do: Query.list_chapters(series_id, params)
+
+  @spec list_categories() :: [Category.t()]
+  def list_categories do
+    import Ecto.Query
+    Crysa.Repo.all(from c in Category, order_by: [asc: c.name])
+  end
 
   @spec list_categories_with_counts() :: [{Category.t(), non_neg_integer()}]
   def list_categories_with_counts, do: Query.list_categories_with_counts()

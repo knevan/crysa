@@ -435,6 +435,109 @@ defmodule Crysa.Accounts do
     |> UserProfile.changeset(attrs)
   end
 
+  @admin_default_page_size 25
+  @admin_max_page_size 100
+  @max_search_length 100
+
+  @doc """
+  Admin user listing for the dashboard TanStack table.
+
+  Search is `ILIKE` on `username` and `email` (wildcard-escaped),
+  ordering is stable `inserted_at DESC, id DESC`. Pagination defaults to
+  25 and is clamped to `1..50`.
+  """
+  @spec admin_list_users(map()) :: {[User.t()], Crysa.Pagination.t()}
+  def admin_list_users(params \\ %{}) when is_map(params) do
+    q = parse_admin_search(params)
+    page = parse_admin_page(params)
+    page_size = parse_admin_page_size(params)
+
+    base =
+      from(u in User, as: :user)
+      |> filter_admin_users(q)
+      |> order_by([u], desc: u.inserted_at, desc: u.id)
+
+    total = Repo.aggregate(base, :count, :id)
+    page = clamp_admin_page(page, page_size, total)
+
+    users =
+      base
+      |> preload([:role])
+      |> limit(^page_size)
+      |> offset(^((page - 1) * page_size))
+      |> Repo.all()
+
+    {users, Crysa.Pagination.build(page, page_size, total)}
+  end
+
+  defp parse_admin_search(%{"q" => q}) when is_binary(q) do
+    case q |> String.trim() |> String.slice(0, @max_search_length) do
+      "" -> nil
+      term -> term
+    end
+  end
+
+  defp parse_admin_search(%{q: q}) when is_binary(q) do
+    case q |> String.trim() |> String.slice(0, @max_search_length) do
+      "" -> nil
+      term -> term
+    end
+  end
+
+  defp parse_admin_search(_), do: nil
+
+  defp filter_admin_users(query, nil), do: query
+
+  defp filter_admin_users(query, term) do
+    pattern = "%#{escape_admin_like(term)}%"
+    where(query, [u], ilike(u.username, ^pattern) or ilike(u.email, ^pattern))
+  end
+
+  defp escape_admin_like(term) when is_binary(term) do
+    term
+    |> String.replace("\\", "\\\\")
+    |> String.replace("%", "\\%")
+    |> String.replace("_", "\\_")
+  end
+
+  defp parse_admin_page(params) do
+    case parse_admin_integer(params, "page", 1) do
+      page when page > 0 -> page
+      _ -> 1
+    end
+  end
+
+  defp parse_admin_page_size(params) do
+    params
+    |> parse_admin_integer("page_size", @admin_default_page_size)
+    |> clamp_admin(1, @admin_max_page_size)
+  end
+
+  defp parse_admin_integer(params, key, default) do
+    case params do
+      %{^key => value} when is_integer(value) ->
+        value
+
+      %{^key => value} when is_binary(value) ->
+        case Integer.parse(value) do
+          {int, ""} -> int
+          _ -> default
+        end
+
+      _ ->
+        default
+    end
+  end
+
+  defp clamp_admin_page(page, page_size, total) do
+    total_pages = max(div(total + page_size - 1, page_size), 1)
+    min(page, total_pages)
+  end
+
+  defp clamp_admin(value, min, _max) when value < min, do: min
+  defp clamp_admin(value, _min, max) when value > max, do: max
+  defp clamp_admin(value, _min, _max), do: value
+
   @doc "Deletes all expired session and reset tokens."
   @spec cleanup_expired_tokens() :: non_neg_integer()
   def cleanup_expired_tokens do
