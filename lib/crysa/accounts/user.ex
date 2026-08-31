@@ -90,6 +90,26 @@ defmodule Crysa.Accounts.User do
     |> unique_constraint(:username, name: :users_lower_username_index)
   end
 
+  @doc """
+  Admin changeset for updating user metadata.
+
+  Allows `username`, `email`, `active` and `role_id`. Validates presence
+  only when the corresponding field is changed, so partial updates are
+  permitted. Email is normalized to lower-case, username is trimmed.
+  """
+  @spec admin_changeset(t(), map()) :: Ecto.Changeset.t()
+  def admin_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:email, :username, :active, :role_id])
+    |> normalize_email_and_username()
+    |> validate_email_format()
+    |> validate_username()
+    |> validate_inclusion(:active, [true, false])
+    |> foreign_key_constraint(:role_id)
+    |> unique_constraint(:email, name: :users_lower_email_index)
+    |> unique_constraint(:username, name: :users_lower_username_index)
+  end
+
   defp validate_registration(changeset) do
     changeset
     |> normalize_email_and_username()

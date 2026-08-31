@@ -59,63 +59,62 @@
           <ul class="menu menu-horizontal px-1 text-sm">
             <li><a href={~p"/series"}>Browse</a></li>
             <li><a href={~p"/popular"}>Popular</a></li>
-            <li><a href={~p"/updates"}>Updates</a></li>
-            <li><a href={~p"/tags"}>Tags</a></li>
+            <li :if={moderator?(@current_user)}><a href={~p"/admin"}>Admin Panel</a></li>
           </ul>
         </div>
-      <div class="navbar-end">
-        <!-- Desktop: Sign in / @admin, hidden on mobile -->
-        <div :if={@current_user} class="hidden lg:flex items-center gap-2">
-          <div class="dropdown dropdown-end">
-            <div tabindex="0" role="button" class="btn btn-ghost">
-              @{@current_user.username}
+        <div class="navbar-end">
+          <!-- Desktop: Sign in / @admin, hidden on mobile -->
+          <div :if={@current_user} class="hidden lg:flex items-center gap-2">
+            <div class="dropdown dropdown-end">
+              <div tabindex="0" role="button" class="btn btn-ghost">
+                @{@current_user.username}
+              </div>
+              <ul
+                tabindex="0"
+                class="dropdown-content menu bg-base-100 rounded-box z-10 w-52 p-2 shadow"
+              >
+                <li><a href={~p"/users/profile"}>Profile</a></li>
+                <li><a href={~p"/users/settings"}>Settings</a></li>
+                <li :if={moderator?(@current_user)}>
+                  <a href={~p"/admin"}>Dashboard</a>
+                </li>
+                <li>
+                  <.form for={%{}} action={~p"/auth/logout"} method="delete" class="contents">
+                    <.button type="submit">Log out</.button>
+                  </.form>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div :if={!@current_user} class="hidden lg:flex items-center gap-2">
+            <a
+              href={~p"/auth/login"}
+              class="text-sm font-medium hover:text-primary hover:underline underline-offset-4 transition-colors"
+            >
+              Sign in
+            </a>
+          </div>
+          <!-- Mobile: hamburger on right, contains browse + manga updates + profile + settings -->
+          <div class="dropdown dropdown-end lg:hidden">
+            <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
+              <.icon name="hero-bars-3" class="h-5 w-5" />
             </div>
             <ul
               tabindex="0"
-              class="dropdown-content menu bg-base-100 rounded-box z-10 w-52 p-2 shadow"
+              class="menu menu-sm dropdown-content bg-white rounded-box z-50 mt-1 w-52 p-2 shadow-xl"
             >
-              <li><a href={~p"/users/profile"}>Profile</a></li>
-              <li><a href={~p"/users/settings"}>Settings</a></li>
-              <li :if={moderator?(@current_user)}>
-                <a href={~p"/admin"}>Dashboard</a>
-              </li>
-              <li>
+              <li><a href={~p"/series"}>Browse</a></li>
+              <li :if={moderator?(@current_user)}><a href={~p"/admin"}>Admin Panel</a></li>
+              <li :if={@current_user}><a href={~p"/users/profile"}>Profile</a></li>
+              <li :if={@current_user}><a href={~p"/users/settings"}>Settings</a></li>
+              <li :if={@current_user}>
                 <.form for={%{}} action={~p"/auth/logout"} method="delete" class="contents">
-                  <.button type="submit">Log out</.button>
+                  <.button type="submit" variant="ghost" class="w-full justify-start font-normal">Log out</.button>
                 </.form>
               </li>
+              <li :if={!@current_user}><a href={~p"/auth/login"}>Sign in</a></li>
             </ul>
           </div>
-        </div>
-        <div :if={!@current_user} class="hidden lg:flex items-center gap-2">
-          <a
-            href={~p"/auth/login"}
-            class="text-sm font-medium hover:text-primary hover:underline underline-offset-4 transition-colors"
-          >
-            Sign in
-          </a>
-        </div>
-        <!-- Mobile: hamburger on right, contains browse + manga updates + profile + settings -->
-        <div class="dropdown dropdown-end lg:hidden">
-          <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
-            <.icon name="hero-bars-3" class="h-5 w-5" />
-          </div>
-          <ul
-            tabindex="0"
-            class="menu menu-sm dropdown-content bg-white rounded-box z-50 mt-1 w-52 p-2 shadow-xl"
-          >
-            <li><a href={~p"/series"}>Browse</a></li>
-            <li><a href={~p"/updates"}>Manga updates</a></li>
-            <li :if={@current_user}><a href={~p"/users/profile"}>Profile</a></li>
-            <li :if={@current_user}><a href={~p"/users/settings"}>Settings</a></li>
-            <li :if={@current_user}>
-              <.form for={%{}} action={~p"/auth/logout"} method="delete" class="contents">
-                <.button type="submit" variant="ghost" class="w-full justify-start font-normal">Log out</.button>
-              </.form>
-            </li>
-            <li :if={!@current_user}><a href={~p"/auth/login"}>Sign in</a></li>
-          </ul>
-        </div>
         </div>
       </div>
     </nav>

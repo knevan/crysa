@@ -42,6 +42,10 @@ defmodule Crysa.Processing.CheckSchedule do
           interval_minutes() | nil
   def base_interval_minutes(series)
 
+  # Archived series are delisted and never scheduled, even if a manual
+  # override is present — archive is an explicit admin delist.
+  def base_interval_minutes(%{archived_at: archived}) when not is_nil(archived), do: nil
+
   def base_interval_minutes(%{manual_check_interval_minutes: minutes})
       when is_integer(minutes),
       do: minutes

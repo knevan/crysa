@@ -30,7 +30,8 @@ defmodule Crysa.Catalog.Series do
     :manual_check_interval_minutes,
     :check_retry_count,
     :last_chapter_at,
-    :last_error
+    :last_error,
+    :archived_at
   ]
 
   schema "series" do
@@ -56,6 +57,7 @@ defmodule Crysa.Catalog.Series do
     field :check_retry_count, :integer, default: 0
     field :last_chapter_at, :utc_datetime_usec
     field :last_error, :string
+    field :archived_at, :utc_datetime_usec
 
     has_many :chapters, Chapter
     many_to_many :categories, Category, join_through: "series_categories", on_replace: :delete

@@ -4,15 +4,15 @@ defmodule Crysa.Storage.S3 do
 
   Uses `Req` as the HTTP client and implements AWS Signature V4 signing
   manually so no additional `ExAws`/`hackney` dependency is required. The
-  adapter is configured via environment variables / application config:
+  adapter is configured via environment variables / application config (vendor-neutral):
 
-  - `:bucket` - R2/S3 bucket name (`R2_BUCKET_NAME` in Castra)
-  - `:account_id` - Cloudflare account ID for R2 (`R2_ACCOUNT_ID`)
-  - `:access_key_id` - (`R2_ACCESS_KEY_ID`)
-  - `:secret_access_key` - (`R2_SECRET_ACCESS_KEY`)
-  - `:endpoint_url` - Full S3 endpoint, e.g. `https://<account_id>.r2.cloudflarestorage.com`
-  - `:region` - S3 region, defaults to `"auto"` for R2
-  - `:cdn_base_url` - Public CDN base URL (`R2_DOMAIN_CDN_URL`), used to build public URLs
+  - `:bucket` - S3 bucket name (`BUCKET_NAME`)
+  - `:account_id` - Cloudflare account ID / vendor account (`ACCOUNT_ID`, optional, for future use)
+  - `:access_key_id` - (`ACCESS_KEY_ID`)
+  - `:secret_access_key` - (`SECRET_ACCESS_KEY`)
+  - `:endpoint_url` - Full S3 endpoint, e.g. `https://s3.amazonaws.com` or `https://<account>.r2.cloudflarestorage.com` (`ENDPOINT_URL`)
+  - `:region` - S3 region, defaults to `"auto"` (`REGION`)
+  - `:cdn_base_url` - Public CDN base URL (`DOMAIN_CDN_URL`), used to build public URLs
 
   When the bucket is not configured, `put/3` and `delete/1` return
   `{:error, :not_configured}` so callers can surface a clear error
@@ -247,16 +247,14 @@ defmodule Crysa.Storage.S3 do
     conf = Application.get_env(:crysa, Crysa.Storage, [])
 
     %{
-      bucket: Keyword.get(conf, :bucket) || System.get_env("R2_BUCKET_NAME"),
-      account_id: Keyword.get(conf, :account_id) || System.get_env("R2_ACCOUNT_ID"),
-      access_key_id: Keyword.get(conf, :access_key_id) || System.get_env("R2_ACCESS_KEY_ID"),
+      bucket: Keyword.get(conf, :bucket) || System.get_env("BUCKET_NAME"),
+      account_id: Keyword.get(conf, :account_id) || System.get_env("ACCOUNT_ID"),
+      access_key_id: Keyword.get(conf, :access_key_id) || System.get_env("ACCESS_KEY_ID"),
       secret_access_key:
-        Keyword.get(conf, :secret_access_key) || System.get_env("R2_SECRET_ACCESS_KEY"),
-      cdn_base: Keyword.get(conf, :cdn_base_url) || System.get_env("R2_DOMAIN_CDN_URL"),
-      endpoint_url:
-        Keyword.get(conf, :endpoint_url) ||
-          endpoint_from_account(Keyword.get(conf, :account_id) || System.get_env("R2_ACCOUNT_ID")),
-      region: Keyword.get(conf, :region, "auto")
+        Keyword.get(conf, :secret_access_key) || System.get_env("SECRET_ACCESS_KEY"),
+      cdn_base: Keyword.get(conf, :cdn_base_url) || System.get_env("DOMAIN_CDN_URL"),
+      endpoint_url: Keyword.get(conf, :endpoint_url) || System.get_env("ENDPOINT_URL"),
+      region: Keyword.get(conf, :region) || System.get_env("REGION") || "auto"
     }
   end
 
@@ -296,13 +294,9 @@ defmodule Crysa.Storage.S3 do
   defp blank?(""), do: true
   defp blank?(_), do: false
 
-  defp endpoint_from_account(nil), do: nil
-  defp endpoint_from_account(""), do: nil
-  defp endpoint_from_account(account_id), do: "https://#{account_id}.r2.cloudflarestorage.com"
-
   defp cdn_base_url do
     conf = Application.get_env(:crysa, Crysa.Storage, [])
-    Keyword.get(conf, :cdn_base_url) || System.get_env("R2_DOMAIN_CDN_URL")
+    Keyword.get(conf, :cdn_base_url) || System.get_env("DOMAIN_CDN_URL")
   end
 
   defp s3_object_url(%{endpoint_url: endpoint, bucket: bucket}, key) do

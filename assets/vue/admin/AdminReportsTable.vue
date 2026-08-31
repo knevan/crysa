@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { createColumnHelper, getCoreRowModel, useVueTable, FlexRender } from '@tanstack/vue-table'
-import { computed, h, ref } from 'vue'
+import { computed, h, ref, watch } from 'vue'
+import { Check, X } from '@lucide/vue'
 
 export type ReportRow = {
   id: number
@@ -53,6 +54,8 @@ function reasonClass(reason: string): string {
   // chapter reasons vs comment reasons — just neutral pill
   return 'bg-muted text-muted-foreground'
 }
+
+const dataRef = computed(() => [...props.data])
 
 const columnSizing = ref<Record<string, number>>({})
 
@@ -124,23 +127,23 @@ const columns = [
           'button',
           {
             class:
-              'inline-flex h-7 px-2 items-center justify-center rounded-md border bg-emerald-50 text-emerald-700 border-emerald-200 text-xs hover:bg-emerald-100 disabled:opacity-50 disabled:pointer-events-none',
+              'inline-flex h-7 px-2 items-center justify-center rounded-md border bg-emerald-50 text-emerald-700 border-emerald-200 text-xs hover:bg-emerald-100 disabled:opacity-50 disabled:pointer-events-none gap-1',
             disabled: !isPending,
             title: isPending ? 'Resolve report' : 'Already resolved',
             onClick: () => isPending && emit('resolve', row.id),
           },
-          'Resolve',
+          [h(Check, { class: 'size-3.5' }), 'Resolve'],
         ),
         h(
           'button',
           {
             class:
-              'inline-flex h-7 px-2 items-center justify-center rounded-md border bg-red-50 text-red-700 border-red-200 text-xs hover:bg-red-100 disabled:opacity-50 disabled:pointer-events-none',
+              'inline-flex h-7 px-2 items-center justify-center rounded-md border bg-red-50 text-red-700 border-red-200 text-xs hover:bg-red-100 disabled:opacity-50 disabled:pointer-events-none gap-1',
             disabled: !isPending,
             title: isPending ? 'Reject report' : 'Already resolved',
             onClick: () => isPending && emit('reject', row.id),
           },
-          'Reject',
+          [h(X, { class: 'size-3.5' }), 'Reject'],
         ),
       ])
     },
@@ -151,9 +154,7 @@ const columns = [
 ]
 
 const table = useVueTable({
-  get data() {
-    return props.data
-  },
+  data: dataRef,
   columns,
   state: {
     get columnSizing() {
@@ -170,7 +171,21 @@ const table = useVueTable({
 })
 
 const headerGroups = computed(() => table.getHeaderGroups())
-const rows = computed(() => table.getRowModel().rows)
+const rows = computed(() => {
+  const _track = dataRef.value.length
+  return table.getRowModel().rows
+})
+
+watch(
+  () => props.data,
+  (newData) => {
+    table.setOptions((prev) => ({ ...prev, data: [...newData] }))
+  },
+  { deep: true },
+)
+watch(dataRef, (v) => {
+  table.setOptions((prev) => ({ ...prev, data: [...v] }))
+})
 </script>
 
 <template>

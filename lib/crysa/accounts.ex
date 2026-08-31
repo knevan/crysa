@@ -538,6 +538,306 @@ defmodule Crysa.Accounts do
   defp clamp_admin(value, _min, max) when value > max, do: max
   defp clamp_admin(value, _min, _max), do: value
 
+  @role_levels %{"user" => 1, "moderator" => 2, "admin" => 3, "superadmin" => 4}
+
+  @doc """
+  Admin update for a target user.
+
+  Enforces hierarchy rules mirroring Castra but without its gaps:
+
+    * Actor cannot update themselves.
+    * Actor's role level must be strictly higher than the target's current level.
+    * When changing role, the new role level must be strictly lower than the actor's level.
+    * Username/email conflicts are reported as changeset errors.
+
+  `attrs` may contain string or atom keys: `"username"`, `"email"`,
+  `"role"` (name string), `"role_id"` (integer), `"active"`/`"is_active"`
+  (boolean). Unknown keys are ignored.
+
+  Returns `{:ok, user}`, `{:error, :not_found}`, `{:error, :cannot_update_self}`,
+  `{:error, :forbidden}`, `{:error, :cannot_assign_higher_role}` or
+  `{:error, changeset}`.
+  """
+  @spec admin_update_user(integer(), map(), User.t()) ::
+          {:ok, User.t()}
+          | {:error, :not_found}
+          | {:error, :cannot_update_self}
+          | {:error, :forbidden}
+          | {:error, :cannot_assign_higher_role}
+          | {:error, :invalid_role}
+          | {:error, Ecto.Changeset.t()}
+  def admin_update_user(target_id, attrs, %User{} = actor)
+      when is_integer(target_id) and is_map(attrs) do
+    actor_role = actor_role_name(actor)
+    actor_level = Map.get(@role_levels, actor_role, 0)
+
+    Repo.transaction(fn ->
+      target =
+        Repo.one(from(u in User, where: u.id == ^target_id, lock: "FOR UPDATE", preload: [:role]))
+
+      cond do
+        is_nil(target) ->
+          Repo.rollback(:not_found)
+
+        actor.id == target.id ->
+          Repo.rollback(:cannot_update_self)
+
+        true ->
+          target_role = target_role_name(target)
+          target_level = Map.get(@role_levels, target_role, 0)
+
+          if actor_level <= target_level do
+            Repo.rollback(:forbidden)
+          else
+            normalized = normalize_admin_attrs(attrs)
+
+            case resolve_admin_role(normalized, actor_level) do
+              {:ok, role_id_or_nil} ->
+                changes = build_admin_changes(normalized, role_id_or_nil)
+
+                if map_size(changes) == 0 do
+                  preload_user(target)
+                else
+                  changeset = User.admin_changeset(target, changes)
+
+                  case Repo.update(changeset) do
+                    {:ok, updated} -> preload_user(updated)
+                    {:error, changeset} -> Repo.rollback(changeset)
+                  end
+                end
+
+              {:error, reason} ->
+                Repo.rollback(reason)
+            end
+          end
+      end
+    end)
+    |> case do
+      {:ok, user} when is_struct(user, User) -> {:ok, user}
+      {:error, %Ecto.Changeset{} = cs} -> {:error, cs}
+      {:error, reason} when is_atom(reason) -> {:error, reason}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  @doc """
+  Admin deletion of a target user.
+
+  Hierarchy rules are identical to `admin_update_user/3`: cannot delete
+  self, cannot delete equal or higher role.
+
+  Sessions for the target are removed atomically with the user row.
+  """
+  @spec admin_delete_user(integer(), User.t()) ::
+          {:ok, User.t()} | {:error, :not_found | :cannot_delete_self | :forbidden}
+  def admin_delete_user(target_id, %User{} = actor) when is_integer(target_id) do
+    actor_role = actor_role_name(actor)
+    actor_level = Map.get(@role_levels, actor_role, 0)
+
+    Repo.transaction(fn ->
+      target =
+        Repo.one(from(u in User, where: u.id == ^target_id, lock: "FOR UPDATE", preload: [:role]))
+
+      cond do
+        is_nil(target) ->
+          Repo.rollback(:not_found)
+
+        actor.id == target.id ->
+          Repo.rollback(:cannot_delete_self)
+
+        true ->
+          target_role = target_role_name(target)
+          target_level = Map.get(@role_levels, target_role, 0)
+
+          if actor_level <= target_level do
+            Repo.rollback(:forbidden)
+          else
+            # Remove sessions first; FK cascades handle bookmarks etc.,
+            # but token rows should be cleared explicitly for clarity.
+            Repo.delete_all(from(t in UsersToken, where: t.user_id == ^target.id))
+            # Password reset digests are also cleared; on_delete is delete_all
+            # but we delete explicitly to keep the transaction tight.
+            Repo.delete_all(from(t in PasswordResetToken, where: t.user_id == ^target.id))
+
+            case Repo.delete(target) do
+              {:ok, deleted} -> deleted
+              {:error, cs} -> Repo.rollback(cs)
+            end
+          end
+      end
+    end)
+    |> case do
+      {:ok, user} -> {:ok, user}
+      {:error, reason} when is_atom(reason) -> {:error, reason}
+      {:error, %Ecto.Changeset{} = cs} -> {:error, cs}
+    end
+  end
+
+  defp actor_role_name(%User{role: %Role{name: name}}) when is_binary(name), do: name
+
+  defp actor_role_name(%User{role_id: role_id}) when is_integer(role_id) do
+    case Repo.get(Role, role_id) do
+      %Role{name: name} -> name
+      _ -> "user"
+    end
+  end
+
+  defp actor_role_name(_), do: "user"
+
+  defp target_role_name(%User{role: %Role{name: name}}) when is_binary(name), do: name
+  defp target_role_name(%User{role: %{} = role}), do: Map.get(role, :name, "user")
+  defp target_role_name(_), do: "user"
+
+  defp normalize_admin_attrs(attrs) when is_map(attrs) do
+    Enum.reduce(attrs, %{}, fn {k, v}, acc ->
+      key =
+        case k do
+          k when is_atom(k) -> Atom.to_string(k)
+          k when is_binary(k) -> k
+          _ -> to_string(k)
+        end
+
+      Map.put(acc, key, v)
+    end)
+  end
+
+  defp resolve_admin_role(normalized, actor_level) do
+    cond do
+      Map.has_key?(normalized, "role") ->
+        raw = normalized["role"]
+
+        name =
+          raw
+          |> to_string()
+          |> String.trim()
+          |> String.downcase()
+
+        cond do
+          name == "" ->
+            {:ok, nil}
+
+          name not in @role_names ->
+            {:error, :invalid_role}
+
+          Map.get(@role_levels, name, 0) >= actor_level ->
+            {:error, :cannot_assign_higher_role}
+
+          true ->
+            case Repo.get_by(Role, name: name) do
+              %Role{id: id} -> {:ok, id}
+              nil -> {:error, :invalid_role}
+            end
+        end
+
+      Map.has_key?(normalized, "role_id") ->
+        raw = normalized["role_id"]
+
+        role_id =
+          case raw do
+            id when is_integer(id) ->
+              id
+
+            bin when is_binary(bin) ->
+              case Integer.parse(bin) do
+                {int, ""} -> int
+                _ -> nil
+              end
+
+            _ ->
+              nil
+          end
+
+        if is_nil(role_id) do
+          {:ok, nil}
+        else
+          case Repo.get(Role, role_id) do
+            %Role{name: name} ->
+              if Map.get(@role_levels, name, 0) >= actor_level do
+                {:error, :cannot_assign_higher_role}
+              else
+                {:ok, role_id}
+              end
+
+            nil ->
+              {:error, :invalid_role}
+          end
+        end
+
+      true ->
+        {:ok, :no_change}
+    end
+  end
+
+  defp build_admin_changes(normalized, role_id_or_nil) do
+    changes = %{}
+
+    changes =
+      case Map.get(normalized, "username") do
+        nil ->
+          case Map.get(normalized, "userName") do
+            nil -> changes
+            v when is_binary(v) -> Map.put(changes, :username, String.trim(v))
+            _ -> changes
+          end
+
+        v when is_binary(v) ->
+          trimmed = String.trim(v)
+          if trimmed == "", do: changes, else: Map.put(changes, :username, trimmed)
+
+        _ ->
+          changes
+      end
+
+    changes =
+      case Map.get(normalized, "email") do
+        nil ->
+          changes
+
+        v when is_binary(v) ->
+          trimmed = v |> String.trim() |> String.downcase()
+          if trimmed == "", do: changes, else: Map.put(changes, :email, trimmed)
+
+        _ ->
+          changes
+      end
+
+    changes =
+      case Map.get(normalized, "active") do
+        nil ->
+          case Map.get(normalized, "is_active") do
+            nil -> changes
+            v -> put_active(changes, v)
+          end
+
+        v ->
+          put_active(changes, v)
+      end
+
+    case role_id_or_nil do
+      :no_change -> changes
+      nil -> changes
+      id when is_integer(id) -> Map.put(changes, :role_id, id)
+    end
+  end
+
+  defp put_active(changes, v) when is_boolean(v), do: Map.put(changes, :active, v)
+
+  defp put_active(changes, v) when is_binary(v) do
+    case String.downcase(String.trim(v)) do
+      "true" -> Map.put(changes, :active, true)
+      "false" -> Map.put(changes, :active, false)
+      "1" -> Map.put(changes, :active, true)
+      "0" -> Map.put(changes, :active, false)
+      _ -> changes
+    end
+  end
+
+  defp put_active(changes, v) when is_integer(v) do
+    if v == 0, do: Map.put(changes, :active, false), else: Map.put(changes, :active, true)
+  end
+
+  defp put_active(changes, _), do: changes
+
   @doc "Deletes all expired session and reset tokens."
   @spec cleanup_expired_tokens() :: non_neg_integer()
   def cleanup_expired_tokens do

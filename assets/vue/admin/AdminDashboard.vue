@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useLiveVue } from 'live_vue'
 import { Search, Tag, Plus } from '@lucide/vue'
@@ -8,8 +8,13 @@ import { Input } from '@/assets/vue/components/ui/input'
 import AdminSeriesTable, { type SeriesRow } from '@/assets/vue/admin/AdminSeriesTable.vue'
 import AdminUsersTable, { type UserRow } from '@/assets/vue/admin/AdminUsersTable.vue'
 import AdminReportsTable, { type ReportRow } from '@/assets/vue/admin/AdminReportsTable.vue'
+import AdminAuditTable, { type AuditRow } from '@/assets/vue/admin/AdminAuditTable.vue'
 import ManageTagsDialog from '@/assets/vue/admin/ManageTagsDialog.vue'
 import AddSeriesDialog from '@/assets/vue/admin/AddSeriesDialog.vue'
+import ChapterListDialog, { type ChapterRow } from '@/assets/vue/admin/ChapterListDialog.vue'
+import EditUserDialog from '@/assets/vue/admin/EditUserDialog.vue'
+import SeriesScheduleDialog from '@/assets/vue/admin/SeriesScheduleDialog.vue'
+import ConfirmDialog from '@/assets/vue/admin/ConfirmDialog.vue'
 
 type Pagination = {
   page: number
@@ -34,11 +39,19 @@ const props = defineProps<{
   reportRows: ReportRow[]
   reportPagination: Pagination
   reportStatus: string
+  chapterRows: ChapterRow[]
+  chapterPagination: Pagination
+  chapterSeriesId: number | null
+  chapterSeriesTitle: string | null
+  auditRows: AuditRow[]
+  auditPagination: Pagination
+  auditAction: string
+  auditTargetType: string
 }>()
 
 const live = useLiveVue()
 
-const activeTab = ref<'series' | 'users' | 'reports'>('series')
+const activeTab = ref<'series' | 'users' | 'reports' | 'audit'>('series')
 
 // Series search
 const searchQuery = ref(props.query ?? '')
@@ -110,8 +123,18 @@ watch(
 function handleAddTag(name: string) {
   live.pushEvent('admin:add_tag', { name })
 }
+const showDeleteTagDialog = ref(false)
+const tagPendingDelete = ref<{ id: number; name: string } | null>(null)
 function handleRemoveTag(id: number) {
-  live.pushEvent('admin:remove_tag', { id })
+  const tag = props.tags.find(t => t.id === id)
+  tagPendingDelete.value = { id, name: tag?.name ?? `#${id}` }
+  showDeleteTagDialog.value = true
+}
+function confirmDeleteTag() {
+  if (!tagPendingDelete.value) return
+  live.pushEvent('admin:remove_tag', { id: tagPendingDelete.value.id })
+  showDeleteTagDialog.value = false
+  tagPendingDelete.value = null
 }
 function handleCreateSeries(data: {
   title: string
@@ -148,6 +171,167 @@ function handleResolveReport(id: number) {
 function handleRejectReport(id: number) {
   live.pushEvent('admin:reject_report', { id })
 }
+
+// ---- Audit ----
+const auditAction = ref(props.auditAction ?? 'all')
+const auditTargetType = ref(props.auditTargetType ?? 'all')
+
+watch(
+  () => props.auditAction,
+  (v) => { if (v !== auditAction.value) auditAction.value = v },
+)
+watch(
+  () => props.auditTargetType,
+  (v) => { if (v !== auditTargetType.value) auditTargetType.value = v },
+)
+
+function onAuditActionChange(event: Event) {
+  const v = (event.target as HTMLSelectElement).value
+  live.pushEvent('admin:audit_filter_change', { action: v, target_type: auditTargetType.value })
+}
+
+function onAuditTargetTypeChange(event: Event) {
+  const v = (event.target as HTMLSelectElement).value
+  live.pushEvent('admin:audit_filter_change', { action: auditAction.value, target_type: v })
+}
+
+function goToAuditPage(page: number) {
+  live.pushEvent('admin:audit_page_change', { page })
+}
+
+function onAuditPageSizeChange(event: Event) {
+  const size = Number.parseInt((event.target as HTMLSelectElement).value, 10)
+  live.pushEvent('admin:audit_page_size_change', { page_size: size })
+}
+
+// ---- Chapter dialog state ----
+const showChaptersDialog = ref(false)
+const showScheduleDialog = ref(false)
+const scheduleSeries = ref<SeriesRow | null>(null)
+
+function handleOpenChapters(row: SeriesRow) {
+  live.pushEvent('admin:list_chapters', { series_id: row.id, page: 1, page_size: 25 })
+  showChaptersDialog.value = true
+}
+
+function handleEditSchedule(row: SeriesRow) {
+  scheduleSeries.value = row
+  showScheduleDialog.value = true
+}
+
+const showDeleteSeriesDialog = ref(false)
+const seriesPendingDelete = ref<SeriesRow | null>(null)
+const showArchiveDialog = ref(false)
+const seriesPendingArchive = ref<SeriesRow | null>(null)
+const showUnarchiveDialog = ref(false)
+const seriesPendingUnarchive = ref<SeriesRow | null>(null)
+
+function handleDeleteSeries(row: SeriesRow) {
+  seriesPendingDelete.value = row
+  showDeleteSeriesDialog.value = true
+}
+function confirmDeleteSeries() {
+  if (!seriesPendingDelete.value) return
+  live.pushEvent('admin:delete_series', { id: seriesPendingDelete.value.id })
+  showDeleteSeriesDialog.value = false
+  seriesPendingDelete.value = null
+}
+
+function handleArchiveSeries(row: SeriesRow) {
+  seriesPendingArchive.value = row
+  showArchiveDialog.value = true
+}
+function confirmArchiveSeries() {
+  if (!seriesPendingArchive.value) return
+  live.pushEvent('admin:archive_series', { id: seriesPendingArchive.value.id })
+  showArchiveDialog.value = false
+  seriesPendingArchive.value = null
+}
+
+function handleUnarchiveSeries(row: SeriesRow) {
+  seriesPendingUnarchive.value = row
+  showUnarchiveDialog.value = true
+}
+function confirmUnarchiveSeries() {
+  if (!seriesPendingUnarchive.value) return
+  live.pushEvent('admin:unarchive_series', { id: seriesPendingUnarchive.value.id })
+  showUnarchiveDialog.value = false
+  seriesPendingUnarchive.value = null
+}
+
+function handleChapterPageChange(page: number) {
+  live.pushEvent('admin:chapters_page_change', { page })
+}
+
+function handleChapterPageSizeChange(size: number) {
+  live.pushEvent('admin:chapters_page_size_change', { page_size: size })
+}
+
+const showDeleteChapterDialog = ref(false)
+const chapterPendingDelete = ref<ChapterRow | null>(null)
+function handleDeleteChapter(row: ChapterRow) {
+  chapterPendingDelete.value = row
+  showDeleteChapterDialog.value = true
+}
+function confirmDeleteChapter() {
+  if (!chapterPendingDelete.value) return
+  live.pushEvent('admin:delete_chapter', { id: chapterPendingDelete.value.id })
+  showDeleteChapterDialog.value = false
+  chapterPendingDelete.value = null
+}
+
+function handleRepairChapter(payload: { id: number; newSourceUrl: string | null }) {
+  live.pushEvent('admin:repair_chapter', { id: payload.id, new_source_url: payload.newSourceUrl })
+}
+
+function handleChapterRefresh() {
+  if (props.chapterSeriesId) {
+    live.pushEvent('admin:list_chapters', { series_id: props.chapterSeriesId, page: props.chapterPagination.page, page_size: props.chapterPagination.pageSize })
+  }
+}
+
+function handleSaveSchedule(data: { id: number; publicationStatus: string; manualInterval: string | null }) {
+  live.pushEvent('admin:update_series_schedule', { id: data.id, publication_status: data.publicationStatus, manual_check_interval_minutes: data.manualInterval })
+  showScheduleDialog.value = false
+}
+
+// ---- User dialog state ----
+const showEditUserDialog = ref(false)
+const editingUser = ref<UserRow | null>(null)
+const showDeleteUserDialog = ref(false)
+const userPendingDelete = ref<UserRow | null>(null)
+
+function handleEditUser(row: UserRow) {
+  editingUser.value = row
+  showEditUserDialog.value = true
+}
+
+function handleDeleteUser(row: UserRow) {
+  userPendingDelete.value = row
+  showDeleteUserDialog.value = true
+}
+function confirmDeleteUser() {
+  if (!userPendingDelete.value) return
+  live.pushEvent('admin:delete_user', { id: userPendingDelete.value.id })
+  showDeleteUserDialog.value = false
+  userPendingDelete.value = null
+}
+
+function handleSaveUser(data: { id: number; username: string; email: string; role: string; active: boolean }) {
+  live.pushEvent('admin:update_user', { id: data.id, username: data.username, email: data.email, role: data.role, active: data.active })
+  showEditUserDialog.value = false
+}
+
+const seriesRowsForTable = computed(() => [...(props.seriesRows ?? [])])
+const userRowsForTable = computed(() => [...(props.userRows ?? [])])
+const reportRowsForTable = computed(() => [...(props.reportRows ?? [])])
+const chapterRowsForTable = computed(() => [...(props.chapterRows ?? [])])
+const auditRowsForTable = computed(() => [...(props.auditRows ?? [])])
+
+// Keep chapter dialog open when props update after delete/repair? No auto-close
+watch(() => props.chapterRows, () => {
+  // keep dialog open, no action
+})
 
 // Folder tabs — differentiated from Castra: neutral border/shadow, not blue.
 // Active overlaps card border via -mb-px + border-b-card.
@@ -195,6 +379,16 @@ const tabInactive =
         @click="activeTab = 'reports'"
       >
         Reports
+      </button>
+      <button
+        type="button"
+        :class="[tabBase, activeTab === 'audit' ? tabActive : tabInactive]"
+        class="border-b-0"
+        :aria-selected="activeTab === 'audit'"
+        role="tab"
+        @click="activeTab = 'audit'"
+      >
+        Audit
       </button>
     </div>
 
@@ -248,8 +442,8 @@ const tabInactive =
           </select>
         </div>
 
-        <!-- Table -->
-        <AdminSeriesTable :data="seriesRows" />
+        <!-- Table — use computed copy so LiveVue in-place `splice` triggers TanStack -->
+        <AdminSeriesTable :data="seriesRowsForTable" @openChapters="handleOpenChapters" @editSchedule="handleEditSchedule" @deleteSeries="handleDeleteSeries" @archiveSeries="handleArchiveSeries" @unarchiveSeries="handleUnarchiveSeries" />
 
         <!-- Pagination — softer, more spacing -->
         <div class="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-4 border-t bg-muted/10">
@@ -329,7 +523,7 @@ const tabInactive =
           </select>
         </div>
 
-        <AdminUsersTable :data="userRows" />
+        <AdminUsersTable :data="userRowsForTable" @edit="handleEditUser" @delete="handleDeleteUser" />
 
         <div class="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-4 border-t bg-muted/10">
           <p class="text-xs text-muted-foreground">
@@ -385,7 +579,7 @@ const tabInactive =
           </select>
         </div>
 
-        <AdminReportsTable :data="reportRows" @resolve="handleResolveReport" @reject="handleRejectReport" />
+        <AdminReportsTable :data="reportRowsForTable" @resolve="handleResolveReport" @reject="handleRejectReport" />
 
         <div class="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-4 border-t bg-muted/10">
           <p class="text-xs text-muted-foreground">
@@ -408,6 +602,80 @@ const tabInactive =
           </div>
         </div>
       </div>
+
+      <!-- Audit — traceable admin actions -->
+      <div v-show="activeTab === 'audit'">
+        <div class="flex items-center justify-between px-5 py-4 border-b bg-muted/20">
+          <h2 class="text-base font-semibold tracking-tight">Audit Logs</h2>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-muted-foreground hidden sm:inline">{{ auditPagination.totalEntries }} total</span>
+            <select
+              :value="auditAction"
+              class="flex h-8 w-[160px] items-center justify-between rounded-lg border bg-card px-2.5 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              aria-label="Filter by action"
+              @change="onAuditActionChange"
+            >
+              <option value="all">All actions</option>
+              <option value="category.create">category.create</option>
+              <option value="category.delete">category.delete</option>
+              <option value="series.create">series.create</option>
+              <option value="series.delete">series.delete</option>
+              <option value="series.archive">series.archive</option>
+              <option value="series.unarchive">series.unarchive</option>
+              <option value="series.update_schedule">series.update_schedule</option>
+              <option value="chapter.delete">chapter.delete</option>
+              <option value="chapter.repair">chapter.repair</option>
+              <option value="user.update">user.update</option>
+              <option value="user.delete">user.delete</option>
+              <option value="report.resolve">report.resolve</option>
+              <option value="report.reject">report.reject</option>
+            </select>
+            <select
+              :value="auditTargetType"
+              class="flex h-8 w-[120px] items-center justify-between rounded-lg border bg-card px-2.5 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              aria-label="Filter by target"
+              @change="onAuditTargetTypeChange"
+            >
+              <option value="all">All targets</option>
+              <option value="category">category</option>
+              <option value="series">series</option>
+              <option value="chapter">chapter</option>
+              <option value="user">user</option>
+              <option value="report">report</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 items-center justify-between px-4 py-4">
+          <p class="text-xs text-muted-foreground">Traceable history of every mutating admin action — actor, target, IP and metadata.</p>
+          <select
+            :value="String(auditPagination.pageSize)"
+            class="flex h-8 w-[72px] items-center justify-between rounded-lg border bg-card px-2.5 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+            aria-label="Rows per page"
+            @change="onAuditPageSizeChange"
+          >
+            <option v-for="n in pageSizeOptions" :key="n" :value="String(n)">{{ n }}</option>
+          </select>
+        </div>
+
+        <AdminAuditTable :data="auditRowsForTable" />
+
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-4 border-t bg-muted/10">
+          <p class="text-xs text-muted-foreground">
+            <template v-if="auditPagination.totalEntries === 0"> No audit logs </template>
+            <template v-else>
+              Showing {{ (auditPagination.page - 1) * auditPagination.pageSize + 1 }}–{{
+                Math.min(auditPagination.page * auditPagination.pageSize, auditPagination.totalEntries)
+              }} of {{ auditPagination.totalEntries }} logs
+            </template>
+          </p>
+          <div class="flex items-center gap-2">
+            <Button variant="ghost" size="sm" :disabled="!auditPagination.hasPrevious" class="h-7" @click="goToAuditPage(auditPagination.page - 1)"> Previous </Button>
+            <span class="text-xs tabular-nums px-2 py-1 rounded bg-muted"> Page {{ auditPagination.page }} of {{ auditPagination.totalPages }} </span>
+            <Button variant="ghost" size="sm" :disabled="!auditPagination.hasNext" class="h-7" @click="goToAuditPage(auditPagination.page + 1)"> Next </Button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <ManageTagsDialog
@@ -423,6 +691,91 @@ const tabInactive =
       :coverUpload="coverUpload"
       @update:open="showAddSeriesDialog = $event"
       @createSeries="handleCreateSeries"
+    />
+    <ChapterListDialog
+      :open="showChaptersDialog"
+      :seriesTitle="chapterSeriesTitle"
+      :seriesId="chapterSeriesId"
+      :chapters="chapterRowsForTable"
+      :pagination="chapterPagination"
+      @update:open="showChaptersDialog = $event"
+      @deleteChapter="handleDeleteChapter"
+      @repairChapter="handleRepairChapter"
+      @pageChange="handleChapterPageChange"
+      @pageSizeChange="handleChapterPageSizeChange"
+      @refresh="handleChapterRefresh"
+    />
+    <EditUserDialog
+      :open="showEditUserDialog"
+      :user="editingUser"
+      @update:open="showEditUserDialog = $event"
+      @save="handleSaveUser"
+    />
+    <SeriesScheduleDialog
+      :open="showScheduleDialog"
+      :series="scheduleSeries"
+      @update:open="showScheduleDialog = $event"
+      @save="handleSaveSchedule"
+    />
+    <ConfirmDialog
+      :open="showDeleteSeriesDialog"
+      title="Are you sure to delete series?"
+      :description="seriesPendingDelete ? `This action will permanently mark the series '${seriesPendingDelete.title}' for deletion. This cannot be undone.` : 'This action cannot be undone.'"
+      confirm-label="Confirm"
+      variant="destructive"
+      @update:open="showDeleteSeriesDialog = $event"
+      @confirm="confirmDeleteSeries"
+      @cancel="showDeleteSeriesDialog = false"
+    />
+    <ConfirmDialog
+      :open="showDeleteUserDialog"
+      title="Are you sure to delete user?"
+      :description="userPendingDelete ? `This action will permanently delete user '${userPendingDelete.username}' (${userPendingDelete.email}). This cannot be undone.` : 'This action cannot be undone.'"
+      confirm-label="Confirm"
+      variant="destructive"
+      @update:open="showDeleteUserDialog = $event"
+      @confirm="confirmDeleteUser"
+      @cancel="showDeleteUserDialog = false"
+    />
+    <ConfirmDialog
+      :open="showDeleteChapterDialog"
+      title="Are you sure to delete chapter?"
+      :description="chapterPendingDelete ? `This action will permanently delete chapter '${chapterPendingDelete.displayNumber}' (${chapterPendingDelete.chapterKey}) and its images from storage. This cannot be undone.` : 'This action cannot be undone.'"
+      confirm-label="Confirm"
+      variant="destructive"
+      @update:open="showDeleteChapterDialog = $event"
+      @confirm="confirmDeleteChapter"
+      @cancel="showDeleteChapterDialog = false"
+    />
+    <ConfirmDialog
+      :open="showDeleteTagDialog"
+      title="Are you sure to delete tag?"
+      :description="tagPendingDelete ? `This action will permanently delete tag '${tagPendingDelete.name}'. Series using this tag will be untagged.` : 'This action cannot be undone.'"
+      confirm-label="Confirm"
+      variant="destructive"
+      @update:open="showDeleteTagDialog = $event"
+      @confirm="confirmDeleteTag"
+      @cancel="showDeleteTagDialog = false"
+    />
+    <ConfirmDialog
+      :open="showArchiveDialog"
+      title="Are you sure to archive series?"
+      :description="seriesPendingArchive ? `This action will archive series '${seriesPendingArchive.title}' — it will be delisted from user UI instantly but kept in DB/storage until hard-deleted one-by-one.` : 'This action will archive the series.'"
+      confirm-label="Confirm"
+      variant="default"
+      @update:open="showArchiveDialog = $event"
+      @confirm="confirmArchiveSeries"
+      @cancel="showArchiveDialog = false"
+    />
+    <ConfirmDialog
+      :open="showUnarchiveDialog"
+      title="Are you sure to unarchive series?"
+      :description="seriesPendingUnarchive ? `This action will unarchive series '${seriesPendingUnarchive.title}' — it will be visible again and rescheduled.` : 'This action will unarchive the series.'"
+      confirm-label="Confirm"
+      variant="default"
+      @update:open="showUnarchiveDialog = $event"
+      @confirm="confirmUnarchiveSeries"
+      @cancel="showUnarchiveDialog = false"
     />
 
     <p class="text-center text-xs text-muted-foreground pt-3">

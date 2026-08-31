@@ -34,6 +34,7 @@ defmodule Crysa.Catalog.Query do
 
     base =
       from(s in Series, as: :series)
+      |> where([s], is_nil(s.archived_at))
       |> filter_series(filters)
       |> order_series(filters)
 
@@ -85,18 +86,31 @@ defmodule Crysa.Catalog.Query do
   @spec list_categories_with_counts() :: [{Category.t(), non_neg_integer()}]
   def list_categories_with_counts do
     from(c in Category,
-      left_join: sc in "series_categories",
+      join: sc in "series_categories",
       on: sc.category_id == c.id,
+      join: s in Series,
+      on: s.id == sc.series_id and is_nil(s.archived_at),
       group_by: c.id,
-      having: count(sc.series_id) > 0,
+      having: count(s.id) > 0,
       order_by: [asc: c.name],
-      select: {c, count(sc.series_id)}
+      select: {c, count(s.id)}
     )
     |> Repo.all()
   end
 
   @spec get_series_by_slug(String.t()) :: Series.t() | nil
   def get_series_by_slug(slug) when is_binary(slug) do
+    from(s in Series,
+      where: s.slug == ^slug and is_nil(s.archived_at),
+      preload: [:categories, :authors],
+      limit: 1
+    )
+    |> Repo.one()
+  end
+
+  @doc "Admin variant that returns archived series as well."
+  @spec get_series_by_slug_admin(String.t()) :: Series.t() | nil
+  def get_series_by_slug_admin(slug) when is_binary(slug) do
     from(s in Series,
       where: s.slug == ^slug,
       preload: [:categories, :authors],

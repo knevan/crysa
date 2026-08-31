@@ -100,6 +100,7 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
       add :check_retry_count, :integer, null: false, default: 0
       add :last_chapter_at, :utc_datetime_usec
       add :last_error, :text
+      add :archived_at, :utc_datetime_usec
 
       timestamps(type: :utc_datetime_usec)
     end
@@ -109,6 +110,12 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
     create index(:series, [:publication_status])
     create index(:series, [:processing_status])
     create index(:series, [:next_check_at])
+    create index(:series, [:archived_at])
+
+    create index(:series, [:inserted_at, :id],
+             where: "archived_at IS NULL",
+             name: :series_public_browse_index
+           )
 
     # Partial index for the series-check scheduler: only rows that are due and
     # eligible (publication status schedulable, not in a deletion lifecycle).

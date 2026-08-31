@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { createColumnHelper, getCoreRowModel, useVueTable, FlexRender } from '@tanstack/vue-table'
-import { computed, h, ref } from 'vue'
+import { computed, h, ref, watch } from 'vue'
+import { Pencil, Trash2 } from '@lucide/vue'
 
 export type UserRow = {
   id: number
@@ -14,6 +15,11 @@ export type UserRow = {
 
 const props = defineProps<{
   data: UserRow[]
+}>()
+
+const emit = defineEmits<{
+  (e: 'edit', row: UserRow): void
+  (e: 'delete', row: UserRow): void
 }>()
 
 const columnHelper = createColumnHelper<UserRow>()
@@ -41,6 +47,10 @@ function roleClass(role: string | null): string {
       return 'bg-muted text-muted-foreground'
   }
 }
+
+// Reactive copy — same reason as AdminSeriesTable: LiveVue patches the source array
+// in place (`splice`), TanStack only re-renders when the data ref changes.
+const dataRef = computed(() => [...props.data])
 
 // Column sizing — drag to resize
 const columnSizing = ref<Record<string, number>>({})
@@ -129,20 +139,20 @@ const columns = [
           {
             class:
               'inline-flex h-7 w-7 items-center justify-center rounded-md border border-input bg-background text-xs hover:bg-accent',
-            title: `Edit ${row.username}`,
-            onClick: () => console.log('edit user', row.id),
+            title: `Edit ${row.username} — username/email/role/active (hierarchy enforced)`,
+            onClick: () => emit('edit', row),
           },
-          '✎',
+          [h(Pencil, { class: 'size-3.5' })],
         ),
         h(
           'button',
           {
             class:
               'inline-flex h-7 w-7 items-center justify-center rounded-md border border-input bg-background text-xs hover:bg-accent hover:text-destructive',
-            title: `Delete ${row.username}`,
-            onClick: () => console.log('delete user', row.id),
+            title: `Delete ${row.username} — hard delete, cannot delete self or ≥ your role`,
+            onClick: () => emit('delete', row),
           },
-          '🗑',
+          [h(Trash2, { class: 'size-3.5' })],
         ),
       ])
     },
@@ -153,9 +163,7 @@ const columns = [
 ]
 
 const table = useVueTable({
-  get data() {
-    return props.data
-  },
+  data: dataRef,
   columns,
   state: {
     get columnSizing() {
@@ -172,7 +180,22 @@ const table = useVueTable({
 })
 
 const headerGroups = computed(() => table.getHeaderGroups())
-const rows = computed(() => table.getRowModel().rows)
+const rows = computed(() => {
+  const _track = dataRef.value.length
+  const r = table.getRowModel().rows
+  return r
+})
+
+watch(
+  () => props.data,
+  (newData) => {
+    table.setOptions((prev) => ({ ...prev, data: [...newData] }))
+  },
+  { deep: true },
+)
+watch(dataRef, (v) => {
+  table.setOptions((prev) => ({ ...prev, data: [...v] }))
+})
 </script>
 
 <template>

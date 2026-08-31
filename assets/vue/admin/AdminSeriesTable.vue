@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { createColumnHelper, getCoreRowModel, useVueTable, FlexRender } from '@tanstack/vue-table'
-import { computed, h, ref } from 'vue'
+import { computed, h, ref, watch } from 'vue'
+import { Archive, ArchiveRestore, ClockFading, ListOrdered, Trash2 } from '@lucide/vue'
 
 export type SeriesRow = {
   id: number
@@ -13,10 +14,25 @@ export type SeriesRow = {
   coverUrl: string | null
   updatedAt: string | null
   insertedAt: string | null
+  manualCheckIntervalMinutes: number | null
+  effectiveIntervalMinutes: number | null
+  nextCheckAt: string | null
+  lastCheckedAt: string | null
+  checkRetryCount: number
+  lastError: string | null
+  archivedAt: string | null
 }
 
 const props = defineProps<{
   data: SeriesRow[]
+}>()
+
+const emit = defineEmits<{
+  (e: 'openChapters', row: SeriesRow): void
+  (e: 'editSchedule', row: SeriesRow): void
+  (e: 'deleteSeries', row: SeriesRow): void
+  (e: 'archiveSeries', row: SeriesRow): void
+  (e: 'unarchiveSeries', row: SeriesRow): void
 }>()
 
 const columnHelper = createColumnHelper<SeriesRow>()
@@ -60,6 +76,29 @@ function statusClass(status: string): string {
   }
 }
 
+function processingStatusClass(status: string): string {
+  switch (status) {
+    case 'available':
+      return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-100'
+    case 'pending':
+      return 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-100'
+    case 'processing':
+      return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100'
+    case 'error':
+      return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
+    case 'pending_deletion':
+      return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-100'
+    case 'deleting':
+      return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100'
+    case 'deletion_failed':
+      return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
+    default:
+      return 'bg-muted text-muted-foreground'
+  }
+}
+
+const dataRef = computed(() => [...props.data])
+
 // Column sizing state — persisted client-side, enables drag-to-resize
 const columnSizing = ref<Record<string, number>>({})
 
@@ -102,7 +141,7 @@ const columns = [
     enableResizing: true,
   }),
   columnHelper.accessor('publicationStatus', {
-    header: 'Status',
+    header: 'Public Status',
     cell: info => {
       const status = info.getValue() as string
       return h(
@@ -113,8 +152,46 @@ const columns = [
         status,
       )
     },
-    size: 100,
-    minSize: 100,
+    size: 90,
+    minSize: 90,
+    enableResizing: true,
+  }),
+  columnHelper.accessor('processingStatus', {
+    header: 'Process Status',
+    cell: info => {
+      const status = info.getValue() as string
+      const label = status.replace('_', ' ')
+      return h(
+        'span',
+        {
+          class: `inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize ${processingStatusClass(status)}`,
+          title: status,
+        },
+        label,
+      )
+    },
+    size: 110,
+    minSize: 110,
+    enableResizing: true,
+  }),
+  columnHelper.accessor('archivedAt', {
+    header: 'Archived',
+    cell: info => {
+      const v = info.getValue() as string | null
+      if (!v) return h('span', { class: 'text-xs text-muted-foreground' }, '—')
+      const d = new Date(v)
+      const label = Number.isNaN(d.getTime()) ? v.slice(0, 10) : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      return h(
+        'span',
+        {
+          class: 'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium bg-zinc-800 text-white dark:bg-zinc-100 dark:text-zinc-900',
+          title: v,
+        },
+        [h(Archive, { class: 'size-3' }), label],
+      )
+    },
+    size: 110,
+    minSize: 110,
     enableResizing: true,
   }),
   columnHelper.accessor('sourceUrl', {
@@ -132,39 +209,61 @@ const columns = [
     header: 'Actions',
     cell: info => {
       const row = info.row.original
+      const isArchived = !!row.archivedAt
       return h('div', { class: 'flex gap-1' }, [
         h(
           'button',
           {
             class:
-              'inline-flex h-7 w-7 items-center justify-center rounded-md border border-input bg-background text-xs hover:bg-accent',
-            title: `Edit ${row.title}`,
-            onClick: () => console.log('edit', row.id),
+              'inline-flex h-7 px-2 items-center justify-center rounded-md border border-input bg-background text-xs hover:bg-accent gap-1',
+            title: `Chapters for ${row.title} — list/delete/repair (stable chapter_key, bounded pagination)`,
+            onClick: () => emit('openChapters', row),
           },
-          '✎',
+          [h(ListOrdered, { class: 'size-3.5' })],
         ),
         h(
           'button',
           {
             class:
-              'inline-flex h-7 w-7 items-center justify-center rounded-md border border-input bg-background text-xs hover:bg-accent hover:text-destructive',
-            title: `Delete ${row.title}`,
-            onClick: () => console.log('delete', row.id),
+              'inline-flex h-7 w-7 items-center justify-center rounded-md border border-input bg-background text-xs hover:bg-accent',
+            title: `Schedule for ${row.title} — effective ${row.effectiveIntervalMinutes ?? '—'}m, next ${row.nextCheckAt ?? '—'}`,
+            onClick: () => emit('editSchedule', row),
           },
-          '🗑',
+          [h(ClockFading, { class: 'size-3.5' })],
+        ),
+        h(
+          'button',
+          {
+            class: isArchived
+              ? 'inline-flex h-7 w-7 items-center justify-center rounded-md border border-input bg-amber-50 text-amber-700 border-amber-200 text-xs hover:bg-amber-100'
+              : 'inline-flex h-7 w-7 items-center justify-center rounded-md border border-input bg-background text-xs hover:bg-accent',
+            title: isArchived
+              ? `Unarchive ${row.title} — will be visible again & rescheduled`
+              : `Archive ${row.title} — delist from user UI instantly (keeps DB/storage, then delete one-by-one)`,
+            onClick: () => (isArchived ? emit('unarchiveSeries', row) : emit('archiveSeries', row)),
+          },
+          [h(isArchived ? ArchiveRestore : Archive, { class: 'size-3.5' })],
+        ),
+        h(
+          'button',
+          {
+            class:
+              'inline-flex h-7 w-7 items-center justify-center rounded-md border border-input bg-background text-xs hover:bg-accent hover:text-destructive hover:border-destructive/50',
+            title: `Delete ${row.title} — hard delete DB + cover + all chapter images from storage (via durable worker, one-by-one)` ,
+            onClick: () => emit('deleteSeries', row),
+          },
+          [h(Trash2, { class: 'size-3.5' })],
         ),
       ])
     },
-    size: 163,
-    minSize: 163,
+    size: 210,
+    minSize: 210,
     enableResizing: true,
   }),
 ]
 
 const table = useVueTable({
-  get data() {
-    return props.data
-  },
+  data: dataRef,
   columns,
   state: {
     get columnSizing() {
@@ -180,8 +279,22 @@ const table = useVueTable({
   getCoreRowModel: getCoreRowModel(),
 })
 
+watch(
+  () => props.data,
+  (newData) => {
+    table.setOptions((prev) => ({ ...prev, data: [...newData] }))
+  },
+  { deep: true },
+)
+watch(dataRef, (v) => {
+  table.setOptions((prev) => ({ ...prev, data: [...v] }))
+})
+
 const headerGroups = computed(() => table.getHeaderGroups())
-const rows = computed(() => table.getRowModel().rows)
+const rows = computed(() => {
+  const _track = dataRef.value.length
+  return table.getRowModel().rows
+})
 </script>
 
 <template>

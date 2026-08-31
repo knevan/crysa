@@ -124,29 +124,43 @@ if config_env() == :prod do
   # See https://swoosh.hexdocs.pm/Swoosh.html#module-installation for details.
 end
 
-# Storage configuration — S3-compatible
+# Storage configuration — S3-compatible, vendor-neutral
 # For local dev/test without S3, Local adapter is used (priv/static/uploads).
 if config_env() in [:dev, :test, :prod] do
-  s3_bucket = env!("S3_BUCKET_NAME", :string, nil)
-  s3_endpoint = env!("S3_ENDPOINT_URL", :string, nil)
-  s3_access_key = env!("S3_ACCESS_KEY_ID", :string, nil)
-  s3_secret = env!("S3_SECRET_ACCESS_KEY", :string, nil)
-  s3_region = env!("S3_REGION", :string, "auto")
-  cdn_url = System.get_env("CDN_BASE_URL") || env!("S3_CDN_URL", :string, nil)
+  bucket_name = env!("BUCKET_NAME", :string, nil)
+  account_id = env!("ACCOUNT_ID", :string, nil)
+  endpoint_url = env!("ENDPOINT_URL", :string, nil)
+  access_key_id = env!("ACCESS_KEY_ID", :string, nil)
+  secret_access_key = env!("SECRET_ACCESS_KEY", :string, nil)
+  region = env!("REGION", :string, "auto")
+  domain_cdn_url = env!("DOMAIN_CDN_URL", :string, nil)
 
-  if s3_bucket && s3_access_key && s3_secret && s3_endpoint do
+  # Basic vendor-neutral validation: endpoint must be https:// if present
+  endpoint_url =
+    cond do
+      is_nil(endpoint_url) or endpoint_url == "" -> nil
+      String.starts_with?(endpoint_url, "https://") -> endpoint_url
+      true ->
+        require Logger
+        Logger.warning("storage endpoint should be https://, got #{String.slice(endpoint_url, 0, 80)}")
+        endpoint_url
+    end
+
+  if bucket_name && access_key_id && secret_access_key && endpoint_url do
     config :crysa, Crysa.Storage,
       adapter: Crysa.Storage.S3,
-      bucket: s3_bucket,
-      endpoint_url: s3_endpoint,
-      access_key_id: s3_access_key,
-      secret_access_key: s3_secret,
-      region: s3_region,
-      cdn_base_url: cdn_url,
-      trusted_cdn_urls: if(cdn_url && cdn_url != "", do: [String.trim_trailing(cdn_url, "/")], else: [])
+      bucket: bucket_name,
+      account_id: account_id,
+      endpoint_url: endpoint_url,
+      access_key_id: access_key_id,
+      secret_access_key: secret_access_key,
+      region: region,
+      cdn_base_url: domain_cdn_url,
+      trusted_cdn_urls:
+        if(domain_cdn_url && domain_cdn_url != "", do: [String.trim_trailing(domain_cdn_url, "/")], else: [])
   else
-    if cdn_url && cdn_url != "" do
-      trimmed = String.trim_trailing(cdn_url, "/")
+    if domain_cdn_url && domain_cdn_url != "" do
+      trimmed = String.trim_trailing(domain_cdn_url, "/")
 
       config :crysa, Crysa.Storage,
         adapter: Crysa.Storage.Local,
@@ -156,9 +170,10 @@ if config_env() in [:dev, :test, :prod] do
         trusted_cdn_urls: [trimmed]
     else
       # Prod without S3 and without CDN → must explicitly allow ephemeral Local
-      if config_env() == :prod and System.get_env("STORAGE_ADAPTER") != "local" and is_nil(s3_bucket) do
+      if config_env() == :prod and System.get_env("STORAGE_ADAPTER") != "local" and
+           is_nil(bucket_name) do
         raise """
-        S3 storage not configured in prod: set S3_BUCKET_NAME, S3_ENDPOINT_URL, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY and CDN_BASE_URL,
+        S3 storage not configured in prod: set BUCKET_NAME, ENDPOINT_URL (https://...), ACCESS_KEY_ID, SECRET_ACCESS_KEY and DOMAIN_CDN_URL,
         or set STORAGE_ADAPTER=local to allow ephemeral local storage (data will be lost on redeploy).
         """
       end

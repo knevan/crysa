@@ -15,7 +15,7 @@ defmodule Crysa.AccountsAdminTest do
       assert pagination.page_size == 25
       assert pagination.total_entries >= 2
       assert length(users) >= 2
-      assert Enum.all?(users, & &1.role != nil)
+      assert Enum.all?(users, &(&1.role != nil))
     end
 
     test "search filters by username and email case-insensitively and escapes wildcards" do
