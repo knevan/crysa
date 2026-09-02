@@ -89,7 +89,7 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
       add :bookmark_count, :integer, null: false, default: 0
       add :view_count, :integer, null: false, default: 0
       add :rating_count, :integer, null: false, default: 0
-      add :rating_sum, :integer, null: false, default: 0
+      add :rating_sum, :float, null: false, default: 0.0
       add :next_check_at, :utc_datetime_usec
       add :last_checked_at, :utc_datetime_usec
       # Nullable manual override: NULL means derive the interval from the
@@ -204,7 +204,7 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
     create table(:series_ratings) do
       add :user_id, references(:users, on_delete: :delete_all), null: false
       add :series_id, references(:series, on_delete: :delete_all), null: false
-      add :rating, :integer, null: false
+      add :rating, :float, null: false
 
       timestamps(type: :utc_datetime_usec)
     end

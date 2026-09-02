@@ -120,22 +120,26 @@ watch(
   },
 )
 
+const showDeleteTagDialog = ref(false)
+const tagPendingDelete = ref<{ id: number; name: string } | null>(null)
+
 function handleAddTag(name: string) {
   live.pushEvent('admin:add_tag', { name })
 }
-const showDeleteTagDialog = ref(false)
-const tagPendingDelete = ref<{ id: number; name: string } | null>(null)
+
 function handleRemoveTag(id: number) {
   const tag = props.tags.find(t => t.id === id)
   tagPendingDelete.value = { id, name: tag?.name ?? `#${id}` }
   showDeleteTagDialog.value = true
 }
+
 function confirmDeleteTag() {
   if (!tagPendingDelete.value) return
   live.pushEvent('admin:remove_tag', { id: tagPendingDelete.value.id })
   showDeleteTagDialog.value = false
   tagPendingDelete.value = null
 }
+
 function handleCreateSeries(data: {
   title: string
   originalTitle: string
@@ -180,6 +184,7 @@ watch(
   () => props.auditAction,
   (v) => { if (v !== auditAction.value) auditAction.value = v },
 )
+
 watch(
   () => props.auditTargetType,
   (v) => { if (v !== auditTargetType.value) auditTargetType.value = v },
@@ -230,6 +235,7 @@ function handleDeleteSeries(row: SeriesRow) {
   seriesPendingDelete.value = row
   showDeleteSeriesDialog.value = true
 }
+
 function confirmDeleteSeries() {
   if (!seriesPendingDelete.value) return
   live.pushEvent('admin:delete_series', { id: seriesPendingDelete.value.id })
@@ -269,10 +275,12 @@ function handleChapterPageSizeChange(size: number) {
 
 const showDeleteChapterDialog = ref(false)
 const chapterPendingDelete = ref<ChapterRow | null>(null)
+
 function handleDeleteChapter(row: ChapterRow) {
   chapterPendingDelete.value = row
   showDeleteChapterDialog.value = true
 }
+
 function confirmDeleteChapter() {
   if (!chapterPendingDelete.value) return
   live.pushEvent('admin:delete_chapter', { id: chapterPendingDelete.value.id })
@@ -310,6 +318,7 @@ function handleDeleteUser(row: UserRow) {
   userPendingDelete.value = row
   showDeleteUserDialog.value = true
 }
+
 function confirmDeleteUser() {
   if (!userPendingDelete.value) return
   live.pushEvent('admin:delete_user', { id: userPendingDelete.value.id })
@@ -333,7 +342,7 @@ watch(() => props.chapterRows, () => {
   // keep dialog open, no action
 })
 
-// Folder tabs — differentiated from Castra: neutral border/shadow, not blue.
+// Folder tabs
 // Active overlaps card border via -mb-px + border-b-card.
 const tabBase =
   'relative px-4 py-2.5 text-sm font-medium rounded-t-lg border transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'

@@ -43,10 +43,10 @@ defmodule Crysa.DbConstraintsTest do
   describe "check constraints" do
     test "rating is enforced by the database", %{user: user, series: series} do
       too_low =
-        %Rating{} |> Ecto.Changeset.change(%{user_id: user.id, series_id: series.id, rating: 0})
+        %Rating{} |> Ecto.Changeset.change(%{user_id: user.id, series_id: series.id, rating: 0.0})
 
       too_high =
-        %Rating{} |> Ecto.Changeset.change(%{user_id: user.id, series_id: series.id, rating: 6})
+        %Rating{} |> Ecto.Changeset.change(%{user_id: user.id, series_id: series.id, rating: 6.0})
 
       assert_raise Ecto.ConstraintError, ~r/rating_between_1_and_5/, fn ->
         Repo.insert!(too_low)

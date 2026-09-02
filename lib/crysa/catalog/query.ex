@@ -64,12 +64,13 @@ defmodule Crysa.Catalog.Query do
   def list_chapters(series_id, params \\ %{}) when is_integer(series_id) do
     page = parse_page(params)
     page_size = parse_page_size(params, @default_chapter_page_size, @max_chapter_page_size)
+    search = parse_search(params)
+    sort = parse_chapter_sort(params)
 
     base =
-      from(c in Chapter,
-        where: c.series_id == ^series_id,
-        order_by: [desc: c.sort_key, desc: c.id]
-      )
+      from(c in Chapter, where: c.series_id == ^series_id)
+      |> filter_chapters_search(search)
+      |> order_chapters(sort)
 
     total = Repo.aggregate(base, :count, :id)
     page = clamp_page(page, page_size, total)
@@ -82,6 +83,31 @@ defmodule Crysa.Catalog.Query do
 
     {chapters, Pagination.build(page, page_size, total)}
   end
+
+  defp parse_chapter_sort(%{"sort" => sort}) when sort in ~w(newest oldest) do
+    case sort do
+      "oldest" -> :oldest
+      _ -> :newest
+    end
+  end
+
+  defp parse_chapter_sort(_), do: :newest
+
+  defp filter_chapters_search(query, nil), do: query
+
+  defp filter_chapters_search(query, term) do
+    pattern = "%#{escape_like(term)}%"
+
+    where(
+      query,
+      [c],
+      ilike(c.display_number, ^pattern) or ilike(c.title, ^pattern) or
+        ilike(c.chapter_key, ^pattern)
+    )
+  end
+
+  defp order_chapters(query, :oldest), do: order_by(query, [c], asc: c.sort_key, asc: c.id)
+  defp order_chapters(query, :newest), do: order_by(query, [c], desc: c.sort_key, desc: c.id)
 
   @spec list_categories_with_counts() :: [{Category.t(), non_neg_integer()}]
   def list_categories_with_counts do

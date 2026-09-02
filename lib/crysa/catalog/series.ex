@@ -46,7 +46,7 @@ defmodule Crysa.Catalog.Series do
     field :bookmark_count, :integer, default: 0
     field :view_count, :integer, default: 0
     field :rating_count, :integer, default: 0
-    field :rating_sum, :integer, default: 0
+    field :rating_sum, :float, default: 0.0
     field :next_check_at, :utc_datetime_usec
     field :last_checked_at, :utc_datetime_usec
 

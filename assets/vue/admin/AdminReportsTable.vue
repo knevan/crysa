@@ -51,7 +51,7 @@ function statusClass(status: string): string {
 }
 
 function reasonClass(reason: string): string {
-  // chapter reasons vs comment reasons — just neutral pill
+  // chapter reasons vs comment reasons
   return 'bg-muted text-muted-foreground'
 }
 
@@ -183,6 +183,7 @@ watch(
   },
   { deep: true },
 )
+
 watch(dataRef, (v) => {
   table.setOptions((prev) => ({ ...prev, data: [...v] }))
 })

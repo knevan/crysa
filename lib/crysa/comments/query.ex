@@ -18,15 +18,32 @@ defmodule Crysa.Comments.Query do
   @spec list_comments_for_series(integer(), map()) :: {[Comment.t()], Pagination.t()}
   def list_comments_for_series(series_id, params \\ %{})
       when is_integer(series_id) and is_map(params) do
+    sort = parse_comment_sort(params)
+
     base =
       from(c in Comment,
         where: c.series_id == ^series_id and is_nil(c.deleted_at),
-        order_by: [asc: c.inserted_at, asc: c.id],
         preload: [:user]
       )
+      |> order_comments(sort)
 
     paginate(base, params, @default_page_size, @max_page_size)
   end
+
+  defp parse_comment_sort(%{"sort" => sort}) when sort in ~w(newest oldest most_voted) do
+    case sort do
+      "newest" -> :newest
+      "oldest" -> :oldest
+      "most_voted" -> :most_voted
+      _ -> :newest
+    end
+  end
+
+  defp parse_comment_sort(_), do: :newest
+
+  defp order_comments(query, :oldest), do: order_by(query, [c], asc: c.inserted_at, asc: c.id)
+  defp order_comments(query, :most_voted), do: order_by(query, [c], desc: c.vote_score, desc: c.inserted_at, desc: c.id)
+  defp order_comments(query, _), do: order_by(query, [c], desc: c.inserted_at, desc: c.id)
 
   @spec list_comments_for_chapter(integer(), map()) :: {[Comment.t()], Pagination.t()}
   def list_comments_for_chapter(chapter_id, params \\ %{})

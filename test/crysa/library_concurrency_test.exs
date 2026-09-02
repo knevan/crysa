@@ -103,7 +103,7 @@ defmodule Crysa.LibraryConcurrencyTest do
         # no matter which concurrent write committed last.
         assert series.rating_count == 1
         assert series.rating_sum == rating.rating
-        assert series.rating_sum in 1..5
+        assert series.rating_sum >= 1 and series.rating_sum <= 5
         assert Repo.aggregate(ratings_for(series.id), :count, :id) == 1
       end)
     end

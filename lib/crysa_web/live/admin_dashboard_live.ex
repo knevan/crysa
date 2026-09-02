@@ -294,7 +294,12 @@ defmodule CrysaWeb.Live.AdminDashboardLive do
 
           {:error, reason} ->
             require Logger
-            Logger.error("cover upload failed", reason: inspect(reason), filename: entry.client_name)
+
+            Logger.error("cover upload failed",
+              reason: inspect(reason),
+              filename: entry.client_name
+            )
+
             {:postpone, reason}
         end
       end)
@@ -327,74 +332,78 @@ defmodule CrysaWeb.Live.AdminDashboardLive do
          socket,
          :error,
          case cover_error do
-           {:validation, errors} -> "Cover upload failed: #{inspect(errors)}"
-           {:storage, reason} -> "Cover upload to R2 failed: #{inspect(reason)} — check S3 config and bucket"
-           _ -> "Cover upload failed"
+           {:validation, errors} ->
+             "Cover upload failed: #{inspect(errors)}"
+
+           {:storage, reason} ->
+             "Cover upload to R2 failed: #{inspect(reason)} — check S3 config and bucket"
+
+           _ ->
+             "Cover upload failed"
          end
        )}
     else
+      slug = slugify(title)
 
-    slug = slugify(title)
+      attrs =
+        %{
+          title: title,
+          slug: slug,
+          description: description,
+          source_url: source_url,
+          publication_status: "ongoing",
+          processing_status: "available"
+        }
+        |> maybe_put_cover(cover_url)
 
-    attrs =
-      %{
-        title: title,
-        slug: slug,
-        description: description,
-        source_url: source_url,
-        publication_status: "ongoing",
-        processing_status: "available"
-      }
-      |> maybe_put_cover(cover_url)
+      case Catalog.create_series(attrs) do
+        {:ok, series} ->
+          Enum.each(authors, fn name when is_binary(name) ->
+            trimmed = String.trim(name)
 
-    case Catalog.create_series(attrs) do
-      {:ok, series} ->
-        Enum.each(authors, fn name when is_binary(name) ->
-          trimmed = String.trim(name)
+            if trimmed != "" do
+              {:ok, author} = Catalog.get_or_create_author(trimmed)
+              Catalog.add_series_author(series, author)
+            end
+          end)
 
-          if trimmed != "" do
-            {:ok, author} = Catalog.get_or_create_author(trimmed)
-            Catalog.add_series_author(series, author)
+          categories =
+            tag_ids
+            |> Enum.map(&parse_integer(&1, nil))
+            |> Enum.reject(&is_nil/1)
+            |> Enum.map(&Catalog.get_category/1)
+            |> Enum.reject(&is_nil/1)
+
+          if categories != [] do
+            {:ok, _} = Catalog.set_series_categories(series, categories)
           end
-        end)
 
-        categories =
-          tag_ids
-          |> Enum.map(&parse_integer(&1, nil))
-          |> Enum.reject(&is_nil/1)
-          |> Enum.map(&Catalog.get_category/1)
-          |> Enum.reject(&is_nil/1)
+          audit(socket, "series.create", "series", series.id, series.slug, %{
+            title: series.title,
+            source_url: series.source_url,
+            authors: authors,
+            category_ids: tag_ids
+          })
 
-        if categories != [] do
-          {:ok, _} = Catalog.set_series_categories(series, categories)
-        end
+          query = socket.assigns.query
+          page_size = socket.assigns.page_size
 
-        audit(socket, "series.create", "series", series.id, series.slug, %{
-          title: series.title,
-          source_url: series.source_url,
-          authors: authors,
-          category_ids: tag_ids
-        })
+          {series_list, pagination} =
+            Catalog.admin_list_series(%{"q" => query, "page" => 1, "page_size" => page_size})
 
-        query = socket.assigns.query
-        page_size = socket.assigns.page_size
+          {:noreply,
+           socket
+           |> put_flash(:info, "Series \"#{series.title}\" created")
+           |> assign(
+             series_rows: Enum.map(series_list, &to_series_row/1),
+             pagination: to_pagination_map(pagination),
+             page: 1
+           )
+           |> refresh_audit_rows()}
 
-        {series_list, pagination} =
-          Catalog.admin_list_series(%{"q" => query, "page" => 1, "page_size" => page_size})
-
-        {:noreply,
-         socket
-         |> put_flash(:info, "Series \"#{series.title}\" created")
-         |> assign(
-           series_rows: Enum.map(series_list, &to_series_row/1),
-           pagination: to_pagination_map(pagination),
-           page: 1
-         )
-         |> refresh_audit_rows()}
-
-      {:error, changeset} ->
-        {:noreply, put_flash(socket, :error, format_series_error(changeset))}
-    end
+        {:error, changeset} ->
+          {:noreply, put_flash(socket, :error, format_series_error(changeset))}
+      end
     end
   end
 
@@ -1429,8 +1438,30 @@ defmodule CrysaWeb.Live.AdminDashboardLive do
   end
 
   defp maybe_put_attr(attrs, params, key, normalized_key) do
-    value = Map.get(params, key) || Map.get(params, String.to_atom(key))
+    value = fetch_param(params, key)
     if is_nil(value), do: attrs, else: Map.put(attrs, normalized_key, value)
+  end
+
+  # Safe param lookup without atom table exhaustion. LiveView `params`
+  # is string-keyed, but we support existing atom keys for test convenience
+  # via `to_existing_atom` (never creates new atoms).
+  defp fetch_param(params, key) when is_binary(key) do
+    case Map.fetch(params, key) do
+      {:ok, val} -> val
+      :error ->
+        try do
+          Map.get(params, String.to_existing_atom(key))
+        rescue
+          ArgumentError -> nil
+        end
+    end
+  end
+
+  defp fetch_param(params, key) when is_atom(key) do
+    case Map.fetch(params, Atom.to_string(key)) do
+      {:ok, val} -> val
+      :error -> Map.get(params, key)
+    end
   end
 
   defp refresh_series_rows(socket) do
@@ -1550,19 +1581,19 @@ defmodule CrysaWeb.Live.AdminDashboardLive do
   end
 
   defp parse_query(params, key) when is_binary(key) do
-    case Map.get(params, key) || Map.get(params, String.to_atom(key)) do
+    case fetch_param(params, key) do
       q when is_binary(q) -> q |> String.trim() |> String.slice(0, 100)
       _ -> ""
     end
   end
 
   defp parse_page(params, key) when is_binary(key) do
-    raw = Map.get(params, key) || Map.get(params, String.to_atom(key))
+    raw = fetch_param(params, key)
     parse_integer(raw, 1)
   end
 
   defp parse_page_size(params, key) when is_binary(key) do
-    raw = Map.get(params, key) || Map.get(params, String.to_atom(key))
+    raw = fetch_param(params, key)
     parse_integer(raw, @default_page_size)
   end
 

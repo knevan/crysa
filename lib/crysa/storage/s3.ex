@@ -6,12 +6,12 @@ defmodule Crysa.Storage.S3 do
   manually so no additional `ExAws`/`hackney` dependency is required. The
   adapter is configured via environment variables / application config (vendor-neutral):
 
-  - `:bucket` - S3 bucket name (`BUCKET_NAME`)
-  - `:account_id` - Cloudflare account ID / vendor account (`ACCOUNT_ID`, optional, for future use)
+  - `:bucket` - Bucket name (`BUCKET_NAME`)
+  - `:account_id` - Account ID (`ACCOUNT_ID`, optional, for future use)
   - `:access_key_id` - (`ACCESS_KEY_ID`)
   - `:secret_access_key` - (`SECRET_ACCESS_KEY`)
-  - `:endpoint_url` - Full S3 endpoint, e.g. `https://s3.amazonaws.com` or `https://<account>.r2.cloudflarestorage.com` (`ENDPOINT_URL`)
-  - `:region` - S3 region, defaults to `"auto"` (`REGION`)
+  - `:endpoint_url` - Full endpoint url
+  - `:region` - Region, defaults to `"auto"` (`REGION`)
   - `:cdn_base_url` - Public CDN base URL (`DOMAIN_CDN_URL`), used to build public URLs
 
   When the bucket is not configured, `put/3` and `delete/1` return

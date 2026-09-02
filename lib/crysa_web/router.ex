@@ -43,9 +43,8 @@ defmodule CrysaWeb.Router do
 
     get "/", PageController, :home
 
-    # Series
+    # Series (browse)
     get "/series", CatalogController, :index
-    get "/series/:slug", CatalogController, :show
     get "/series/:slug/:chapter_key", CatalogController, :reader
     get "/popular", CatalogController, :popular
     get "/updates", CatalogController, :updates
@@ -65,7 +64,7 @@ defmodule CrysaWeb.Router do
       post "/profile/avatar", ProfileController, :update_avatar
     end
 
-    # Websocket
+    # Websocket - auth pages
     live_session :current_user, on_mount: [{CrysaWeb.UserAuth, :mount_current_user}] do
       scope "/auth" do
         live "/login", UserLoginLive, :new
@@ -81,6 +80,16 @@ defmodule CrysaWeb.Router do
     end
   end
 
+  # Series detail
+  # Uses v-ssr for crawler-visible HTML. View tracking is best-effort.
+  live_session :series_show, on_mount: [{CrysaWeb.UserAuth, :mount_current_user}] do
+    scope "/", CrysaWeb do
+      pipe_through [:browser, :auth]
+
+      live "/series/:slug", Live.SeriesShowLive, :show
+    end
+  end
+
   scope "/moderator", CrysaWeb, as: :moderator do
     pipe_through [:browser, :auth, :moderator]
 
@@ -88,8 +97,6 @@ defmodule CrysaWeb.Router do
   end
 
   # Admin dashboard LiveView.
-  # Primary route is GET /admin. The legacy controller remains
-  # at /admin/legacy for manual fallback and is not used by navigation.
   live_session :admin_dashboard,
     on_mount: [{CrysaWeb.UserAuth, :mount_current_user}] do
     scope "/admin", CrysaWeb do
@@ -105,18 +112,8 @@ defmodule CrysaWeb.Router do
     get "/legacy", AdminDashboardController, :index
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", CrysaWeb do
-  #   pipe_through :api
-  # end
-
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:crysa, :dev_routes) do
-    # If you want to use the LiveDashboard in production, you should put
-    # it behind authentication and allow only admins to access it.
-    # If your application does not have an admins-only section yet,
-    # you can use Plug.BasicAuth to set up some basic authentication
-    # as long as you are also using SSL (which you should anyway).
     import Phoenix.LiveDashboard.Router
 
     scope "/dev" do

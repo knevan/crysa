@@ -193,6 +193,7 @@ watch(
   },
   { deep: true },
 )
+
 watch(dataRef, (v) => {
   table.setOptions((prev) => ({ ...prev, data: [...v] }))
 })

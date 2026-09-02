@@ -47,7 +47,7 @@ const coverFile = ref<File | null>(null)
 const coverPreviewUrl = ref<string | null>(null)
 const coverInputKey = ref(0)
 
-// LiveView upload — file is buffered in LiveView temp (RAM/disk) via allow_upload, then moved to S3/R2 on create
+// LiveView upload — file is buffered in LiveView temp (RAM/disk) via allow_upload, then moved to Object Storage on create
 const { entries: coverEntries, showFilePicker, addFiles, progress: coverProgress } = useLiveUpload(
   () => props.coverUpload,
   { changeEvent: undefined, submitEvent: undefined } as any,

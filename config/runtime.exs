@@ -138,11 +138,19 @@ if config_env() in [:dev, :test, :prod] do
   # Basic vendor-neutral validation: endpoint must be https:// if present
   endpoint_url =
     cond do
-      is_nil(endpoint_url) or endpoint_url == "" -> nil
-      String.starts_with?(endpoint_url, "https://") -> endpoint_url
+      is_nil(endpoint_url) or endpoint_url == "" ->
+        nil
+
+      String.starts_with?(endpoint_url, "https://") ->
+        endpoint_url
+
       true ->
         require Logger
-        Logger.warning("storage endpoint should be https://, got #{String.slice(endpoint_url, 0, 80)}")
+
+        Logger.warning(
+          "storage endpoint should be https://, got #{String.slice(endpoint_url, 0, 80)}"
+        )
+
         endpoint_url
     end
 
@@ -157,7 +165,10 @@ if config_env() in [:dev, :test, :prod] do
       region: region,
       cdn_base_url: domain_cdn_url,
       trusted_cdn_urls:
-        if(domain_cdn_url && domain_cdn_url != "", do: [String.trim_trailing(domain_cdn_url, "/")], else: [])
+        if(domain_cdn_url && domain_cdn_url != "",
+          do: [String.trim_trailing(domain_cdn_url, "/")],
+          else: []
+        )
   else
     if domain_cdn_url && domain_cdn_url != "" do
       trimmed = String.trim_trailing(domain_cdn_url, "/")

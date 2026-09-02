@@ -150,10 +150,11 @@ defmodule Crysa.LibraryTest do
       assert {:ok, %RatingChange{created?: true, previous_rating: nil, rating: rating}} =
                Library.rate_series(user, series, 4)
 
-      assert rating.rating == 4
-      assert %Rating{rating: 4} = Library.get_rating(user, series)
+      assert rating.rating == 4.0
+      assert %Rating{rating: rating} = Library.get_rating(user, series)
+      assert rating == 4
 
-      assert %{count: 1, sum: 4, average: 4.0} =
+      assert %{count: 1, sum: 4.0, average: 4.0} =
                series |> reload_series() |> Library.rating_summary()
     end
 
@@ -163,13 +164,13 @@ defmodule Crysa.LibraryTest do
     } do
       {:ok, _} = Library.rate_series(user, series, 4)
 
-      assert {:ok, %RatingChange{created?: false, previous_rating: 4, rating: rating}} =
+      assert {:ok, %RatingChange{created?: false, previous_rating: 4.0, rating: rating}} =
                Library.rate_series(user, series, 2)
 
-      assert rating.rating == 2
+      assert rating.rating == 2.0
 
       series = reload_series(series)
-      assert %{count: 1, sum: 2} = Library.rating_summary(series)
+      assert %{count: 1, sum: 2.0} = Library.rating_summary(series)
       assert count_ratings(series.id) == 1
     end
 
@@ -179,10 +180,10 @@ defmodule Crysa.LibraryTest do
       assert {:ok, %RatingChange{created?: false, rating: rating}} =
                Library.rate_series(user, series, 3)
 
-      assert rating.rating == 3
+      assert rating.rating == 3.0
 
       series = reload_series(series)
-      assert %{count: 1, sum: 3} = Library.rating_summary(series)
+      assert %{count: 1, sum: 3.0} = Library.rating_summary(series)
     end
 
     test "unrate_series removes the aggregates", %{user: user, series: series} do
@@ -198,7 +199,10 @@ defmodule Crysa.LibraryTest do
       refute Library.get_rating(user, series)
 
       series = reload_series(series)
-      assert %{count: 0, sum: 0, average: nil} = Library.rating_summary(series)
+      summary = Library.rating_summary(series)
+      assert summary.count == 0
+      assert summary.sum == 0.0
+      assert summary.average == nil
       assert count_ratings(series.id) == 0
     end
 
@@ -213,7 +217,9 @@ defmodule Crysa.LibraryTest do
         assert changeset.errors[:rating]
       end
 
-      assert %{count: 0, sum: 0} = series |> reload_series() |> Library.rating_summary()
+      summary = series |> reload_series() |> Library.rating_summary()
+      assert summary.count == 0
+      assert summary.sum == 0.0
     end
 
     test "different users rate the same series independently", %{
@@ -225,9 +231,11 @@ defmodule Crysa.LibraryTest do
       {:ok, _} = Library.rate_series(other_user, series, 5)
 
       series = reload_series(series)
-      assert %{count: 2, sum: 8, average: 4.0} = Library.rating_summary(series)
-      assert %Rating{rating: 3} = Library.get_rating(user, series)
-      assert %Rating{rating: 5} = Library.get_rating(other_user, series)
+      assert %{count: 2, sum: 8.0, average: 4.0} = Library.rating_summary(series)
+      assert %Rating{rating: r3} = Library.get_rating(user, series)
+      assert r3 == 3
+      assert %Rating{rating: r5} = Library.get_rating(other_user, series)
+      assert r5 == 5
     end
   end
 

@@ -82,7 +82,7 @@ defmodule Crysa.Library do
   in one transaction. The resulting `Crysa.Library.RatingChange` tells the
   caller whether a rating was created, updated, or left unchanged.
   """
-  @spec rate_series(User.t(), Series.t(), integer()) ::
+  @spec rate_series(User.t(), Series.t(), number()) ::
           {:ok, RatingChange.t()} | {:error, Ecto.Changeset.t()}
   def rate_series(%User{id: user_id}, %Series{id: series_id}, rating) do
     changeset =
@@ -127,13 +127,68 @@ defmodule Crysa.Library do
   @doc "Series rating aggregate plus a derived average (nil when nobody rated)."
   @spec rating_summary(Series.t()) :: %{
           count: non_neg_integer(),
-          sum: non_neg_integer(),
+          sum: number(),
           average: float() | nil
         }
   def rating_summary(%Series{rating_count: count, rating_sum: sum}) do
     average = if count > 0, do: sum / count, else: nil
     %{count: count, sum: sum, average: average}
   end
+
+  @doc """
+  Rating distribution for a series (1..5 star, half increments supported).
+
+  Returns a list of 5 maps sorted desc (5 to 1) with `rating`, `count`, and
+  `percent` (0..100, rounded to 1 decimal). Half-star ratings (e.g. 4.5)
+  are bucketed via `ceil` into the next star (4.5 → 5) so the 5-row
+  pencil design stays stable while half values are not lost. Total is
+  derived from `series_ratings` so it stays authoritative even if
+  `series.rating_count` drifts briefly before reconciliation.
+  """
+  @spec rating_distribution(Series.t() | integer()) :: [
+          %{rating: 1..5, count: non_neg_integer(), percent: float()}
+        ]
+  def rating_distribution(%Series{id: series_id}), do: rating_distribution(series_id)
+
+  def rating_distribution(series_id) when is_integer(series_id) do
+    counts =
+      from(r in Rating,
+        where: r.series_id == ^series_id,
+        group_by: r.rating,
+        select: {r.rating, count(r.id)}
+      )
+      |> Repo.all()
+      |> Map.new()
+
+    # Bucket half stars via ceil into star 1..5 for the 5-row UI
+    bucketed =
+      Enum.reduce(counts, %{}, fn {rating, cnt}, acc ->
+        # rating may be integer or float; normalize to float then ceil
+        bucket = rating |> to_float() |> Float.ceil() |> trunc()
+        bucket = bucket |> max(1) |> min(5)
+        Map.update(acc, bucket, cnt, &(&1 + cnt))
+      end)
+
+    total = Enum.sum(Map.values(counts))
+
+    for rating <- 5..1//-1 do
+      count = Map.get(bucketed, rating, 0)
+      percent = if total > 0, do: Float.round(count / total * 100, 1), else: 0.0
+      %{rating: rating, count: count, percent: percent}
+    end
+  end
+
+  defp to_float(v) when is_integer(v), do: v * 1.0
+  defp to_float(v) when is_float(v), do: v
+
+  defp to_float(v) when is_binary(v) do
+    case Float.parse(v) do
+      {f, _} -> f
+      :error -> 0.0
+    end
+  end
+
+  defp to_float(_), do: 0.0
 
   @doc """
   Records a series view event and increments `series.view_count`.
@@ -247,8 +302,10 @@ defmodule Crysa.Library do
   # Adjust an aggregate counter on a series row the caller already locked
   # (`FOR UPDATE`), so `Map.fetch!/2` reads the latest committed value and no
   # update can be lost. Counters are floored at zero defensively.
-  defp adjust_counter(%Series{id: series_id} = series, field, delta) when is_integer(delta) do
-    new_value = max(Map.fetch!(series, field) + delta, 0)
+  # Supports both integer (bookmark/view) and float (rating_sum) deltas.
+  defp adjust_counter(%Series{id: series_id} = series, field, delta) when is_number(delta) do
+    current = Map.fetch!(series, field) || 0
+    new_value = max(current + delta, 0)
 
     from(s in Series, where: s.id == ^series_id, select: s)
     |> Repo.update_all(set: [{field, new_value}])
