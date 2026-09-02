@@ -71,6 +71,113 @@ defmodule Crysa.Comments do
   @spec count_comments_for_chapter(integer()) :: non_neg_integer()
   def count_comments_for_chapter(chapter_id), do: Query.count_comments_for_chapter(chapter_id)
 
+  @max_tree_depth 10
+
+  @doc """
+  Returns a threaded comment tree for a series page (Reddit-style).
+
+  Roots are paginated by `params` (`sort`/`page`/`page_size`), descendants are
+  loaded breadth-first up to `@max_tree_depth`. Result is `{tree, pagination}`
+  where `tree` is a list of root nodes each with nested `children`. Every node
+  carries vote counts, depth, and `reply_count` (total descendants).
+  """
+  @spec list_comment_tree_for_series(integer(), map()) :: {[map()], Crysa.Pagination.t()}
+  def list_comment_tree_for_series(series_id, params \\ %{})
+      when is_integer(series_id) and is_map(params) do
+    {all_nodes, pagination} = Query.list_comment_tree_for_series(series_id, params)
+    ids = Enum.map(all_nodes, & &1.id)
+    vote_counts = vote_counts_for_comment_ids(ids)
+    tree = build_comment_tree(all_nodes, vote_counts)
+    {tree, pagination}
+  end
+
+  @doc """
+  Same as `list_comment_tree_for_series/2` but for chapter threads.
+  """
+  @spec list_comment_tree_for_chapter(integer(), map()) :: {[map()], Crysa.Pagination.t()}
+  def list_comment_tree_for_chapter(chapter_id, params \\ %{})
+      when is_integer(chapter_id) and is_map(params) do
+    {all_nodes, pagination} = Query.list_comment_tree_for_chapter(chapter_id, params)
+    ids = Enum.map(all_nodes, & &1.id)
+    vote_counts = vote_counts_for_comment_ids(ids)
+    tree = build_comment_tree(all_nodes, vote_counts)
+    {tree, pagination}
+  end
+
+  @doc """
+  Returns a thread view rooted at `thread_id` (the parent before "More replies").
+  The parent becomes the new head at depth 0, with its descendants as children.
+  Used to implement "Continue this thread" where a deep comment starts a new thread.
+  """
+  @spec list_thread_tree(integer()) :: {[map()], Crysa.Pagination.t()}
+  def list_thread_tree(thread_id) when is_integer(thread_id) do
+    {all_nodes, pagination} = Query.list_thread_tree(thread_id)
+
+    case all_nodes do
+      [] ->
+        {[], pagination}
+
+      nodes ->
+        # Normalize thread root's parent_id to nil so it becomes a root in the tree
+        normalized =
+          Enum.map(nodes, fn
+            %Comment{id: ^thread_id} = c -> %{c | parent_id: nil}
+            c -> c
+          end)
+
+        ids = Enum.map(normalized, & &1.id)
+        vote_counts = vote_counts_for_comment_ids(ids)
+        tree = build_comment_tree(normalized, vote_counts)
+        {tree, pagination}
+    end
+  end
+
+  @doc false
+  @spec build_comment_tree([Comment.t()], %{integer() => %{up: non_neg_integer(), down: non_neg_integer()}}) ::
+          [map()]
+  def build_comment_tree(nodes, vote_counts) when is_list(nodes) and is_map(vote_counts) do
+    grouped = Enum.group_by(nodes, & &1.parent_id)
+    roots = Map.get(grouped, nil, [])
+    # Roots already ordered by Query (sort), keep that order; children are ordered chronologically via Query
+    build_nodes(roots, grouped, vote_counts, 0)
+  end
+
+  defp build_nodes([], _grouped, _vote_counts, _depth), do: []
+
+  defp build_nodes(nodes, grouped, vote_counts, depth) do
+    nodes
+    |> Enum.map(fn node ->
+      counts = Map.get(vote_counts, node.id, %{up: 0, down: 0})
+      deleted = Comment.deleted?(node)
+      children_raw = Map.get(grouped, node.id, [])
+      children_raw = Enum.sort_by(children_raw, &{&1.inserted_at, &1.id})
+
+      # Cap depth for styling; beyond max we still render but without further indent
+      next_depth = min(depth + 1, @max_tree_depth)
+
+      children = build_nodes(children_raw, grouped, vote_counts, next_depth)
+
+      # Hide isolated deleted leaves (no replies) to match flat-list filtering
+      if deleted and children == [] do
+        nil
+      else
+        reply_count =
+          Enum.reduce(children, 0, fn child, acc -> acc + 1 + child.reply_count end)
+
+        %{
+          comment: node,
+          depth: depth,
+          deleted: deleted,
+          has_more: false,
+          reply_count: reply_count,
+          vote_counts: counts,
+          children: children
+        }
+      end
+    end)
+    |> Enum.reject(&is_nil/1)
+  end
+
   @doc """
   Updates a comment's markdown.
 
@@ -217,6 +324,15 @@ defmodule Crysa.Comments do
 
   @spec list_votes(Comment.t()) :: [Vote.t()]
   def list_votes(%Comment{id: comment_id}), do: Query.list_votes(comment_id)
+
+  @doc """
+  Batch vote counts for a list of comments.
+  """
+  @spec vote_counts_for_comment_ids([integer()]) :: %{
+          integer() => %{up: non_neg_integer(), down: non_neg_integer()}
+        }
+  def vote_counts_for_comment_ids(ids) when is_list(ids),
+    do: Query.vote_counts_for_comment_ids(ids)
 
   # Attachments
 

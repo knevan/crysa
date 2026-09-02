@@ -29,6 +29,8 @@ import {
 import { Button } from '@/assets/vue/components/ui/button'
 import { Input } from '@/assets/vue/components/ui/input'
 import { Separator } from '@/assets/vue/components/ui/separator'
+import CommentTree from '@/assets/vue/comments/CommentTree.vue'
+import type { CommentNodeData } from '@/assets/vue/comments/CommentNode.vue'
 
 type Series = {
   id: number
@@ -64,13 +66,18 @@ type Chapter = {
 
 type Comment = {
   id: number
-  bodyMarkdown: string
+  bodyMarkdown: string | null
   bodyHtml: string
   voteScore: number
+  upCount: number
+  downCount: number
   insertedAt: string | null
   user: { id: number; username: string } | null
   parentId: number | null
 }
+
+// Tree node is the recursive shape used by CommentTree
+type CommentTreeNode = CommentNodeData
 
 type Pagination = {
   page: number
@@ -99,9 +106,12 @@ const props = defineProps<{
   chapterQuery: string
   chapterSort: string
   comments: Comment[]
+  commentTree: CommentTreeNode[]
   commentPagination: Pagination
   commentSort: string
   commentCount: number
+  threadId: number | null
+  isThreadView: boolean
 }>()
 
 const live = useLiveVue()
@@ -404,49 +414,11 @@ const firstChapterLabel = computed(() => {
   return oldest ? `Ch. ${oldest.displayNumber}` : latestChapterLabel.value
 })
 
-// --- Comments ---
-const commentBody = ref('')
-const commentSort = ref(props.commentSort || 'newest')
-watch(() => props.commentSort, v => (commentSort.value = v))
-
-const maxCommentLength = 10_000
-const commentLength = computed(() => commentBody.value.length)
-
-function submitComment() {
-  const body = commentBody.value.trim()
-  if (!body) return
-  if (!props.currentUser) {
-    window.location.href = '/auth/login'
-    return
-  }
-  live.pushEvent('create_comment', { body })
-  commentBody.value = ''
-}
-
-function handleCommentKeydown(e: KeyboardEvent) {
-  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-    submitComment()
-  }
-}
-
-function voteComment(id: number, vote: number) {
-  if (!props.currentUser) {
-    window.location.href = '/auth/login'
-    return
-  }
-  live.pushEvent('vote_comment', { id, vote })
-}
-
-function setCommentSort(sort: string) {
-  commentSort.value = sort
-  live.pushEvent('sort_comments', { sort })
-}
-
-function goCommentPage(page: number) {
-  live.pushEvent('comment_page_change', { page })
-}
-
-const commentsForList = computed(() => [...(props.comments ?? [])])
+// --- Comments (threaded tree) ---
+// All interactive comment logic (composer, vote, reply, sort, pagination) is
+// encapsulated in <CommentTree>. SeriesPage stays a thin composition surface
+// and only forwards SSR-propagated props.
+const commentTreeNodes = computed(() => props.commentTree ?? [])
 
 // --- Helpers for display ---
 function formatChapterDate(iso: string | null): string {
@@ -501,11 +473,6 @@ function authorDisplay(): string {
                     HOT
                   </div>
                 </div>
-              </div>
-              <!-- Cover meta — verified scan (desktop shows under cover) -->
-              <div class="hidden md:flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                <span class="size-3.5 rounded-full bg-emerald-500 flex items-center justify-center text-white text-[8px]">✓</span>
-                Verified scan • {{ statusLabel }}
               </div>
             </div>
 
@@ -881,161 +848,16 @@ function authorDisplay(): string {
           </div>
         </div>
 
-        <!-- Composer M -->
-        <div class="p-3">
-          <div class="rounded-xl border bg-card overflow-hidden">
-            <div class="bg-muted/30 p-2.5">
-              <textarea
-                v-model="commentBody"
-                placeholder="Share your thoughts..."
-                class="min-h-[72px] w-full resize-none rounded-lg border bg-card p-2.5 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                maxlength="10000"
-                @keydown="handleCommentKeydown"
-              />
-              <div class="mt-2 flex items-center justify-between">
-                <div class="flex items-center gap-1">
-                  <button type="button" class="size-6 rounded-md flex items-center justify-center hover:bg-accent" title="Bold" @click="commentBody += '**bold**'">
-                    <Bold class="size-3 text-muted-foreground" />
-                  </button>
-                  <button type="button" class="size-6 rounded-md flex items-center justify-center hover:bg-accent" title="Italic" @click="commentBody += '*italic*'">
-                    <Italic class="size-3 text-muted-foreground" />
-                  </button>
-                  <button type="button" class="size-6 rounded-md flex items-center justify-center hover:bg-accent" title="Link" @click="commentBody += '[text](url)'">
-                    <Link2 class="size-3 text-muted-foreground" />
-                  </button>
-                  <button type="button" class="size-6 rounded-md flex items-center justify-center hover:bg-accent" title="Emoji">
-                    <Smile class="size-3 text-muted-foreground" />
-                  </button>
-                </div>
-                <div class="flex items-center gap-2">
-                  <span class="text-[10px] text-muted-foreground">{{ commentLength }}/10000</span>
-                  <Button
-                    size="sm"
-                    class="h-7 rounded-lg px-3 text-xs gap-1"
-                    :disabled="!commentBody.trim() || commentLength > maxCommentLength"
-                    @click="submitComment"
-                  >
-                    Send
-                    <Send class="size-3" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <p v-if="!currentUser" class="mt-2 text-center text-[11px] text-muted-foreground">
-            Please <a href="/auth/login" class="font-bold text-primary hover:underline">login</a> to join the discussion.
-          </p>
-        </div>
-
-        <!-- Sort M -->
-        <div class="flex items-center gap-3 px-3.5 py-2 border-y bg-muted/20">
-          <button
-            type="button"
-            class="relative pb-1 text-xs font-bold"
-            :class="commentSort === 'newest' ? 'text-primary' : 'text-muted-foreground'"
-            @click="setCommentSort('newest')"
-          >
-            Newest
-            <span v-if="commentSort === 'newest'" class="absolute inset-x-0 -bottom-1.5 h-0.5 bg-primary rounded-full" />
-          </button>
-          <button
-            type="button"
-            class="relative pb-1 text-xs font-medium"
-            :class="commentSort === 'oldest' ? 'text-primary font-bold' : 'text-muted-foreground'"
-            @click="setCommentSort('oldest')"
-          >
-            Oldest
-            <span v-if="commentSort === 'oldest'" class="absolute inset-x-0 -bottom-1.5 h-0.5 bg-primary rounded-full" />
-          </button>
-          <button
-            type="button"
-            class="relative pb-1 text-xs font-medium"
-            :class="commentSort === 'most_voted' ? 'text-primary font-bold' : 'text-muted-foreground'"
-            @click="setCommentSort('most_voted')"
-          >
-            Most Vote
-            <span v-if="commentSort === 'most_voted'" class="absolute inset-x-0 -bottom-1.5 h-0.5 bg-primary rounded-full" />
-          </button>
-        </div>
-
-        <div v-if="commentsForList.length === 0" class="flex flex-col items-center gap-2 px-4 py-8">
-          <div class="size-11 rounded-xl bg-muted flex items-center justify-center border">
-            <MessageCircle class="size-5 text-muted-foreground" />
-          </div>
-          <p class="text-xs text-muted-foreground text-center max-w-[260px]">No comments yet. Be the first to share your thoughts!</p>
-          <p v-if="!currentUser" class="text-[11px] text-muted-foreground">
-            Please <a href="/auth/login" class="font-bold text-primary">login</a> to join.
-          </p>
-        </div>
-
-        <div v-else class="divide-y">
-          <div v-for="c in commentsForList" :key="c.id" class="p-3.5 flex flex-col gap-2">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <div class="size-6 rounded-full bg-muted border flex items-center justify-center">
-                  <span class="text-[10px] font-bold">{{ (c.user?.username || 'A').charAt(0).toUpperCase() }}</span>
-                </div>
-                <span class="text-xs font-semibold">{{ c.user?.username || 'Anonymous' }}</span>
-                <span class="text-[10px] text-muted-foreground">{{ formatRelative(c.insertedAt) }}</span>
-              </div>
-              <span class="text-xs font-medium text-muted-foreground">Score {{ c.voteScore }}</span>
-            </div>
-            <div class="prose prose-sm max-w-none text-xs leading-5 prose-p:my-1 prose-a:text-primary" v-html="c.bodyHtml" />
-            <div class="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="xs"
-                class="h-6 px-2 text-[11px]"
-                @click="voteComment(c.id, 1)"
-              >
-                ▲ Up
-              </Button>
-              <Button
-                variant="ghost"
-                size="xs"
-                class="h-6 px-2 text-[11px]"
-                @click="voteComment(c.id, -1)"
-              >
-                ▼ Down
-              </Button>
-              <Button
-                variant="ghost"
-                size="xs"
-                class="h-6 px-2 text-[11px]"
-                @click="voteComment(c.id, 1)"
-              >
-                Reply
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <div
-          v-if="commentPagination.totalPages > 1"
-          class="flex items-center justify-between px-3.5 py-3 border-t bg-muted/20"
-        >
-          <Button
-            variant="ghost"
-            size="sm"
-            :disabled="!commentPagination.hasPrevious"
-            class="h-7 text-xs"
-            @click="goCommentPage(commentPagination.page - 1)"
-          >
-            Previous
-          </Button>
-          <span class="text-xs text-muted-foreground">
-            Page {{ commentPagination.page }} of {{ commentPagination.totalPages }}
-          </span>
-          <Button
-            variant="ghost"
-            size="sm"
-            :disabled="!commentPagination.hasNext"
-            class="h-7 text-xs"
-            @click="goCommentPage(commentPagination.page + 1)"
-          >
-            Next
-          </Button>
-        </div>
+        <!-- Threaded Comments recursive tree -->
+        <CommentTree
+          :tree="commentTreeNodes"
+          :pagination="commentPagination"
+          :sort="commentSort"
+          :count="commentCount"
+          :current-user="currentUser"
+          :thread-id="threadId"
+          :is-thread-view="isThreadView"
+        />
       </div>
 
       <!-- Footer M -->

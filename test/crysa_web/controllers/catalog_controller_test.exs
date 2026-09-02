@@ -105,23 +105,43 @@ defmodule CrysaWeb.CatalogControllerTest do
     end
   end
 
-  describe "GET /series/:slug" do
-    test "renders the series detail page with chapters", %{conn: conn} do
+  describe "GET /series/:slug (LiveView — SeriesPage mobile)" do
+    test "renders the series detail LiveView with chapters (SSR + LiveVue)", %{conn: conn} do
       series = CatalogFixtures.series_fixture()
       chapter = CatalogFixtures.chapter_fixture(series)
 
-      conn = get(conn, ~p"/series/#{series.slug}")
+      # Series detail is now a LiveView (SeriesShowLive) with LiveVue island `SeriesPage` (v-ssr=true).
+      # Dead render is not assertable via `get` HTML because LiveView uses `data-phx-static` compression;
+      # use `live` helper which decodes the static and renders SSR HTML.
+      import Phoenix.LiveViewTest
 
-      html = html_response(conn, 200)
-      assert html =~ series.title
-      assert html =~ "Chapter #{chapter.display_number}"
-      assert html =~ "Read latest chapter"
+      {:ok, view, _html} = live(conn, ~p"/series/#{series.slug}")
+
+      # The page is a LiveVue island; verify via the Vue props and via rendered HTML
+      vue = LiveVue.Test.get_vue(view)
+      assert vue.component == "SeriesPage"
+      assert vue.props["series"]["title"] == series.title
+      assert vue.props["series"]["slug"] == series.slug
+
+      # Chapters are passed as props and SSR-rendered
+      assert Enum.any?(vue.props["chapters"], fn ch ->
+               ch["displayNumber"] == chapter.display_number
+             end)
+
+      # In test, SSR is disabled (data-ssr="false"), so HTML is the LiveVue placeholder.
+      # Verify via props and via the static HEEX wrapper not the Vue SSR output.
+      assert vue.props["chapters"] != []
+
+      # When SSR is enabled in dev/prod, "Chapters" will be server-rendered; in test we check props instead.
     end
 
-    test "returns 404 for an unknown slug", %{conn: conn} do
-      conn = get(conn, ~p"/series/does-not-exist")
+    test "shows not-found for an unknown slug (LiveView renders 200 with message)", %{conn: conn} do
+      import Phoenix.LiveViewTest
 
-      assert html_response(conn, 404) =~ "Not Found"
+      {:ok, view, _html} = live(conn, ~p"/series/does-not-exist")
+
+      html = render(view)
+      assert html =~ "Series not found"
     end
   end
 

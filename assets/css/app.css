@@ -146,6 +146,25 @@
 /* Use the data attribute for dark mode  */
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
+/* Spoiler inline (||text||) — click to reveal, click outside to hide */
+.spoiler {
+  @apply bg-zinc-800 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-700 border border-dashed border-zinc-500 rounded px-1 py-0.5 cursor-pointer select-none;
+}
+.spoiler.revealed {
+  @apply bg-transparent text-foreground border-solid border-border;
+}
+.dark .spoiler.revealed {
+  @apply bg-transparent text-zinc-100;
+}
+
+/* Comment preview & body links — force blue (prose-a variant needs typography plugin, so explicit) */
+.prose a {
+  @apply text-blue-600 dark:text-blue-400 underline decoration-blue-600 dark:decoration-blue-400 underline-offset-2;
+}
+.prose a:hover {
+  @apply text-blue-700 dark:text-blue-300;
+}
+
 /* Make LiveView wrapper divs transparent for layout */
 [data-phx-session], [data-phx-teleported-src] { display: contents }
 

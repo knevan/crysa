@@ -40,6 +40,20 @@ topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
 window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
 window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
 
+// Spoiler: click to reveal, click outside to hide
+// Delegated handler works for both server-rendered comments and Vue preview (v-html)
+document.addEventListener('click', (e) => {
+  const spoiler = e.target.closest('.spoiler')
+  if (spoiler) {
+    e.preventDefault()
+    e.stopPropagation()
+    spoiler.classList.toggle('revealed')
+    return
+  }
+  // Click outside any spoiler -> hide all revealed
+  document.querySelectorAll('.spoiler.revealed').forEach(el => el.classList.remove('revealed'))
+})
+
 // connect if there are any LiveViews on the page
 liveSocket.connect()
 

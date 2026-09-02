@@ -41,7 +41,10 @@ defmodule CrysaWeb.Live.SeriesShowLive do
     <div :if={@not_found} class="mx-auto max-w-[680px] px-4 py-16 text-center">
       <h1 class="text-2xl font-bold">Series not found</h1>
       <p class="mt-2 text-sm text-muted-foreground">The series you are looking for does not exist.</p>
-      <a href={~p"/series"} class="mt-6 inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground">Browse series</a>
+      <a
+        href={~p"/series"}
+        class="mt-6 inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
+      >Browse series</a>
     </div>
 
     <div :if={!@not_found}>
@@ -65,9 +68,12 @@ defmodule CrysaWeb.Live.SeriesShowLive do
         chapterQuery={@chapter_query}
         chapterSort={@chapter_sort}
         comments={@comments}
+        commentTree={@comment_tree}
         commentPagination={@comment_pagination}
         commentSort={@comment_sort}
         commentCount={@comment_count}
+        threadId={@thread_id}
+        isThreadView={@is_thread_view}
       />
     </div>
     """
@@ -114,13 +120,20 @@ defmodule CrysaWeb.Live.SeriesShowLive do
 
         comment_sort = parse_comment_sort(params)
         comment_page = parse_page(params, "comment_page")
+        thread_id = parse_thread_id(params["thread"])
 
-        {comments, comment_pagination} =
-          Comments.list_comments_for_series(series.id, %{
+        {comment_tree_nodes, comment_pagination, thread_view?} =
+          load_comment_tree(series, thread_id, %{
             "sort" => comment_sort,
             "page" => comment_page,
             "page_size" => @comment_page_size
           })
+
+        comment_tree = Enum.map(comment_tree_nodes, &to_comment_node_json/1)
+        # Keep flat `comments` for backwards compat (flattened tree) and for tests that may inspect it
+        flat_comments = flatten_comment_tree(comment_tree_nodes)
+        vote_counts = Comments.vote_counts_for_comment_ids(Enum.map(flat_comments, & &1.id))
+        comments = Enum.map(flat_comments, &to_comment_json(&1, Map.get(vote_counts, &1.id, %{up: 0, down: 0})))
 
         comment_count = Comments.count_comments_for_series(series.id)
         rating_summary = Library.rating_summary(series)
@@ -148,10 +161,13 @@ defmodule CrysaWeb.Live.SeriesShowLive do
            chapter_pagination: to_pagination_json(chapter_pagination),
            chapter_query: chapter_query || "",
            chapter_sort: chapter_sort,
-           comments: Enum.map(comments, &to_comment_json/1),
+           comments: comments,
+           comment_tree: comment_tree,
            comment_pagination: to_pagination_json(comment_pagination),
            comment_sort: comment_sort,
            comment_count: comment_count,
+           thread_id: thread_id,
+           is_thread_view: thread_view?,
            chapter_page: chapter_pagination.page,
            comment_page: comment_pagination.page
          )}
@@ -176,7 +192,10 @@ defmodule CrysaWeb.Live.SeriesShowLive do
       socket =
         if needs_chapter_reload do
           q = parse_q(params, "q") || parse_q(params, "chapter_q") || socket.assigns.chapter_query
-          sort = parse_chapter_sort_opt(params, "sort") || parse_chapter_sort_opt(params, "chapter_sort") || socket.assigns.chapter_sort
+
+          sort =
+            parse_chapter_sort_opt(params, "sort") ||
+              parse_chapter_sort_opt(params, "chapter_sort") || socket.assigns.chapter_sort
 
           page =
             cond do
@@ -204,30 +223,45 @@ defmodule CrysaWeb.Live.SeriesShowLive do
           socket
         end
 
+      new_thread_id = parse_thread_id(params["thread"])
+      old_thread_id = socket.assigns[:thread_id]
+
       needs_comment_reload =
-        Map.has_key?(params, "comment_sort") or Map.has_key?(params, "comment_page")
+        Map.has_key?(params, "comment_sort") or Map.has_key?(params, "comment_page") or
+          Map.has_key?(params, "thread") or new_thread_id != old_thread_id
 
       socket =
         if needs_comment_reload do
-          sort = parse_comment_sort_opt(params, "comment_sort") || parse_comment_sort_opt(params, "sort") || socket.assigns.comment_sort
+          sort =
+            parse_comment_sort_opt(params, "comment_sort") ||
+              parse_comment_sort_opt(params, "sort") || socket.assigns.comment_sort
 
           page =
             if Map.has_key?(params, "comment_page"),
               do: parse_page(params, "comment_page"),
               else: socket.assigns.comment_page
 
-          {comments, pagination} =
-            Comments.list_comments_for_series(series.id, %{
+          thread_id = new_thread_id
+
+          {tree_nodes, pagination, thread_view?} =
+            load_comment_tree(series, thread_id, %{
               "sort" => sort,
               "page" => page,
               "page_size" => @comment_page_size
             })
 
+          tree = Enum.map(tree_nodes, &to_comment_node_json/1)
+          flat = flatten_comment_tree(tree_nodes)
+          vote_counts = Comments.vote_counts_for_comment_ids(Enum.map(flat, & &1.id))
+
           assign(socket,
-            comments: Enum.map(comments, &to_comment_json/1),
+            comments: Enum.map(flat, &to_comment_json(&1, Map.get(vote_counts, &1.id, %{up: 0, down: 0}))),
+            comment_tree: tree,
             comment_pagination: to_pagination_json(pagination),
             comment_sort: sort,
-            comment_page: pagination.page
+            comment_page: pagination.page,
+            thread_id: thread_id,
+            is_thread_view: thread_view?
           )
         else
           socket
@@ -318,12 +352,18 @@ defmodule CrysaWeb.Live.SeriesShowLive do
               {:noreply, put_flash(socket, :error, "Invalid rating.")}
           end
         else
-          _ -> {:noreply, put_flash(socket, :error, "Rating must be between 1 and 5 in 0.5 steps.")}
+          _ ->
+            {:noreply, put_flash(socket, :error, "Rating must be between 1 and 5 in 0.5 steps.")}
         end
       rescue
         e ->
           require Logger
-          Logger.error("rate_series crashed: #{inspect(e)}", error: inspect(e), series_id: series.id)
+
+          Logger.error("rate_series crashed: #{inspect(e)}",
+            error: inspect(e),
+            series_id: series.id
+          )
+
           {:noreply, put_flash(socket, :error, "Could not save rating. Please try again.")}
       end
     end
@@ -464,20 +504,25 @@ defmodule CrysaWeb.Live.SeriesShowLive do
 
           case Comments.create_comment(attrs) do
             {:ok, _comment} ->
-              # Reload comments — keep current sort/page but go to newest (page 1 desc)
               sort = socket.assigns.comment_sort
-              {comments, pagination} =
-                Comments.list_comments_for_series(series.id, %{
+              thread_id = socket.assigns[:thread_id]
+
+              {tree_nodes, pagination, _} =
+                load_comment_tree(series, thread_id, %{
                   "sort" => sort,
                   "page" => 1,
                   "page_size" => @comment_page_size
                 })
 
+              tree = Enum.map(tree_nodes, &to_comment_node_json/1)
+              flat = flatten_comment_tree(tree_nodes)
+              vote_counts = Comments.vote_counts_for_comment_ids(Enum.map(flat, & &1.id))
               count = Comments.count_comments_for_series(series.id)
 
               {:noreply,
                assign(socket,
-                 comments: Enum.map(comments, &to_comment_json/1),
+                 comments: Enum.map(flat, &to_comment_json(&1, Map.get(vote_counts, &1.id, %{up: 0, down: 0}))),
+                 comment_tree: tree,
                  comment_pagination: to_pagination_json(pagination),
                  comment_count: count,
                  comment_page: 1
@@ -506,21 +551,26 @@ defmodule CrysaWeb.Live.SeriesShowLive do
            comment when not is_nil(comment) <- Comments.get_comment(comment_id) do
         case Comments.vote_comment(current_user, comment, vote) do
           {:ok, _vote} ->
-            # Optimistic: reload current comment list page to reflect vote_score
             series = socket.assigns.raw_series
             sort = socket.assigns.comment_sort
             page = socket.assigns.comment_page
+            thread_id = socket.assigns[:thread_id]
 
-            {comments, pagination} =
-              Comments.list_comments_for_series(series.id, %{
+            {tree_nodes, pagination, _} =
+              load_comment_tree(series, thread_id, %{
                 "sort" => sort,
                 "page" => page,
                 "page_size" => @comment_page_size
               })
 
+            tree = Enum.map(tree_nodes, &to_comment_node_json/1)
+            flat = flatten_comment_tree(tree_nodes)
+            vote_counts = Comments.vote_counts_for_comment_ids(Enum.map(flat, & &1.id))
+
             {:noreply,
              assign(socket,
-               comments: Enum.map(comments, &to_comment_json/1),
+               comments: Enum.map(flat, &to_comment_json(&1, Map.get(vote_counts, &1.id, %{up: 0, down: 0}))),
+               comment_tree: tree,
                comment_pagination: to_pagination_json(pagination)
              )}
 
@@ -549,17 +599,23 @@ defmodule CrysaWeb.Live.SeriesShowLive do
         series = socket.assigns.raw_series
         sort = socket.assigns.comment_sort
         page = socket.assigns.comment_page
+        thread_id = socket.assigns[:thread_id]
 
-        {comments, pagination} =
-          Comments.list_comments_for_series(series.id, %{
+        {tree_nodes, pagination, _} =
+          load_comment_tree(series, thread_id, %{
             "sort" => sort,
             "page" => page,
             "page_size" => @comment_page_size
           })
 
+        tree = Enum.map(tree_nodes, &to_comment_node_json/1)
+        flat = flatten_comment_tree(tree_nodes)
+        vote_counts = Comments.vote_counts_for_comment_ids(Enum.map(flat, & &1.id))
+
         {:noreply,
          assign(socket,
-           comments: Enum.map(comments, &to_comment_json/1),
+           comments: Enum.map(flat, &to_comment_json(&1, Map.get(vote_counts, &1.id, %{up: 0, down: 0}))),
+           comment_tree: tree,
            comment_pagination: to_pagination_json(pagination)
          )}
       else
@@ -571,17 +627,28 @@ defmodule CrysaWeb.Live.SeriesShowLive do
   def handle_event("sort_comments", %{"sort" => sort}, socket) do
     series = socket.assigns.raw_series
     sort = if sort in ["newest", "oldest", "most_voted"], do: sort, else: "newest"
+    thread_id = socket.assigns[:thread_id]
 
-    {comments, pagination} =
-      Comments.list_comments_for_series(series.id, %{
-        "sort" => sort,
-        "page" => 1,
-        "page_size" => @comment_page_size
-      })
+    # In thread view, sort is ignored (thread is chronological); still handle for full view
+    {tree_nodes, pagination, _} =
+      if thread_id do
+        load_comment_tree(series, thread_id, %{})
+      else
+        load_comment_tree(series, nil, %{
+          "sort" => sort,
+          "page" => 1,
+          "page_size" => @comment_page_size
+        })
+      end
+
+    tree = Enum.map(tree_nodes, &to_comment_node_json/1)
+    flat = flatten_comment_tree(tree_nodes)
+    vote_counts = Comments.vote_counts_for_comment_ids(Enum.map(flat, & &1.id))
 
     {:noreply,
      assign(socket,
-       comments: Enum.map(comments, &to_comment_json/1),
+       comments: Enum.map(flat, &to_comment_json(&1, Map.get(vote_counts, &1.id, %{up: 0, down: 0}))),
+       comment_tree: tree,
        comment_pagination: to_pagination_json(pagination),
        comment_sort: sort,
        comment_page: 1
@@ -592,20 +659,84 @@ defmodule CrysaWeb.Live.SeriesShowLive do
     series = socket.assigns.raw_series
     page = parse_int(page_param, 1)
     sort = socket.assigns.comment_sort
+    thread_id = socket.assigns[:thread_id]
 
-    {comments, pagination} =
-      Comments.list_comments_for_series(series.id, %{
-        "sort" => sort,
-        "page" => page,
-        "page_size" => @comment_page_size
-      })
+    # Thread view has single page; ignore pagination when in thread
+    {tree_nodes, pagination, _} =
+      if thread_id do
+        load_comment_tree(series, thread_id, %{})
+      else
+        load_comment_tree(series, nil, %{
+          "sort" => sort,
+          "page" => page,
+          "page_size" => @comment_page_size
+        })
+      end
+
+    tree = Enum.map(tree_nodes, &to_comment_node_json/1)
+    flat = flatten_comment_tree(tree_nodes)
+    vote_counts = Comments.vote_counts_for_comment_ids(Enum.map(flat, & &1.id))
 
     {:noreply,
      assign(socket,
-       comments: Enum.map(comments, &to_comment_json/1),
+       comments: Enum.map(flat, &to_comment_json(&1, Map.get(vote_counts, &1.id, %{up: 0, down: 0}))),
+       comment_tree: tree,
        comment_pagination: to_pagination_json(pagination),
        comment_page: pagination.page
      )}
+  end
+
+  def handle_event("preview_markdown", %{"markdown" => markdown}, socket) do
+    # Server-side preview ensures 1:1 with persisted body_html (same sanitizer, spoiler ||, etc.)
+    html = Crysa.Comments.Markdown.render(markdown || "")
+    {:reply, %{html: html}, socket}
+  end
+
+  def handle_event("load_more_replies", %{"id" => id_param}, socket) do
+    # "Continue this thread" → make parent before "More replies" the new head
+    with {thread_id, ""} <- Integer.parse(to_string(id_param)),
+         %Crysa.Comments.Comment{} = comment <- Crysa.Comments.get_comment(thread_id),
+         true <- comment.series_id == socket.assigns.raw_series.id do
+      {:noreply, push_patch(socket, to: ~p"/series/#{socket.assigns.slug}?thread=#{thread_id}")}
+    else
+      _ -> {:noreply, put_flash(socket, :error, "Thread not found.")}
+    end
+  end
+
+  def handle_event("clear_thread", _params, socket) do
+    {:noreply, push_patch(socket, to: ~p"/series/#{socket.assigns.slug}")}
+  end
+
+  # Thread helpers
+
+  defp parse_thread_id(nil), do: nil
+  defp parse_thread_id(id) when is_integer(id) and id > 0, do: id
+  defp parse_thread_id(id) when is_binary(id) do
+    case Integer.parse(String.trim(id)) do
+      {int, ""} when int > 0 -> int
+      _ -> nil
+    end
+  end
+  defp parse_thread_id(_), do: nil
+
+  defp load_comment_tree(series, thread_id, params) do
+    cond do
+      is_integer(thread_id) ->
+        case Crysa.Comments.get_comment(thread_id) do
+          %Crysa.Comments.Comment{series_id: sid} = _c when sid == series.id ->
+            {tree, pagination} = Crysa.Comments.list_thread_tree(thread_id)
+            # Thread tree is single root; pagination is for that thread
+            {tree, pagination, true}
+
+          _ ->
+            {tree, pagination} = Crysa.Comments.list_comment_tree_for_series(series.id, params)
+            {tree, pagination, false}
+        end
+
+      true ->
+        {tree, pagination} = Crysa.Comments.list_comment_tree_for_series(series.id, params)
+        {tree, pagination, false}
+    end
   end
 
   # Helpers
@@ -683,16 +814,69 @@ defmodule CrysaWeb.Live.SeriesShowLive do
     }
   end
 
-  defp to_comment_json(c) do
+  defp to_comment_json(c, counts) do
+    {up, down} =
+      case counts do
+        %{up: u, down: d} -> {u, d}
+        _ -> {0, 0}
+      end
+
     %{
       id: c.id,
       bodyMarkdown: c.body_markdown,
       bodyHtml: c.body_html,
       voteScore: c.vote_score || 0,
+      upCount: up,
+      downCount: down,
       insertedAt: c.inserted_at && DateTime.to_iso8601(c.inserted_at),
       user: c.user && %{id: c.user.id, username: c.user.username},
       parentId: c.parent_id
     }
+  end
+
+  # Tree JSON for Recursive CommentThread (Reddit-style)
+  defp to_comment_node_json(%{
+         comment: c,
+         depth: depth,
+         deleted: deleted,
+         has_more: has_more,
+         reply_count: reply_count,
+         vote_counts: counts,
+         children: children
+       }) do
+    {up, down} =
+      case counts do
+        %{up: u, down: d} -> {u, d}
+        _ -> {0, 0}
+      end
+
+    %{
+      id: c.id,
+      bodyMarkdown: if(deleted, do: nil, else: c.body_markdown),
+      bodyHtml:
+        if(deleted,
+          do: "<p class=\"italic text-muted-foreground text-xs\">[deleted]</p>",
+          else: c.body_html
+        ),
+      voteScore: c.vote_score || 0,
+      upCount: up,
+      downCount: down,
+      insertedAt: c.inserted_at && DateTime.to_iso8601(c.inserted_at),
+      user: if(deleted, do: nil, else: c.user && %{id: c.user.id, username: c.user.username}),
+      parentId: c.parent_id,
+      depth: depth,
+      deleted: deleted,
+      hasMore: has_more,
+      replyCount: reply_count,
+      children: Enum.map(children, &to_comment_node_json/1)
+    }
+  end
+
+  # Flattens tree nodes to a list of Comment structs (for flat `comments` compat and vote_counts batching)
+  defp flatten_comment_tree(nodes) when is_list(nodes) do
+    Enum.flat_map(nodes, fn %{comment: c, children: children} ->
+      [c | flatten_comment_tree(children)]
+    end)
   end
 
   defp to_user_json(nil), do: nil
@@ -722,7 +906,9 @@ defmodule CrysaWeb.Live.SeriesShowLive do
 
   defp parse_page(params, key) do
     case Map.get(params, key) do
-      v when is_integer(v) and v > 0 -> v
+      v when is_integer(v) and v > 0 ->
+        v
+
       v when is_binary(v) ->
         case Integer.parse(v) do
           {int, ""} when int > 0 -> int
@@ -745,8 +931,12 @@ defmodule CrysaWeb.Live.SeriesShowLive do
   defp parse_chapter_sort(%{"chapter_sort" => sort}) when sort in ["newest", "oldest"], do: sort
   defp parse_chapter_sort(_), do: "newest"
 
-  defp parse_comment_sort(%{"sort" => sort}) when sort in ["newest", "oldest", "most_voted"], do: sort
-  defp parse_comment_sort(%{"comment_sort" => sort}) when sort in ["newest", "oldest", "most_voted"], do: sort
+  defp parse_comment_sort(%{"sort" => sort}) when sort in ["newest", "oldest", "most_voted"],
+    do: sort
+
+  defp parse_comment_sort(%{"comment_sort" => sort})
+       when sort in ["newest", "oldest", "most_voted"], do: sort
+
   defp parse_comment_sort(_), do: "newest"
 
   # Helpers for handle_params that need to distinguish missing vs present key

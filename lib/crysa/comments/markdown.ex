@@ -27,7 +27,7 @@ defmodule Crysa.Comments.Markdown do
 
   @max_markdown_length 10_000
   @max_html_length 20_000
-  @allowed_tags ~w(p br strong b em i u s del code pre blockquote ul ol li h1 h2 h3 hr a)
+  @allowed_tags ~w(p br strong b em i u s del code pre blockquote ul ol li h1 h2 h3 hr a span)
 
   @doc "Renders Markdown to sanitized HTML. Returns a safe HTML string."
   @spec render(String.t() | nil) :: String.t()
@@ -207,6 +207,7 @@ defmodule Crysa.Comments.Markdown do
     |> escape_html()
     |> convert_images()
     |> convert_links()
+    |> convert_spoiler()
     |> convert_bold()
     |> convert_italic()
     |> convert_strikethrough()
@@ -264,6 +265,11 @@ defmodule Crysa.Comments.Markdown do
 
   defp convert_strikethrough(text) do
     Regex.replace(~r/~~(.+?)~~/s, text, "<del>\\1</del>")
+  end
+
+  defp convert_spoiler(text) do
+    # Spoiler ||text|| -> <span class="spoiler">text</span> with dashed border, revealed on click/hover
+    Regex.replace(~r/\|\|(.+?)\|\|/s, text, "<span class=\"spoiler\">\\1</span>")
   end
 
   defp convert_line_breaks(text) do
@@ -348,6 +354,15 @@ defmodule Crysa.Comments.Markdown do
   defp sanitize_allowed_tag("br", false, _attrs), do: "<br>"
   defp sanitize_allowed_tag("hr", false, _attrs), do: "<hr>"
   defp sanitize_allowed_tag("a", false, attrs), do: sanitize_a_tag(attrs)
+
+  defp sanitize_allowed_tag("span", false, attrs) do
+    # Only allow spoiler span; strip other spans
+    if String.contains?(attrs, "spoiler") do
+      "<span class=\"spoiler\">"
+    else
+      "<span>"
+    end
+  end
 
   defp sanitize_allowed_tag(tag, false, _attrs)
        when tag in ~w(p strong b em i u s del code pre blockquote ul ol li h1 h2 h3),
