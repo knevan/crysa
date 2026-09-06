@@ -1447,7 +1447,9 @@ defmodule CrysaWeb.Live.AdminDashboardLive do
   # via `to_existing_atom` (never creates new atoms).
   defp fetch_param(params, key) when is_binary(key) do
     case Map.fetch(params, key) do
-      {:ok, val} -> val
+      {:ok, val} ->
+        val
+
       :error ->
         try do
           Map.get(params, String.to_existing_atom(key))

@@ -133,11 +133,14 @@ defmodule Crysa.Comments do
   end
 
   @doc false
-  @spec build_comment_tree([Comment.t()], %{integer() => %{up: non_neg_integer(), down: non_neg_integer()}}) ::
+  @spec build_comment_tree([Comment.t()], %{
+          integer() => %{up: non_neg_integer(), down: non_neg_integer()}
+        }) ::
           [map()]
   def build_comment_tree(nodes, vote_counts) when is_list(nodes) and is_map(vote_counts) do
     grouped = Enum.group_by(nodes, & &1.parent_id)
     roots = Map.get(grouped, nil, [])
+
     # Roots already ordered by Query (sort), keep that order; children are ordered chronologically via Query
     build_nodes(roots, grouped, vote_counts, 0)
   end

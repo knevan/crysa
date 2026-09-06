@@ -1,0 +1,4624 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "type": "frame",
+      "id": "cd2kC",
+      "x": 0,
+      "y": 0,
+      "name": "Bookmark Page - Dekstop",
+      "clip": true,
+      "width": 1280,
+      "fill": "$bg",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "S6BKz6",
+          "name": "Header",
+          "width": "fill_container",
+          "height": 64,
+          "fill": "$surface",
+          "stroke": "$border",
+          "strokeWidth": {
+            "bottom": 1
+          },
+          "padding": [
+            0,
+            28
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "WP2fE",
+              "name": "Header Left",
+              "gap": 20,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "dJr9r",
+                  "name": "Logo",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 8,
+                      "id": "muIPs",
+                      "name": "Logo Mark",
+                      "fill": "#0F172A",
+                      "width": 32,
+                      "height": 32
+                    },
+                    {
+                      "type": "text",
+                      "id": "tSC8a",
+                      "name": "Brand",
+                      "fill": "#0F172A",
+                      "content": "CRYSA",
+                      "fontFamily": "Inter",
+                      "fontSize": 16,
+                      "fontWeight": "800",
+                      "letterSpacing": 1.6
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Kg7oK",
+                  "name": "Nav",
+                  "gap": 24,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "nIzBK",
+                      "name": "Nav Active",
+                      "fill": "$text-primary",
+                      "content": "MANGA UPDATES",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "700",
+                      "letterSpacing": 1.2
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 2,
+                      "id": "x5Xyr",
+                      "name": "Nav Dot",
+                      "fill": "$primary",
+                      "width": 4,
+                      "height": 4
+                    },
+                    {
+                      "type": "text",
+                      "id": "azx1T",
+                      "name": "Nav Browse",
+                      "fill": "$text-muted",
+                      "content": "BROWSE",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "600",
+                      "letterSpacing": 1.2
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "EzvC6",
+              "name": "Header Right",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "shKL6",
+                  "name": "Search Btn",
+                  "width": 36,
+                  "height": 36,
+                  "fill": "#F1F5F9",
+                  "cornerRadius": 10,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "sIeRW",
+                      "name": "Search",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "search",
+                      "library": "lucide",
+                      "fill": "$text-secondary"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Gy3S0",
+                  "name": "Theme Btn",
+                  "width": 36,
+                  "height": 36,
+                  "fill": "#F1F5F9",
+                  "cornerRadius": 10,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "DVPOu",
+                      "name": "Moon",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "moon",
+                      "library": "lucide",
+                      "fill": "$text-secondary"
+                    }
+                  ]
+                },
+                {
+                  "type": "rectangle",
+                  "id": "bHSYo",
+                  "name": "Sep",
+                  "fill": "$border",
+                  "width": 1,
+                  "height": 20
+                },
+                {
+                  "type": "frame",
+                  "id": "u9BZG",
+                  "name": "Sign In",
+                  "fill": "$surface",
+                  "cornerRadius": 10,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "gap": 8,
+                  "padding": [
+                    8,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "M1Yml",
+                      "name": "UserPlus",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "user-plus",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "FuGEN",
+                      "name": "SignIn Label",
+                      "fill": "$text-primary",
+                      "content": "SIGN IN",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "700",
+                      "letterSpacing": 0.8
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "RnHkQ",
+          "name": "Content",
+          "width": "fill_container",
+          "fill": "$bg",
+          "layout": "vertical",
+          "gap": 18,
+          "padding": [
+            32,
+            24,
+            48,
+            24
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "OxmPE",
+              "name": "Title Block",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "EBY3X",
+                  "name": "Page Title",
+                  "fill": "$text-primary",
+                  "content": "Your Bookmarked Manga Library",
+                  "fontFamily": "Inter",
+                  "fontSize": 24,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "D9cLsb",
+                  "name": "Page Subtitle",
+                  "fill": "$text-secondary",
+                  "content": "The list of Manga you subscribe to follow.",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "uZgM9",
+              "name": "Toolbar",
+              "width": "fill_container",
+              "justifyContent": "end",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "LvQhV",
+                  "name": "Sort Group",
+                  "gap": 12,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "yAelh",
+                      "name": "Download Btn",
+                      "fill": "#6D28D9",
+                      "cornerRadius": 6,
+                      "padding": [
+                        9,
+                        20
+                      ],
+                      "justifyContent": "end",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "B1qlyF",
+                          "name": "Download Label",
+                          "fill": "#FFFFFF",
+                          "content": "Download",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "x7rb2",
+                      "name": "Status Drop",
+                      "fill": "$surface",
+                      "cornerRadius": 8,
+                      "stroke": "#93C5FD",
+                      "strokeWidth": 1,
+                      "gap": 10,
+                      "padding": [
+                        9,
+                        16
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "QeyLP",
+                          "name": "Status Val",
+                          "fill": "$text-primary",
+                          "content": "Status: All",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "hEUyE",
+                          "name": "Status Chev",
+                          "width": 15,
+                          "height": 15,
+                          "icon": "chevron-down",
+                          "library": "lucide",
+                          "fill": "$text-secondary"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "xb5hv",
+                      "name": "Sort By Drop",
+                      "fill": "$surface",
+                      "cornerRadius": 8,
+                      "stroke": "#93C5FD",
+                      "strokeWidth": 1,
+                      "gap": 10,
+                      "padding": [
+                        9,
+                        16
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "m6Cvcx",
+                          "name": "Sort By Val",
+                          "fill": "$text-primary",
+                          "content": "Latest Update",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "F6e2r",
+                          "name": "Sort By Chev",
+                          "width": 15,
+                          "height": 15,
+                          "icon": "chevron-down",
+                          "library": "lucide",
+                          "fill": "$text-secondary"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "SkDmK",
+                      "name": "Order Drop",
+                      "width": 88,
+                      "fill": "$surface",
+                      "cornerRadius": 8,
+                      "stroke": "#93C5FD",
+                      "strokeWidth": 1,
+                      "gap": 8,
+                      "padding": [
+                        9,
+                        14
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "UYnx6",
+                          "name": "Order Val",
+                          "fill": "$text-primary",
+                          "content": "Desc",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "ID4RU",
+                          "name": "Order Chev",
+                          "width": 15,
+                          "height": 15,
+                          "icon": "chevron-down",
+                          "library": "lucide",
+                          "fill": "$text-secondary"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "rectangle",
+              "id": "lcWQh",
+              "name": "Divider Strong",
+              "fill": "#0F172A",
+              "width": "fill_container",
+              "height": 2
+            },
+            {
+              "type": "frame",
+              "id": "etfAi",
+              "name": "Grid",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 28,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "rJjwS",
+                  "name": "Row 1",
+                  "width": "fill_container",
+                  "gap": 20,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "UA17V",
+                      "name": "Card 1",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "H5eBq",
+                          "name": "Cover 1",
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": 330,
+                          "fill": {
+                            "type": "gradient",
+                            "gradientType": "linear",
+                            "enabled": true,
+                            "rotation": 135,
+                            "size": {
+                              "height": 1
+                            },
+                            "colors": [
+                              {
+                                "color": "#7F1D1D",
+                                "position": 0
+                              },
+                              {
+                                "color": "#EA580C",
+                                "position": 1
+                              }
+                            ]
+                          },
+                          "cornerRadius": 6,
+                          "layout": "vertical",
+                          "justifyContent": "end",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "f2J5yP",
+                              "name": "Badge Bar",
+                              "width": "fill_container",
+                              "fill": "#00000099",
+                              "gap": 6,
+                              "padding": [
+                                4,
+                                8
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "ffphZ",
+                                  "name": "Badge",
+                                  "fill": "#4ADE80",
+                                  "content": "NOT VIEWED",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "800",
+                                  "letterSpacing": 0.8
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "d11wPs",
+                          "name": "Card Title 1",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "The Demon King Overrun by Heroes",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "yepvn",
+                          "name": "Time Row 1",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "XbikE",
+                              "name": "Clock 1",
+                              "width": 14,
+                              "height": 14,
+                              "icon": "clock-3",
+                              "library": "lucide",
+                              "fill": "$text-muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "oMOUF",
+                              "name": "Time 1",
+                              "fill": "$text-secondary",
+                              "content": "17 minutes",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "c5FG3",
+                          "name": "Card Div 1",
+                          "fill": "$border",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "sf1Md",
+                          "name": "Read Meta 1",
+                          "width": "fill_container",
+                          "gap": 10,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "UAW1G",
+                              "name": "Latest Col 1",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "HvMAv",
+                                  "name": "Latest Lab 1",
+                                  "fill": "$text-muted",
+                                  "content": "Latest",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "d2O7RI",
+                                  "name": "Latest Val 1",
+                                  "fill": "$primary",
+                                  "content": "Ch. 48",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "rectangle",
+                              "id": "D71NdH",
+                              "name": "Meta Div 1",
+                              "fill": "$border",
+                              "width": 1,
+                              "height": 32
+                            },
+                            {
+                              "type": "frame",
+                              "id": "yJErV",
+                              "name": "Reading Col 1",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "QZVkN",
+                                  "name": "Reading Lab 1",
+                                  "fill": "$text-muted",
+                                  "content": "Last Reading",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "l4tWG",
+                                  "name": "Reading Val 1",
+                                  "fill": "$text-primary",
+                                  "content": "Ch. 46",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Tz5uf",
+                      "name": "Card 2",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Q7WTcs",
+                          "name": "Cover 2",
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": 330,
+                          "fill": {
+                            "type": "gradient",
+                            "gradientType": "linear",
+                            "enabled": true,
+                            "rotation": 135,
+                            "size": {
+                              "height": 1
+                            },
+                            "colors": [
+                              {
+                                "color": "#0F172A",
+                                "position": 0
+                              },
+                              {
+                                "color": "#475569",
+                                "position": 1
+                              }
+                            ]
+                          },
+                          "cornerRadius": 6,
+                          "layout": "vertical",
+                          "justifyContent": "end",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "iBw5D",
+                              "name": "Badge Bar",
+                              "width": "fill_container",
+                              "fill": "#00000099",
+                              "gap": 6,
+                              "padding": [
+                                4,
+                                8
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "bEwHA",
+                                  "name": "Badge",
+                                  "fill": "#4ADE80",
+                                  "content": "NOT VIEWED",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "800",
+                                  "letterSpacing": 0.8
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "fo4Ib",
+                          "name": "Card Title 2",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Demonic Beast Hunter Survival Guide",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "qGvot",
+                          "name": "Time Row 2",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "p4S2ZH",
+                              "name": "Clock 2",
+                              "width": 14,
+                              "height": 14,
+                              "icon": "clock-3",
+                              "library": "lucide",
+                              "fill": "$text-muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "e0f5E",
+                              "name": "Time 2",
+                              "fill": "$text-secondary",
+                              "content": "1 hour, 5 minutes",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "dO9aO",
+                          "name": "Card Div 2",
+                          "fill": "$border",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "n4zBYB",
+                          "name": "Read Meta 2",
+                          "width": "fill_container",
+                          "gap": 10,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "c9sup",
+                              "name": "Latest Col 2",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "oOJfR",
+                                  "name": "Latest Lab 2",
+                                  "fill": "$text-muted",
+                                  "content": "Latest",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "jrJvB",
+                                  "name": "Latest Val 2",
+                                  "fill": "$primary",
+                                  "content": "Ch. 33",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "rectangle",
+                              "id": "N0o2Z",
+                              "name": "Meta Div 2",
+                              "fill": "$border",
+                              "width": 1,
+                              "height": 32
+                            },
+                            {
+                              "type": "frame",
+                              "id": "w172ZW",
+                              "name": "Reading Col 2",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "EoZQf",
+                                  "name": "Reading Lab 2",
+                                  "fill": "$text-muted",
+                                  "content": "Last Reading",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "J9m3V",
+                                  "name": "Reading Val 2",
+                                  "fill": "$text-primary",
+                                  "content": "Ch. 33",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "VWPmC",
+                      "name": "Card 3",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "BlQo1",
+                          "name": "Cover 3",
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": 330,
+                          "fill": {
+                            "type": "gradient",
+                            "gradientType": "linear",
+                            "enabled": true,
+                            "rotation": 135,
+                            "size": {
+                              "height": 1
+                            },
+                            "colors": [
+                              {
+                                "color": "#4C1D95",
+                                "position": 0
+                              },
+                              {
+                                "color": "#EC4899",
+                                "position": 1
+                              }
+                            ]
+                          },
+                          "cornerRadius": 6,
+                          "layout": "vertical",
+                          "justifyContent": "end",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "IGB2X",
+                              "name": "Badge Bar",
+                              "width": "fill_container",
+                              "fill": "#00000099",
+                              "gap": 6,
+                              "padding": [
+                                4,
+                                8
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "V2XdHS",
+                                  "name": "Badge",
+                                  "fill": "#4ADE80",
+                                  "content": "NOT VIEWED",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "800",
+                                  "letterSpacing": 0.8
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "V1sUAJ",
+                          "name": "Card Title 3",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "The Retired Killer Just Wants a Peaceful Life",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "s7UnD",
+                          "name": "Time Row 3",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "d8JVr2",
+                              "name": "Clock 3",
+                              "width": 14,
+                              "height": 14,
+                              "icon": "clock-3",
+                              "library": "lucide",
+                              "fill": "$text-muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "LXVVq",
+                              "name": "Time 3",
+                              "fill": "$text-secondary",
+                              "content": "4 hours, 16 minutes",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "A0aa5",
+                          "name": "Card Div 3",
+                          "fill": "$border",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "OUS1H",
+                          "name": "Read Meta 3",
+                          "width": "fill_container",
+                          "gap": 10,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "cql3p",
+                              "name": "Latest Col 3",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "s8ys2P",
+                                  "name": "Latest Lab 3",
+                                  "fill": "$text-muted",
+                                  "content": "Latest",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "b1rd33",
+                                  "name": "Latest Val 3",
+                                  "fill": "$primary",
+                                  "content": "Ch. 21",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "rectangle",
+                              "id": "T14cMD",
+                              "name": "Meta Div 3",
+                              "fill": "$border",
+                              "width": 1,
+                              "height": 32
+                            },
+                            {
+                              "type": "frame",
+                              "id": "mYtud",
+                              "name": "Reading Col 3",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "yLiDb",
+                                  "name": "Reading Lab 3",
+                                  "fill": "$text-muted",
+                                  "content": "Last Reading",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "aPJjS",
+                                  "name": "Reading Val 3",
+                                  "fill": "$text-primary",
+                                  "content": "Ch. 18",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "w3Qbe",
+                      "name": "Card 4",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "LUoax",
+                          "name": "Cover 4",
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": 330,
+                          "fill": {
+                            "type": "gradient",
+                            "gradientType": "linear",
+                            "enabled": true,
+                            "rotation": 135,
+                            "size": {
+                              "height": 1
+                            },
+                            "colors": [
+                              {
+                                "color": "#0F172A",
+                                "position": 0
+                              },
+                              {
+                                "color": "#15803D",
+                                "position": 1
+                              }
+                            ]
+                          },
+                          "cornerRadius": 6,
+                          "layout": "vertical",
+                          "justifyContent": "end",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "injA2",
+                              "name": "Badge Bar",
+                              "width": "fill_container",
+                              "fill": "#00000099",
+                              "gap": 6,
+                              "padding": [
+                                4,
+                                8
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "RLhjJ",
+                                  "name": "Badge",
+                                  "fill": "#4ADE80",
+                                  "content": "NOT VIEWED",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "800",
+                                  "letterSpacing": 0.8
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "b1Y9ni",
+                          "name": "Card Title 4",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Wall Street Genius's Time-Limited...",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "h6EgW",
+                          "name": "Time Row 4",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "m4krx",
+                              "name": "Clock 4",
+                              "width": 14,
+                              "height": 14,
+                              "icon": "clock-3",
+                              "library": "lucide",
+                              "fill": "$text-muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "qmtJO",
+                              "name": "Time 4",
+                              "fill": "$text-secondary",
+                              "content": "4 hours, 35 minutes",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "x9xxmU",
+                          "name": "Card Div 4",
+                          "fill": "$border",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ua0Z0",
+                          "name": "Read Meta 4",
+                          "width": "fill_container",
+                          "gap": 10,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "LNXAY",
+                              "name": "Latest Col 4",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "VE5Sh",
+                                  "name": "Latest Lab 4",
+                                  "fill": "$text-muted",
+                                  "content": "Latest",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "NjZrJ",
+                                  "name": "Latest Val 4",
+                                  "fill": "$primary",
+                                  "content": "Ch. 9",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "rectangle",
+                              "id": "p1UKY",
+                              "name": "Meta Div 4",
+                              "fill": "$border",
+                              "width": 1,
+                              "height": 32
+                            },
+                            {
+                              "type": "frame",
+                              "id": "QizPs",
+                              "name": "Reading Col 4",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "Ivhi3",
+                                  "name": "Reading Lab 4",
+                                  "fill": "$text-muted",
+                                  "content": "Last Reading",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "e5uTEX",
+                                  "name": "Reading Val 4",
+                                  "fill": "$text-primary",
+                                  "content": "Ch. 6",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "itjPx",
+                  "name": "Row 2",
+                  "width": "fill_container",
+                  "gap": 20,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "wcZcZ",
+                      "name": "Card 5",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "PQ6Hd",
+                          "name": "Cover 5",
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": 330,
+                          "fill": {
+                            "type": "gradient",
+                            "gradientType": "linear",
+                            "enabled": true,
+                            "rotation": 135,
+                            "size": {
+                              "height": 1
+                            },
+                            "colors": [
+                              {
+                                "color": "#78350F",
+                                "position": 0
+                              },
+                              {
+                                "color": "#F59E0B",
+                                "position": 1
+                              }
+                            ]
+                          },
+                          "cornerRadius": 6,
+                          "layout": "vertical",
+                          "justifyContent": "end",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "AKGgH",
+                              "name": "Badge Bar",
+                              "width": "fill_container",
+                              "fill": "#00000099",
+                              "gap": 6,
+                              "padding": [
+                                4,
+                                8
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "a4Jyw",
+                                  "name": "Badge",
+                                  "fill": "#4ADE80",
+                                  "content": "NOT VIEWED",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "800",
+                                  "letterSpacing": 0.8
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "B7PlW",
+                          "name": "Card Title 5",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "SSS Grade Saint Knight",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "cXr3D",
+                          "name": "Time Row 5",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "cHZUZ",
+                              "name": "Clock 5",
+                              "width": 14,
+                              "height": 14,
+                              "icon": "clock-3",
+                              "library": "lucide",
+                              "fill": "$text-muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "M7OcWu",
+                              "name": "Time 5",
+                              "fill": "$text-secondary",
+                              "content": "11 hours, 13 minutes",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "dFHpq",
+                          "name": "Card Div 5",
+                          "fill": "$border",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "DuqAX",
+                          "name": "Read Meta 5",
+                          "width": "fill_container",
+                          "gap": 10,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "F5O9u9",
+                              "name": "Latest Col 5",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "nCjjj",
+                                  "name": "Latest Lab 5",
+                                  "fill": "$text-muted",
+                                  "content": "Latest",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "vp0uC",
+                                  "name": "Latest Val 5",
+                                  "fill": "$primary",
+                                  "content": "Ch. 213",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "rectangle",
+                              "id": "vj0Rp",
+                              "name": "Meta Div 5",
+                              "fill": "$border",
+                              "width": 1,
+                              "height": 32
+                            },
+                            {
+                              "type": "frame",
+                              "id": "wKcfD",
+                              "name": "Reading Col 5",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "DOELt",
+                                  "name": "Reading Lab 5",
+                                  "fill": "$text-muted",
+                                  "content": "Last Reading",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "fQa56",
+                                  "name": "Reading Val 5",
+                                  "fill": "$text-primary",
+                                  "content": "Ch. 213",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "cqYWl",
+                      "name": "Card 6",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "kt02G",
+                          "name": "Cover 6",
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": 330,
+                          "fill": {
+                            "type": "gradient",
+                            "gradientType": "linear",
+                            "enabled": true,
+                            "rotation": 135,
+                            "size": {
+                              "height": 1
+                            },
+                            "colors": [
+                              {
+                                "color": "#0C4A6E",
+                                "position": 0
+                              },
+                              {
+                                "color": "#38BDF8",
+                                "position": 1
+                              }
+                            ]
+                          },
+                          "cornerRadius": 6,
+                          "layout": "vertical",
+                          "justifyContent": "end",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "exkAk",
+                              "name": "Badge Bar",
+                              "width": "fill_container",
+                              "fill": "#00000099",
+                              "gap": 6,
+                              "padding": [
+                                4,
+                                8
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "wSzmu",
+                                  "name": "Badge",
+                                  "fill": "#4ADE80",
+                                  "content": "NOT VIEWED",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "800",
+                                  "letterSpacing": 0.8
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "I71yu",
+                          "name": "Card Title 6",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "The Concept-Grasping Magical Genius",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "gxHHx",
+                          "name": "Time Row 6",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "Xn4YU",
+                              "name": "Clock 6",
+                              "width": 14,
+                              "height": 14,
+                              "icon": "clock-3",
+                              "library": "lucide",
+                              "fill": "$text-muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "m6Gdd",
+                              "name": "Time 6",
+                              "fill": "$text-secondary",
+                              "content": "11 hours, 34 minutes",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "B0Cf2",
+                          "name": "Card Div 6",
+                          "fill": "$border",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "awaNn",
+                          "name": "Read Meta 6",
+                          "width": "fill_container",
+                          "gap": 10,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "KFyto",
+                              "name": "Latest Col 6",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "r1YKK",
+                                  "name": "Latest Lab 6",
+                                  "fill": "$text-muted",
+                                  "content": "Latest",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "gGMS0",
+                                  "name": "Latest Val 6",
+                                  "fill": "$primary",
+                                  "content": "Ch. 64",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "rectangle",
+                              "id": "oPoKB",
+                              "name": "Meta Div 6",
+                              "fill": "$border",
+                              "width": 1,
+                              "height": 32
+                            },
+                            {
+                              "type": "frame",
+                              "id": "UFUPt",
+                              "name": "Reading Col 6",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "lEA8Y",
+                                  "name": "Reading Lab 6",
+                                  "fill": "$text-muted",
+                                  "content": "Last Reading",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "m1mhK",
+                                  "name": "Reading Val 6",
+                                  "fill": "$text-primary",
+                                  "content": "Ch. 62",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "cmxUZ",
+                      "name": "Card 7",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "a1uVRE",
+                          "name": "Cover 7",
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": 330,
+                          "fill": {
+                            "type": "gradient",
+                            "gradientType": "linear",
+                            "enabled": true,
+                            "rotation": 135,
+                            "size": {
+                              "height": 1
+                            },
+                            "colors": [
+                              {
+                                "color": "#1E1B4B",
+                                "position": 0
+                              },
+                              {
+                                "color": "#64748B",
+                                "position": 1
+                              }
+                            ]
+                          },
+                          "cornerRadius": 6,
+                          "layout": "vertical",
+                          "justifyContent": "end",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "oDuUs",
+                              "name": "Badge Bar",
+                              "width": "fill_container",
+                              "fill": "#00000099",
+                              "gap": 6,
+                              "padding": [
+                                4,
+                                8
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "CMeYx",
+                                  "name": "Badge",
+                                  "fill": "#4ADE80",
+                                  "content": "NOT VIEWED",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "800",
+                                  "letterSpacing": 0.8
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "L0O9a",
+                          "name": "Card Title 7",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "The Dark Mage's Return to Enlistment",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "UeXcX",
+                          "name": "Time Row 7",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "aenOS",
+                              "name": "Clock 7",
+                              "width": 14,
+                              "height": 14,
+                              "icon": "clock-3",
+                              "library": "lucide",
+                              "fill": "$text-muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "Wn6D1",
+                              "name": "Time 7",
+                              "fill": "$text-secondary",
+                              "content": "11 hours, 56 minutes",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "NIsQ3",
+                          "name": "Card Div 7",
+                          "fill": "$border",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "hNhwz",
+                          "name": "Read Meta 7",
+                          "width": "fill_container",
+                          "gap": 10,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "lpdeg",
+                              "name": "Latest Col 7",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "fIY4a",
+                                  "name": "Latest Lab 7",
+                                  "fill": "$text-muted",
+                                  "content": "Latest",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "PFPJc",
+                                  "name": "Latest Val 7",
+                                  "fill": "$primary",
+                                  "content": "Ch. 110",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "rectangle",
+                              "id": "ccmGu",
+                              "name": "Meta Div 7",
+                              "fill": "$border",
+                              "width": 1,
+                              "height": 32
+                            },
+                            {
+                              "type": "frame",
+                              "id": "U4HkpP",
+                              "name": "Reading Col 7",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "DOPid",
+                                  "name": "Reading Lab 7",
+                                  "fill": "$text-muted",
+                                  "content": "Last Reading",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "e3ekNL",
+                                  "name": "Reading Val 7",
+                                  "fill": "$text-primary",
+                                  "content": "Ch. 104",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "nw2Dp",
+                      "name": "Card 8",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "CFwR0",
+                          "name": "Cover 8",
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": 330,
+                          "fill": {
+                            "type": "gradient",
+                            "gradientType": "linear",
+                            "enabled": true,
+                            "rotation": 135,
+                            "size": {
+                              "height": 1
+                            },
+                            "colors": [
+                              {
+                                "color": "#881337",
+                                "position": 0
+                              },
+                              {
+                                "color": "#F472B6",
+                                "position": 1
+                              }
+                            ]
+                          },
+                          "cornerRadius": 6,
+                          "layout": "vertical",
+                          "justifyContent": "end",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "v4HD4k",
+                              "name": "Badge Bar",
+                              "width": "fill_container",
+                              "fill": "#00000099",
+                              "gap": 6,
+                              "padding": [
+                                4,
+                                8
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "TibSa",
+                                  "name": "Badge",
+                                  "fill": "#4ADE80",
+                                  "content": "NOT VIEWED",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "800",
+                                  "letterSpacing": 0.8
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "FcVMT",
+                          "name": "Card Title 8",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Academy's Genius Swordsman",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "T5COi",
+                          "name": "Time Row 8",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "EkPbM",
+                              "name": "Clock 8",
+                              "width": 14,
+                              "height": 14,
+                              "icon": "clock-3",
+                              "library": "lucide",
+                              "fill": "$text-muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "jib7Y",
+                              "name": "Time 8",
+                              "fill": "$text-secondary",
+                              "content": "12 hours, 15 minutes",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "oQ7kx",
+                          "name": "Card Div 8",
+                          "fill": "$border",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "RUSuM",
+                          "name": "Read Meta 8",
+                          "width": "fill_container",
+                          "gap": 10,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "nR7hN",
+                              "name": "Latest Col 8",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "X5VMaa",
+                                  "name": "Latest Lab 8",
+                                  "fill": "$text-muted",
+                                  "content": "Latest",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "xWEwj",
+                                  "name": "Latest Val 8",
+                                  "fill": "$primary",
+                                  "content": "Ch. 155",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "rectangle",
+                              "id": "teL6K",
+                              "name": "Meta Div 8",
+                              "fill": "$border",
+                              "width": 1,
+                              "height": 32
+                            },
+                            {
+                              "type": "frame",
+                              "id": "x6rXj",
+                              "name": "Reading Col 8",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "tDL5T",
+                                  "name": "Reading Lab 8",
+                                  "fill": "$text-muted",
+                                  "content": "Last Reading",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "n7NQHf",
+                                  "name": "Reading Val 8",
+                                  "fill": "$text-primary",
+                                  "content": "Ch. 153",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ddsuW",
+              "name": "Bottom Pagination",
+              "width": "fill_container",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "EIgUE",
+                  "name": "Seg «",
+                  "width": 40,
+                  "height": 36,
+                  "fill": "#F8FAFC",
+                  "cornerRadius": [
+                    8,
+                    0,
+                    0,
+                    8
+                  ],
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "wOLxv",
+                      "name": "Seg T « 0",
+                      "fill": "$text-muted",
+                      "content": "«",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "PmD3s",
+                  "name": "Seg 1",
+                  "width": 40,
+                  "height": 36,
+                  "fill": "#0F172A",
+                  "stroke": "$border",
+                  "strokeWidth": {
+                    "top": 1,
+                    "right": 1,
+                    "bottom": 1
+                  },
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ofENh",
+                      "name": "Seg T 1 1",
+                      "fill": "#FFFFFF",
+                      "content": "1",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "fuxL1",
+                  "name": "Seg 2",
+                  "width": 40,
+                  "height": 36,
+                  "fill": "$surface",
+                  "stroke": "$border",
+                  "strokeWidth": {
+                    "top": 1,
+                    "right": 1,
+                    "bottom": 1
+                  },
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "p5oDhO",
+                      "name": "Seg T 2 2",
+                      "fill": "$text-primary",
+                      "content": "2",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "mSDpd",
+                  "name": "Seg 3",
+                  "width": 40,
+                  "height": 36,
+                  "fill": "$surface",
+                  "stroke": "$border",
+                  "strokeWidth": {
+                    "top": 1,
+                    "right": 1,
+                    "bottom": 1
+                  },
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "klWsn",
+                      "name": "Seg T 3 3",
+                      "fill": "$text-primary",
+                      "content": "3",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "GC4RX",
+                  "name": "Seg 4",
+                  "width": 40,
+                  "height": 36,
+                  "fill": "$surface",
+                  "stroke": "$border",
+                  "strokeWidth": {
+                    "top": 1,
+                    "right": 1,
+                    "bottom": 1
+                  },
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "LnB5V",
+                      "name": "Seg T 4 4",
+                      "fill": "$text-primary",
+                      "content": "4",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "PxK8y",
+                  "name": "Seg 5",
+                  "width": 40,
+                  "height": 36,
+                  "fill": "$surface",
+                  "stroke": "$border",
+                  "strokeWidth": {
+                    "top": 1,
+                    "right": 1,
+                    "bottom": 1
+                  },
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ngGZ5",
+                      "name": "Seg T 5 5",
+                      "fill": "$text-primary",
+                      "content": "5",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "PHbqn",
+                  "name": "Seg …",
+                  "width": 44,
+                  "height": 36,
+                  "fill": "$surface",
+                  "stroke": "$border",
+                  "strokeWidth": {
+                    "top": 1,
+                    "right": 1,
+                    "bottom": 1
+                  },
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "YFnS9",
+                      "name": "Seg T … 6",
+                      "fill": "$text-muted",
+                      "content": "…",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "JNKf3",
+                  "name": "Seg 8",
+                  "width": 40,
+                  "height": 36,
+                  "fill": "$surface",
+                  "stroke": "$border",
+                  "strokeWidth": {
+                    "top": 1,
+                    "right": 1,
+                    "bottom": 1
+                  },
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "GkpXG",
+                      "name": "Seg T 8 7",
+                      "fill": "$text-primary",
+                      "content": "8",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "l2vVE",
+                  "name": "Seg »",
+                  "width": 40,
+                  "height": 36,
+                  "fill": "$surface",
+                  "cornerRadius": [
+                    0,
+                    8,
+                    8,
+                    0
+                  ],
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "bqX5N",
+                      "name": "Seg T » 8",
+                      "fill": "$text-primary",
+                      "content": "»",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "a51IPv",
+          "name": "Footer",
+          "width": "fill_container",
+          "fill": "$surface",
+          "stroke": "$border",
+          "strokeWidth": {
+            "top": 1
+          },
+          "gap": 12,
+          "padding": [
+            16,
+            24
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "fkh58",
+              "name": "Footer Text",
+              "fill": "$text-muted",
+              "content": "© 2025 Crysa • Crafted for manga lovers  •  Terms  •  Privacy  •  DMCA",
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "e1V8Vg",
+      "x": 1360,
+      "y": 0,
+      "name": "Bookmark Page - Mobile",
+      "clip": true,
+      "width": 390,
+      "fill": "$bg",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "H0D38",
+          "name": "Header Mobile",
+          "width": "fill_container",
+          "height": 56,
+          "fill": "$surface",
+          "stroke": "$border",
+          "strokeWidth": {
+            "bottom": 1
+          },
+          "padding": [
+            0,
+            16
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "bDvQ5",
+              "name": "Header Left M",
+              "gap": 10,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 8,
+                  "id": "GlA4C",
+                  "name": "Logo Mark M",
+                  "fill": "#0F172A",
+                  "width": 28,
+                  "height": 28
+                },
+                {
+                  "type": "text",
+                  "id": "d6iEi",
+                  "name": "Brand M",
+                  "fill": "#0F172A",
+                  "content": "CRYSA",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "800",
+                  "letterSpacing": 1.2
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "tiVBE",
+              "name": "Header Right M",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "O69eG",
+                  "name": "Search M",
+                  "width": 32,
+                  "height": 32,
+                  "fill": "#F1F5F9",
+                  "cornerRadius": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "nUysH",
+                      "name": "Search M",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "search",
+                      "library": "lucide",
+                      "fill": "$text-secondary"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "rztvQ",
+                  "name": "Menu M",
+                  "width": 32,
+                  "height": 32,
+                  "fill": "#0F172A",
+                  "cornerRadius": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "n9nNmv",
+                      "name": "Menu Icon",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "menu",
+                      "library": "lucide",
+                      "fill": "#FFFFFF"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "mg6JC",
+          "name": "Content M",
+          "width": "fill_container",
+          "fill": "$bg",
+          "layout": "vertical",
+          "gap": 14,
+          "padding": [
+            16,
+            12,
+            24,
+            12
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "JCPoc",
+              "name": "Title Block M",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 4,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "fQ6QF",
+                  "name": "Page Title M",
+                  "fill": "$text-primary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Your Bookmarked Manga Library",
+                  "textAlign": "center",
+                  "fontFamily": "Inter",
+                  "fontSize": 19,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "n4uT7",
+                  "name": "Page Subtitle M",
+                  "fill": "$text-secondary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "The list of Manga you subscribe to follow.",
+                  "textAlign": "center",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "gm40N",
+              "name": "Sort Row M",
+              "width": "fill_container",
+              "gap": 10,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "o7qy1",
+                  "name": "Sort By Drop M",
+                  "width": "fill_container",
+                  "height": 40,
+                  "fill": "$surface",
+                  "cornerRadius": 8,
+                  "stroke": "#93C5FD",
+                  "strokeWidth": 1,
+                  "gap": 8,
+                  "padding": [
+                    0,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "cJ7o0",
+                      "name": "Sort By Val M",
+                      "fill": "$text-primary",
+                      "content": "Latest Update",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "EMCwa",
+                      "name": "Sort By Chev M",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "chevron-down",
+                      "library": "lucide",
+                      "fill": "$text-secondary"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "qeAr2",
+                  "name": "Order Drop M",
+                  "width": 78,
+                  "height": 40,
+                  "fill": "$surface",
+                  "cornerRadius": 8,
+                  "stroke": "#93C5FD",
+                  "strokeWidth": 1,
+                  "gap": 6,
+                  "padding": [
+                    0,
+                    10
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "d9JP7f",
+                      "name": "Order Val M",
+                      "fill": "$text-primary",
+                      "content": "Desc",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "e8DJ2L",
+                      "name": "Order Chev M",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "chevron-down",
+                      "library": "lucide",
+                      "fill": "$text-secondary"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "x4mV3",
+              "name": "Status Row M",
+              "width": "fill_container",
+              "height": 40,
+              "fill": "$surface",
+              "cornerRadius": 8,
+              "stroke": "#93C5FD",
+              "strokeWidth": 1,
+              "gap": 8,
+              "padding": [
+                0,
+                14
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "X5IbUT",
+                  "name": "Status Val M",
+                  "fill": "$text-primary",
+                  "content": "Status: All",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "icon",
+                  "id": "EU2ib",
+                  "name": "Status Chev M",
+                  "width": 14,
+                  "height": 14,
+                  "icon": "chevron-down",
+                  "library": "lucide",
+                  "fill": "$text-secondary"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "m0uu8",
+              "name": "Download Btn M",
+              "width": "fill_container",
+              "height": 42,
+              "fill": "#6D28D9",
+              "cornerRadius": 6,
+              "padding": [
+                0,
+                16
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "vI4Vy",
+                  "name": "Download M",
+                  "fill": "#FFFFFF",
+                  "content": "Download",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "rectangle",
+              "id": "cA999",
+              "name": "Divider M",
+              "fill": "#0F172A",
+              "width": "fill_container",
+              "height": 2
+            },
+            {
+              "type": "frame",
+              "id": "nYN2t",
+              "name": "Grid M",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 18,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "WZM8T",
+                  "name": "M Row 2col 1",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Ee3JC",
+                      "name": "M Card 1",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "BCA1W",
+                          "name": "M Cover 1",
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": 220,
+                          "fill": {
+                            "type": "gradient",
+                            "gradientType": "linear",
+                            "enabled": true,
+                            "rotation": 135,
+                            "size": {
+                              "height": 1
+                            },
+                            "colors": [
+                              {
+                                "color": "#7F1D1D",
+                                "position": 0
+                              },
+                              {
+                                "color": "#EA580C",
+                                "position": 1
+                              }
+                            ]
+                          },
+                          "cornerRadius": 6,
+                          "layout": "vertical",
+                          "justifyContent": "end",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "SMatp",
+                              "name": "M Badge",
+                              "width": "fill_container",
+                              "fill": "#00000099",
+                              "padding": [
+                                3,
+                                6
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "rHun5",
+                                  "name": "M Badge T",
+                                  "fill": "#4ADE80",
+                                  "content": "NOT VIEWED",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 8,
+                                  "fontWeight": "800",
+                                  "letterSpacing": 0.6
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "u8COG7",
+                          "name": "M Title 1",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "The Demon King Overrun...",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "c5LCnb",
+                          "name": "M Time 1",
+                          "width": "fill_container",
+                          "gap": 5,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "JCMdr",
+                              "name": "M Clock 1",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "clock-3",
+                              "library": "lucide",
+                              "fill": "$text-muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "Yae3C",
+                              "name": "M Time T 1",
+                              "fill": "$text-secondary",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "17 minutes",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "h90irt",
+                          "name": "M Div 1",
+                          "fill": "$border",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "qrIj7",
+                          "name": "M Read Meta 1",
+                          "width": "fill_container",
+                          "gap": 8,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "OsIFL",
+                              "name": "M Latest Col 1",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "pzuIV",
+                                  "name": "M Latest Lab 1",
+                                  "fill": "$text-muted",
+                                  "content": "Latest",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "Hx9HC",
+                                  "name": "M Latest Val 1",
+                                  "fill": "$primary",
+                                  "content": "Ch. 48",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "rectangle",
+                              "id": "mYgI2",
+                              "name": "M Meta Div 1",
+                              "fill": "$border",
+                              "width": 1,
+                              "height": 30
+                            },
+                            {
+                              "type": "frame",
+                              "id": "ATqPx",
+                              "name": "M Reading Col 1",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "BCIEy",
+                                  "name": "M Reading Lab 1",
+                                  "fill": "$text-muted",
+                                  "content": "Last Reading",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "OxZwm",
+                                  "name": "M Reading Val 1",
+                                  "fill": "$text-primary",
+                                  "content": "Ch. 46",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "JLAmz",
+                      "name": "M Card 2",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "FqUZ6",
+                          "name": "M Cover 2",
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": 220,
+                          "fill": {
+                            "type": "gradient",
+                            "gradientType": "linear",
+                            "enabled": true,
+                            "rotation": 135,
+                            "size": {
+                              "height": 1
+                            },
+                            "colors": [
+                              {
+                                "color": "#0F172A",
+                                "position": 0
+                              },
+                              {
+                                "color": "#475569",
+                                "position": 1
+                              }
+                            ]
+                          },
+                          "cornerRadius": 6,
+                          "layout": "vertical",
+                          "justifyContent": "end",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "huFQ9",
+                              "name": "M Badge",
+                              "width": "fill_container",
+                              "fill": "#00000099",
+                              "padding": [
+                                3,
+                                6
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "sBUmI",
+                                  "name": "M Badge T",
+                                  "fill": "#4ADE80",
+                                  "content": "NOT VIEWED",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 8,
+                                  "fontWeight": "800",
+                                  "letterSpacing": 0.6
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "PJ9re",
+                          "name": "M Title 2",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Demonic Beast Hunter Surviv...",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "pcmwL",
+                          "name": "M Time 2",
+                          "width": "fill_container",
+                          "gap": 5,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "C1J1H",
+                              "name": "M Clock 2",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "clock-3",
+                              "library": "lucide",
+                              "fill": "$text-muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "VdrMT",
+                              "name": "M Time T 2",
+                              "fill": "$text-secondary",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "1 hour, 5 minutes",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "wxyXH",
+                          "name": "M Div 2",
+                          "fill": "$border",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "m4F1f",
+                          "name": "M Read Meta 2",
+                          "width": "fill_container",
+                          "gap": 8,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "s522qS",
+                              "name": "M Latest Col 2",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "KGdRy",
+                                  "name": "M Latest Lab 2",
+                                  "fill": "$text-muted",
+                                  "content": "Latest",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "KkW3a",
+                                  "name": "M Latest Val 2",
+                                  "fill": "$primary",
+                                  "content": "Ch. 33",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "rectangle",
+                              "id": "kdZRG",
+                              "name": "M Meta Div 2",
+                              "fill": "$border",
+                              "width": 1,
+                              "height": 30
+                            },
+                            {
+                              "type": "frame",
+                              "id": "sRmUZ",
+                              "name": "M Reading Col 2",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "CZNr9",
+                                  "name": "M Reading Lab 2",
+                                  "fill": "$text-muted",
+                                  "content": "Last Reading",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "u3IKP",
+                                  "name": "M Reading Val 2",
+                                  "fill": "$text-primary",
+                                  "content": "Ch. 33",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "i7vEB",
+                  "name": "M Row 2col 2",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "E2oYJf",
+                      "name": "M Card 3",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "t7WIk",
+                          "name": "M Cover 3",
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": 220,
+                          "fill": {
+                            "type": "gradient",
+                            "gradientType": "linear",
+                            "enabled": true,
+                            "rotation": 135,
+                            "size": {
+                              "height": 1
+                            },
+                            "colors": [
+                              {
+                                "color": "#4C1D95",
+                                "position": 0
+                              },
+                              {
+                                "color": "#EC4899",
+                                "position": 1
+                              }
+                            ]
+                          },
+                          "cornerRadius": 6,
+                          "layout": "vertical",
+                          "justifyContent": "end",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "VUInK",
+                              "name": "M Badge",
+                              "width": "fill_container",
+                              "fill": "#00000099",
+                              "padding": [
+                                3,
+                                6
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "G84KU7",
+                                  "name": "M Badge T",
+                                  "fill": "#4ADE80",
+                                  "content": "NOT VIEWED",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 8,
+                                  "fontWeight": "800",
+                                  "letterSpacing": 0.6
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "I2V2D",
+                          "name": "M Title 3",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "The Retired Killer Just...",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "F43df",
+                          "name": "M Time 3",
+                          "width": "fill_container",
+                          "gap": 5,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "Z1gPn",
+                              "name": "M Clock 3",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "clock-3",
+                              "library": "lucide",
+                              "fill": "$text-muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "hQz5I",
+                              "name": "M Time T 3",
+                              "fill": "$text-secondary",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "4 hours, 16 minutes",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "OYahQ",
+                          "name": "M Div 3",
+                          "fill": "$border",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "z3TByA",
+                          "name": "M Read Meta 3",
+                          "width": "fill_container",
+                          "gap": 8,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "O2udz0",
+                              "name": "M Latest Col 3",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "KEYaT",
+                                  "name": "M Latest Lab 3",
+                                  "fill": "$text-muted",
+                                  "content": "Latest",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "J70vE",
+                                  "name": "M Latest Val 3",
+                                  "fill": "$primary",
+                                  "content": "Ch. 21",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "rectangle",
+                              "id": "guiCJ",
+                              "name": "M Meta Div 3",
+                              "fill": "$border",
+                              "width": 1,
+                              "height": 30
+                            },
+                            {
+                              "type": "frame",
+                              "id": "pspJz",
+                              "name": "M Reading Col 3",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "a4NN2L",
+                                  "name": "M Reading Lab 3",
+                                  "fill": "$text-muted",
+                                  "content": "Last Reading",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "Nx37C",
+                                  "name": "M Reading Val 3",
+                                  "fill": "$text-primary",
+                                  "content": "Ch. 18",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Rg40q",
+                      "name": "M Card 4",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "yp2sA",
+                          "name": "M Cover 4",
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": 220,
+                          "fill": {
+                            "type": "gradient",
+                            "gradientType": "linear",
+                            "enabled": true,
+                            "rotation": 135,
+                            "size": {
+                              "height": 1
+                            },
+                            "colors": [
+                              {
+                                "color": "#0F172A",
+                                "position": 0
+                              },
+                              {
+                                "color": "#15803D",
+                                "position": 1
+                              }
+                            ]
+                          },
+                          "cornerRadius": 6,
+                          "layout": "vertical",
+                          "justifyContent": "end",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "HYS6Y",
+                              "name": "M Badge",
+                              "width": "fill_container",
+                              "fill": "#00000099",
+                              "padding": [
+                                3,
+                                6
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "nHCt0",
+                                  "name": "M Badge T",
+                                  "fill": "#4ADE80",
+                                  "content": "NOT VIEWED",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 8,
+                                  "fontWeight": "800",
+                                  "letterSpacing": 0.6
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "evGZY",
+                          "name": "M Title 4",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Wall Street Genius's...",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ZDZJV",
+                          "name": "M Time 4",
+                          "width": "fill_container",
+                          "gap": 5,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "xpcWE",
+                              "name": "M Clock 4",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "clock-3",
+                              "library": "lucide",
+                              "fill": "$text-muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "rAVhg",
+                              "name": "M Time T 4",
+                              "fill": "$text-secondary",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "4 hours, 35 minutes",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "RJqqT",
+                          "name": "M Div 4",
+                          "fill": "$border",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "HoZCT",
+                          "name": "M Read Meta 4",
+                          "width": "fill_container",
+                          "gap": 8,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "ZcHGx",
+                              "name": "M Latest Col 4",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "Jb6o6",
+                                  "name": "M Latest Lab 4",
+                                  "fill": "$text-muted",
+                                  "content": "Latest",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "U9qm5g",
+                                  "name": "M Latest Val 4",
+                                  "fill": "$primary",
+                                  "content": "Ch. 9",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "rectangle",
+                              "id": "M1uJn",
+                              "name": "M Meta Div 4",
+                              "fill": "$border",
+                              "width": 1,
+                              "height": 30
+                            },
+                            {
+                              "type": "frame",
+                              "id": "h88g7k",
+                              "name": "M Reading Col 4",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "aGtFV",
+                                  "name": "M Reading Lab 4",
+                                  "fill": "$text-muted",
+                                  "content": "Last Reading",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "Ot10x",
+                                  "name": "M Reading Val 4",
+                                  "fill": "$text-primary",
+                                  "content": "Ch. 6",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Q3x0i",
+                  "name": "M Row 2col 3",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "lz3z1",
+                      "name": "M Card 5",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Li3kA",
+                          "name": "M Cover 5",
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": 220,
+                          "fill": {
+                            "type": "gradient",
+                            "gradientType": "linear",
+                            "enabled": true,
+                            "rotation": 135,
+                            "size": {
+                              "height": 1
+                            },
+                            "colors": [
+                              {
+                                "color": "#78350F",
+                                "position": 0
+                              },
+                              {
+                                "color": "#F59E0B",
+                                "position": 1
+                              }
+                            ]
+                          },
+                          "cornerRadius": 6,
+                          "layout": "vertical",
+                          "justifyContent": "end",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "OjuLW",
+                              "name": "M Badge",
+                              "width": "fill_container",
+                              "fill": "#00000099",
+                              "padding": [
+                                3,
+                                6
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "KLkhh",
+                                  "name": "M Badge T",
+                                  "fill": "#4ADE80",
+                                  "content": "NOT VIEWED",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 8,
+                                  "fontWeight": "800",
+                                  "letterSpacing": 0.6
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "aQr89",
+                          "name": "M Title 5",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "SSS Grade Saint Knight",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "zhWmU",
+                          "name": "M Time 5",
+                          "width": "fill_container",
+                          "gap": 5,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "Rs1MO",
+                              "name": "M Clock 5",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "clock-3",
+                              "library": "lucide",
+                              "fill": "$text-muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "tXTt1",
+                              "name": "M Time T 5",
+                              "fill": "$text-secondary",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "11 hours, 13 minutes",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "A6MUg",
+                          "name": "M Div 5",
+                          "fill": "$border",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Dcc7n",
+                          "name": "M Read Meta 5",
+                          "width": "fill_container",
+                          "gap": 8,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "lCetP",
+                              "name": "M Latest Col 5",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "dJz4P",
+                                  "name": "M Latest Lab 5",
+                                  "fill": "$text-muted",
+                                  "content": "Latest",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "F1fXr",
+                                  "name": "M Latest Val 5",
+                                  "fill": "$primary",
+                                  "content": "Ch. 213",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "rectangle",
+                              "id": "C2jLVk",
+                              "name": "M Meta Div 5",
+                              "fill": "$border",
+                              "width": 1,
+                              "height": 30
+                            },
+                            {
+                              "type": "frame",
+                              "id": "u4sFks",
+                              "name": "M Reading Col 5",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "ahJaI",
+                                  "name": "M Reading Lab 5",
+                                  "fill": "$text-muted",
+                                  "content": "Last Reading",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "CwtU3",
+                                  "name": "M Reading Val 5",
+                                  "fill": "$text-primary",
+                                  "content": "Ch. 213",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Y9f9sm",
+                      "name": "M Card 6",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "rxP2h",
+                          "name": "M Cover 6",
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": 220,
+                          "fill": {
+                            "type": "gradient",
+                            "gradientType": "linear",
+                            "enabled": true,
+                            "rotation": 135,
+                            "size": {
+                              "height": 1
+                            },
+                            "colors": [
+                              {
+                                "color": "#0C4A6E",
+                                "position": 0
+                              },
+                              {
+                                "color": "#38BDF8",
+                                "position": 1
+                              }
+                            ]
+                          },
+                          "cornerRadius": 6,
+                          "layout": "vertical",
+                          "justifyContent": "end",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "Y1MdEE",
+                              "name": "M Badge",
+                              "width": "fill_container",
+                              "fill": "#00000099",
+                              "padding": [
+                                3,
+                                6
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "zEXjC",
+                                  "name": "M Badge T",
+                                  "fill": "#4ADE80",
+                                  "content": "NOT VIEWED",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 8,
+                                  "fontWeight": "800",
+                                  "letterSpacing": 0.6
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "UJgLu",
+                          "name": "M Title 6",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "The Concept-Grasping...",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "pr6KR",
+                          "name": "M Time 6",
+                          "width": "fill_container",
+                          "gap": 5,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "tb3NL",
+                              "name": "M Clock 6",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "clock-3",
+                              "library": "lucide",
+                              "fill": "$text-muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "W3AJFy",
+                              "name": "M Time T 6",
+                              "fill": "$text-secondary",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "11 hours, 34 minutes",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "oAWBH",
+                          "name": "M Div 6",
+                          "fill": "$border",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "EmEj3",
+                          "name": "M Read Meta 6",
+                          "width": "fill_container",
+                          "gap": 8,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "p1Ivq8",
+                              "name": "M Latest Col 6",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "t6AP3l",
+                                  "name": "M Latest Lab 6",
+                                  "fill": "$text-muted",
+                                  "content": "Latest",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "uRKEf",
+                                  "name": "M Latest Val 6",
+                                  "fill": "$primary",
+                                  "content": "Ch. 64",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "rectangle",
+                              "id": "CMbsT",
+                              "name": "M Meta Div 6",
+                              "fill": "$border",
+                              "width": 1,
+                              "height": 30
+                            },
+                            {
+                              "type": "frame",
+                              "id": "lcB7D",
+                              "name": "M Reading Col 6",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "w6r4C",
+                                  "name": "M Reading Lab 6",
+                                  "fill": "$text-muted",
+                                  "content": "Last Reading",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "r1FmkH",
+                                  "name": "M Reading Val 6",
+                                  "fill": "$text-primary",
+                                  "content": "Ch. 62",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "nMysT",
+                  "name": "M Row 2col 4",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Gtmem",
+                      "name": "M Card 7",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "NlCjM",
+                          "name": "M Cover 7",
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": 220,
+                          "fill": {
+                            "type": "gradient",
+                            "gradientType": "linear",
+                            "enabled": true,
+                            "rotation": 135,
+                            "size": {
+                              "height": 1
+                            },
+                            "colors": [
+                              {
+                                "color": "#1E1B4B",
+                                "position": 0
+                              },
+                              {
+                                "color": "#64748B",
+                                "position": 1
+                              }
+                            ]
+                          },
+                          "cornerRadius": 6,
+                          "layout": "vertical",
+                          "justifyContent": "end",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "YIiX5",
+                              "name": "M Badge",
+                              "width": "fill_container",
+                              "fill": "#00000099",
+                              "padding": [
+                                3,
+                                6
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "JhAnt",
+                                  "name": "M Badge T",
+                                  "fill": "#4ADE80",
+                                  "content": "NOT VIEWED",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 8,
+                                  "fontWeight": "800",
+                                  "letterSpacing": 0.6
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "H2NxJn",
+                          "name": "M Title 7",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "The Dark Mage's Return...",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "r05u1w",
+                          "name": "M Time 7",
+                          "width": "fill_container",
+                          "gap": 5,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "p0Ci81",
+                              "name": "M Clock 7",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "clock-3",
+                              "library": "lucide",
+                              "fill": "$text-muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "FA374",
+                              "name": "M Time T 7",
+                              "fill": "$text-secondary",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "11 hours, 56 minutes",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "sB5ZF",
+                          "name": "M Div 7",
+                          "fill": "$border",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "R7n1V7",
+                          "name": "M Read Meta 7",
+                          "width": "fill_container",
+                          "gap": 8,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "fYuTN",
+                              "name": "M Latest Col 7",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "qj6FJ",
+                                  "name": "M Latest Lab 7",
+                                  "fill": "$text-muted",
+                                  "content": "Latest",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "soGeO",
+                                  "name": "M Latest Val 7",
+                                  "fill": "$primary",
+                                  "content": "Ch. 110",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "rectangle",
+                              "id": "Ph1T7",
+                              "name": "M Meta Div 7",
+                              "fill": "$border",
+                              "width": 1,
+                              "height": 30
+                            },
+                            {
+                              "type": "frame",
+                              "id": "Hfloo",
+                              "name": "M Reading Col 7",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "e0Le7L",
+                                  "name": "M Reading Lab 7",
+                                  "fill": "$text-muted",
+                                  "content": "Last Reading",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "WMPjK",
+                                  "name": "M Reading Val 7",
+                                  "fill": "$text-primary",
+                                  "content": "Ch. 104",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "B6dfq",
+                      "name": "M Card 8",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "outMT",
+                          "name": "M Cover 8",
+                          "clip": true,
+                          "width": "fill_container",
+                          "height": 220,
+                          "fill": {
+                            "type": "gradient",
+                            "gradientType": "linear",
+                            "enabled": true,
+                            "rotation": 135,
+                            "size": {
+                              "height": 1
+                            },
+                            "colors": [
+                              {
+                                "color": "#881337",
+                                "position": 0
+                              },
+                              {
+                                "color": "#F472B6",
+                                "position": 1
+                              }
+                            ]
+                          },
+                          "cornerRadius": 6,
+                          "layout": "vertical",
+                          "justifyContent": "end",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "DoAjG",
+                              "name": "M Badge",
+                              "width": "fill_container",
+                              "fill": "#00000099",
+                              "padding": [
+                                3,
+                                6
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "DEioW",
+                                  "name": "M Badge T",
+                                  "fill": "#4ADE80",
+                                  "content": "NOT VIEWED",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 8,
+                                  "fontWeight": "800",
+                                  "letterSpacing": 0.6
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "yeSMA",
+                          "name": "M Title 8",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Academy's Genius Swordsman",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "svuUV",
+                          "name": "M Time 8",
+                          "width": "fill_container",
+                          "gap": 5,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "FRPNM",
+                              "name": "M Clock 8",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "clock-3",
+                              "library": "lucide",
+                              "fill": "$text-muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "mxqBa",
+                              "name": "M Time T 8",
+                              "fill": "$text-secondary",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "12 hours, 15 minutes",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "OVMUf",
+                          "name": "M Div 8",
+                          "fill": "$border",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Xot6k",
+                          "name": "M Read Meta 8",
+                          "width": "fill_container",
+                          "gap": 8,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "wrntj",
+                              "name": "M Latest Col 8",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "WAyqn",
+                                  "name": "M Latest Lab 8",
+                                  "fill": "$text-muted",
+                                  "content": "Latest",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "kYa3a",
+                                  "name": "M Latest Val 8",
+                                  "fill": "$primary",
+                                  "content": "Ch. 155",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "700"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "rectangle",
+                              "id": "c7tGs9",
+                              "name": "M Meta Div 8",
+                              "fill": "$border",
+                              "width": 1,
+                              "height": 30
+                            },
+                            {
+                              "type": "frame",
+                              "id": "x25kU",
+                              "name": "M Reading Col 8",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 2,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "YYP6H",
+                                  "name": "M Reading Lab 8",
+                                  "fill": "$text-muted",
+                                  "content": "Last Reading",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "eJWlh",
+                                  "name": "M Reading Val 8",
+                                  "fill": "$text-primary",
+                                  "content": "Ch. 153",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Xb1jY",
+              "name": "Bottom Pagination M",
+              "width": "fill_container",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "pvkDd",
+                  "name": "Seg «",
+                  "width": 36,
+                  "height": 34,
+                  "fill": "#F8FAFC",
+                  "cornerRadius": [
+                    8,
+                    0,
+                    0,
+                    8
+                  ],
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "V1ViI6",
+                      "name": "Seg T « 0",
+                      "fill": "$text-muted",
+                      "content": "«",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "uiIeS",
+                  "name": "Seg 1",
+                  "width": 36,
+                  "height": 34,
+                  "fill": "#0F172A",
+                  "stroke": "$border",
+                  "strokeWidth": {
+                    "top": 1,
+                    "right": 1,
+                    "bottom": 1
+                  },
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "k8myN2",
+                      "name": "Seg T 1 1",
+                      "fill": "#FFFFFF",
+                      "content": "1",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "GrlPU",
+                  "name": "Seg 2",
+                  "width": 36,
+                  "height": 34,
+                  "fill": "$surface",
+                  "stroke": "$border",
+                  "strokeWidth": {
+                    "top": 1,
+                    "right": 1,
+                    "bottom": 1
+                  },
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "GKjAI",
+                      "name": "Seg T 2 2",
+                      "fill": "$text-primary",
+                      "content": "2",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "M5qru",
+                  "name": "Seg 3",
+                  "width": 36,
+                  "height": 34,
+                  "fill": "$surface",
+                  "stroke": "$border",
+                  "strokeWidth": {
+                    "top": 1,
+                    "right": 1,
+                    "bottom": 1
+                  },
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "M54wg",
+                      "name": "Seg T 3 3",
+                      "fill": "$text-primary",
+                      "content": "3",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "UzSlv",
+                  "name": "Seg 4",
+                  "width": 36,
+                  "height": 34,
+                  "fill": "$surface",
+                  "stroke": "$border",
+                  "strokeWidth": {
+                    "top": 1,
+                    "right": 1,
+                    "bottom": 1
+                  },
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "PGkMs",
+                      "name": "Seg T 4 4",
+                      "fill": "$text-primary",
+                      "content": "4",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "YuJzm",
+                  "name": "Seg 5",
+                  "width": 36,
+                  "height": 34,
+                  "fill": "$surface",
+                  "stroke": "$border",
+                  "strokeWidth": {
+                    "top": 1,
+                    "right": 1,
+                    "bottom": 1
+                  },
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "chd3V",
+                      "name": "Seg T 5 5",
+                      "fill": "$text-primary",
+                      "content": "5",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "V4CGJ",
+                  "name": "Seg …",
+                  "width": 40,
+                  "height": 34,
+                  "fill": "$surface",
+                  "stroke": "$border",
+                  "strokeWidth": {
+                    "top": 1,
+                    "right": 1,
+                    "bottom": 1
+                  },
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Ea3gP",
+                      "name": "Seg T … 6",
+                      "fill": "$text-muted",
+                      "content": "…",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "NmtxL",
+                  "name": "Seg 8",
+                  "width": 36,
+                  "height": 34,
+                  "fill": "$surface",
+                  "stroke": "$border",
+                  "strokeWidth": {
+                    "top": 1,
+                    "right": 1,
+                    "bottom": 1
+                  },
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "u0WHz",
+                      "name": "Seg T 8 7",
+                      "fill": "$text-primary",
+                      "content": "8",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "W82SH",
+                  "name": "Seg »",
+                  "width": 36,
+                  "height": 34,
+                  "fill": "$surface",
+                  "cornerRadius": [
+                    0,
+                    8,
+                    8,
+                    0
+                  ],
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "F0ynM6",
+                      "name": "Seg T » 8",
+                      "fill": "$text-primary",
+                      "content": "»",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "uMLhP",
+          "name": "Footer M",
+          "width": "fill_container",
+          "fill": "$surface",
+          "stroke": "$border",
+          "strokeWidth": {
+            "top": 1
+          },
+          "padding": 12,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "L5EHNv",
+              "name": "Footer T M",
+              "fill": "$text-muted",
+              "content": "© 2025 Crysa • Terms • Privacy",
+              "fontFamily": "Inter",
+              "fontSize": 10,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variables": {
+    "bg": {
+      "type": "color",
+      "value": "#F8F9FB"
+    },
+    "surface": {
+      "type": "color",
+      "value": "#FFFFFF"
+    },
+    "text-primary": {
+      "type": "color",
+      "value": "#0F172A"
+    },
+    "text-secondary": {
+      "type": "color",
+      "value": "#64748B"
+    },
+    "text-muted": {
+      "type": "color",
+      "value": "#94A3B8"
+    },
+    "border": {
+      "type": "color",
+      "value": "#E2E8F0"
+    },
+    "primary": {
+      "type": "color",
+      "value": "#2563EB"
+    },
+    "primary-hover": {
+      "type": "color",
+      "value": "#1D4ED8"
+    },
+    "success": {
+      "type": "color",
+      "value": "#10B981"
+    },
+    "success-bg": {
+      "type": "color",
+      "value": "#ECFDF5"
+    },
+    "warning": {
+      "type": "color",
+      "value": "#F59E0B"
+    },
+    "radius-lg": {
+      "type": "number",
+      "value": 12
+    },
+    "radius-xl": {
+      "type": "number",
+      "value": 16
+    },
+    "shadow-card": {
+      "type": "string",
+      "value": "shadow"
+    }
+  },
+  "fileToken": "b869cbc6-eb5f-4b1c-ba67-552a90dcb85c"
+}

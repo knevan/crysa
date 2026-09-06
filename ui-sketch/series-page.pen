@@ -4,9 +4,9 @@
     {
       "type": "frame",
       "id": "VkumP",
-      "x": 820,
+      "x": 0,
       "y": 0,
-      "name": "Series Page",
+      "name": "Series Page - Dekstop",
       "clip": true,
       "width": 1280,
       "fill": "$bg",
@@ -213,97 +213,6 @@
         },
         {
           "type": "frame",
-          "id": "E28kNh",
-          "name": "Hero Backdrop",
-          "clip": true,
-          "width": "fill_container",
-          "height": 280,
-          "fill": {
-            "type": "gradient",
-            "gradientType": "linear",
-            "enabled": true,
-            "rotation": 90,
-            "size": {
-              "height": 1
-            },
-            "colors": [
-              {
-                "color": "#0F172A",
-                "position": 0
-              },
-              {
-                "color": "#1E293B",
-                "position": 0.55
-              },
-              {
-                "color": "#334155",
-                "position": 1
-              }
-            ]
-          },
-          "children": [
-            {
-              "type": "frame",
-              "id": "okpC6",
-              "name": "Hero Overlay",
-              "width": "fill_container",
-              "height": "fill_container",
-              "padding": 24,
-              "children": [
-                {
-                  "type": "rectangle",
-                  "cornerRadius": 140,
-                  "id": "gPVyp",
-                  "name": "Glow",
-                  "fill": "#3B82F62A",
-                  "width": 280,
-                  "height": 280,
-                  "effect": {
-                    "type": "blur",
-                    "radius": 40
-                  }
-                },
-                {
-                  "type": "frame",
-                  "id": "mrfEU",
-                  "name": "Hero Text",
-                  "width": "fill_container",
-                  "layout": "vertical",
-                  "gap": 8,
-                  "justifyContent": "center",
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "rSVyG",
-                      "name": "Hero Eyebrow",
-                      "fill": "#93C5FD",
-                      "content": "SERIES  •  ACTION  •  ISEKAI  •  FANTASY",
-                      "fontFamily": "Inter",
-                      "fontSize": 10,
-                      "fontWeight": "700",
-                      "letterSpacing": 2
-                    },
-                    {
-                      "type": "text",
-                      "id": "px0hw",
-                      "name": "Hero Quote",
-                      "fill": "#E2E8F0",
-                      "textGrowth": "fixed-width",
-                      "width": 520,
-                      "content": "\"A new legend begins after the throne is claimed.\"",
-                      "fontFamily": "Playfair Display",
-                      "fontSize": 14,
-                      "fontWeight": "normal",
-                      "fontStyle": "italic"
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "frame",
           "id": "c6txnW",
           "name": "Content",
           "width": "fill_container",
@@ -432,7 +341,7 @@
                           "id": "L50SlF",
                           "name": "Verified",
                           "fill": "$text-secondary",
-                          "content": "Verified scan • Completed",
+                          "content": "Verified scan \u2022 Completed",
                           "fontFamily": "Inter",
                           "fontSize": 11,
                           "fontWeight": "600"
@@ -541,7 +450,7 @@
                           "id": "LINFd",
                           "name": "Alt Title",
                           "fill": "$text-secondary",
-                          "content": "Halo • はろー  •  The Halo Chronicles",
+                          "content": "Halo \u2022 \u306f\u308d\u30fc  \u2022  The Halo Chronicles",
                           "fontFamily": "Inter",
                           "fontSize": 13,
                           "fontWeight": "normal"
@@ -1683,7 +1592,7 @@
                   "fill": "$text-secondary",
                   "textGrowth": "fixed-width",
                   "width": 980,
-                  "content": "Halo — a gripping tale of ambition, betrayal, and rebirth. After claiming the throne through cunning and strength, the new overlord is thrust into an unfamiliar world where magic, monsters, and medieval politics collide. With his sharp mind and ruthless resolve, he must carve a new empire from nothing while uncovering why fate brought him here. Expect strategic battles, dark humor, and a relentlessly driven protagonist.",
+                  "content": "Halo \u2014 a gripping tale of ambition, betrayal, and rebirth. After claiming the throne through cunning and strength, the new overlord is thrust into an unfamiliar world where magic, monsters, and medieval politics collide. With his sharp mind and ruthless resolve, he must carve a new empire from nothing while uncovering why fate brought him here. Expect strategic battles, dark humor, and a relentlessly driven protagonist.",
                   "lineHeight": 1.7,
                   "fontFamily": "Inter",
                   "fontSize": 13,
@@ -1731,7 +1640,7 @@
                       "id": "jrQht",
                       "name": "Lang",
                       "fill": "$text-muted",
-                      "content": "EN • JP • ID",
+                      "content": "EN \u2022 JP \u2022 ID",
                       "fontFamily": "Inter",
                       "fontSize": 11,
                       "fontWeight": "normal"
@@ -2571,7 +2480,7 @@
               "id": "m7Luw",
               "name": "Footer Text",
               "fill": "$text-muted",
-              "content": "© 2025 Crysa • Crafted for manga lovers  •  Terms  •  Privacy  •  DMCA",
+              "content": "\u00a9 2025 Crysa \u2022 Crafted for manga lovers  \u2022  Terms  \u2022  Privacy  \u2022  DMCA",
               "fontFamily": "Inter",
               "fontSize": 11,
               "fontWeight": "normal"
@@ -2583,9 +2492,9 @@
     {
       "type": "frame",
       "id": "SWiK7",
-      "x": 2180,
+      "x": 1360,
       "y": 0,
-      "name": "Series Page — Mobile",
+      "name": "Series Page - Mobile",
       "clip": true,
       "width": 390,
       "fill": "$bg",
@@ -2864,7 +2773,7 @@
                       "id": "Fpqxo",
                       "name": "Alt M",
                       "fill": "$text-secondary",
-                      "content": "Halo • はろー",
+                      "content": "Halo \u2022 \u306f\u308d\u30fc",
                       "fontFamily": "Inter",
                       "fontSize": 12,
                       "fontWeight": "normal"
@@ -2900,7 +2809,7 @@
                           "id": "Q0R0uW",
                           "name": "Year M",
                           "fill": "$text-muted",
-                          "content": "• 2024",
+                          "content": "\u2022 2024",
                           "fontFamily": "Inter",
                           "fontSize": 11,
                           "fontWeight": "normal"
@@ -3430,7 +3339,7 @@
                                   "id": "OKaDE",
                                   "name": "BM Label",
                                   "fill": "#94A3B8",
-                                  "content": "Bookmark  •  Login",
+                                  "content": "Bookmark  \u2022  Login",
                                   "fontFamily": "Inter",
                                   "fontSize": 11,
                                   "fontWeight": "600"
@@ -4246,7 +4155,7 @@
                   "fill": "$text-secondary",
                   "textGrowth": "fixed-width",
                   "width": 340,
-                  "content": "Halo — a gripping tale of ambition and rebirth. After claiming the throne, the overlord is thrust into a world of magic and medieval politics. Strategic battles, dark humor, and a ruthlessly driven protagonist.",
+                  "content": "Halo \u2014 a gripping tale of ambition and rebirth. After claiming the throne, the overlord is thrust into a world of magic and medieval politics. Strategic battles, dark humor, and a ruthlessly driven protagonist.",
                   "lineHeight": 1.6,
                   "fontFamily": "Inter",
                   "fontSize": 12,
@@ -4951,7 +4860,7 @@
               "id": "Z1Y3ZM",
               "name": "Footer T M",
               "fill": "$text-muted",
-              "content": "© 2025 Crysa • Terms • Privacy",
+              "content": "\u00a9 2025 Crysa \u2022 Terms \u2022 Privacy",
               "fontFamily": "Inter",
               "fontSize": 10,
               "fontWeight": "normal"

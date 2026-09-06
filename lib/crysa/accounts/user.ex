@@ -64,14 +64,12 @@ defmodule Crysa.Accounts.User do
       |> validate_password_policy()
       |> put_password_hash()
 
-    case Keyword.get(opts, :require_current_password, true) do
-      true ->
-        changeset
-        |> validate_required([:current_password])
-        |> validate_current_password(get_change(changeset, :current_password))
-
-      false ->
-        changeset
+    if Keyword.get(opts, :require_current_password, true) do
+      changeset
+      |> validate_required([:current_password])
+      |> validate_current_password(get_change(changeset, :current_password))
+    else
+      changeset
     end
   end
 

@@ -136,6 +136,9 @@
             {Credo.Check.Refactor.RejectReject, []},
             {Credo.Check.Refactor.UnlessWithElse, []},
             {Credo.Check.Refactor.WithClauses, []},
+            {Credo.Check.Refactor.AppendSingleItem, []},
+            {Credo.Check.Refactor.DoubleBooleanNegation, []},
+            {Credo.Check.Refactor.MapMap, []},
 
             #
             ## Warnings
@@ -163,7 +166,16 @@
             {Credo.Check.Warning.UnusedStringOperation, []},
             {Credo.Check.Warning.UnusedTupleOperation, []},
             {Credo.Check.Warning.WrongTestFilename, []}
-          ] ++ Enum.map(ExSlop.recommended_checks(), &{&1, []}),
+          ] ++
+            Enum.map(ExSlop.recommended_checks(), &{&1, []}) ++
+            [
+              {ExSlop.Check.Refactor.PreferEnumSlice, []},
+              {ExSlop.Check.Refactor.ListFold, []},
+              # {ExSlop.Check.Refactor.ListLast, []},
+              {ExSlop.Check.Refactor.LengthInGuard, []},
+              {ExSlop.Check.Refactor.UseMapJoin, []},
+              {ExSlop.Check.Refactor.CaseTrueFalse, []}
+            ],
         disabled: [
           #
           # Checks scheduled for next check update (opt-in for now)
@@ -191,12 +203,9 @@
           {Credo.Check.Readability.StrictModuleLayout, []},
           {Credo.Check.Readability.WithCustomTaggedTuple, []},
           {Credo.Check.Refactor.ABCSize, []},
-          {Credo.Check.Refactor.AppendSingleItem, []},
           {Credo.Check.Refactor.CondInsteadOfIfElse, []},
-          {Credo.Check.Refactor.DoubleBooleanNegation, []},
           {Credo.Check.Refactor.FilterReject, []},
           {Credo.Check.Refactor.IoPuts, []},
-          {Credo.Check.Refactor.MapMap, []},
           {Credo.Check.Refactor.ModuleDependencies, []},
           {Credo.Check.Refactor.NegatedIsNil, []},
           {Credo.Check.Refactor.PassAsyncInTestCases, []},

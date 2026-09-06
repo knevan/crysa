@@ -1,7 +1,11 @@
 defmodule CrysaWeb.CatalogController do
   use CrysaWeb, :controller
 
+  require Logger
+
+  alias Crysa.Audit
   alias Crysa.Catalog
+  alias Crysa.Library
 
   def index(conn, params) do
     {series, pagination} = Catalog.browse_series(params)
@@ -74,6 +78,7 @@ defmodule CrysaWeb.CatalogController do
             not_found(conn)
 
           chapter ->
+            record_chapter_read(conn, series)
             {previous, next} = Catalog.chapter_navigation(series.id, chapter_key)
 
             render(conn, :reader,
@@ -85,6 +90,35 @@ defmodule CrysaWeb.CatalogController do
             )
         end
     end
+  end
+
+  # Counts a view when a chapter is actually read, not on series page
+  # impressions. Best-effort: reader render must never fail due to tracking.
+  defp record_chapter_read(conn, series) do
+    case Library.record_view(series, %{
+           user: conn.assigns[:current_user],
+           ip: Audit.extract_ip(conn),
+           user_agent: Audit.extract_user_agent(conn)
+         }) do
+      {:ok, _} ->
+        :ok
+
+      {:error, reason} ->
+        Logger.warning("chapter view tracking failed",
+          series_id: series.id,
+          error: inspect(reason)
+        )
+
+        :ok
+    end
+  rescue
+    e ->
+      Logger.warning("chapter view tracking crashed",
+        series_id: series.id,
+        error: inspect(e)
+      )
+
+      :ok
   end
 
   defp not_found(conn) do

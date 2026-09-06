@@ -90,7 +90,14 @@ defmodule Crysa.Library do
       |> Rating.changeset(%{user_id: user_id, series_id: series_id, rating: rating})
 
     if changeset.valid? do
-      in_transaction(fn -> upsert_rating(changeset, user_id, series_id) end)
+      result = in_transaction(fn -> upsert_rating(changeset, user_id, series_id) end)
+
+      case result do
+        {:ok, _} -> Crysa.Library.RatingBroadcaster.debounce_broadcast(series_id)
+        _ -> :ok
+      end
+
+      result
     else
       {:error, changeset}
     end
@@ -103,20 +110,29 @@ defmodule Crysa.Library do
   """
   @spec unrate_series(User.t(), Series.t()) :: :ok | {:error, term()}
   def unrate_series(%User{id: user_id}, %Series{id: series_id}) do
-    in_transaction(fn ->
-      series = lock_series!(series_id)
+    result =
+      in_transaction(fn ->
+        series = lock_series!(series_id)
 
-      case find_rating_for_update(user_id, series_id) do
-        nil ->
-          :ok
+        case find_rating_for_update(user_id, series_id) do
+          nil ->
+            :ok
 
-        %Rating{rating: previous} = rating ->
-          Repo.delete!(rating)
-          adjust_counter(series, :rating_count, -1)
-          adjust_counter(series, :rating_sum, -previous)
-          :ok
-      end
-    end)
+          %Rating{rating: previous} = rating ->
+            Repo.delete!(rating)
+            adjust_counter(series, :rating_count, -1)
+            adjust_counter(series, :rating_sum, -previous)
+            :ok
+        end
+      end)
+
+    case result do
+      :ok -> Crysa.Library.RatingBroadcaster.debounce_broadcast(series_id)
+      {:error, _} -> :ok
+      _ -> :ok
+    end
+
+    result
   end
 
   @spec get_rating(User.t(), Series.t()) :: Rating.t() | nil
@@ -191,12 +207,12 @@ defmodule Crysa.Library do
   defp to_float(_), do: 0.0
 
   @doc """
-  Records a series view event and increments `series.view_count`.
+  Records a chapter read as a series view event and increments `series.view_count`.
 
-  This is the initial simple strategy: one log row plus one atomic counter
-  increment per event. When traffic grows, switch to the write-behind
-  aggregation path (`Query.count_views_before/1` + bounded cleanup) prepared
-  for the durable jobs in Phase 7.
+  Views are counted on chapter reads (`CatalogController.reader`), not on
+  series page impressions. One log row plus one atomic counter increment per
+  event keeps the counter authoritative; `ViewBroadcaster` coalesces the
+  realtime fanout to at most one broadcast per series per 5 second window.
 
   Accepted options: `:user`/`:user_id`, `:ip` and `:user_agent` (both hashed,
   never stored as plaintext).
@@ -212,16 +228,24 @@ defmodule Crysa.Library do
       user_agent_hash: field_hash(opts[:user_agent])
     }
 
-    in_transaction(fn ->
-      case SeriesViewLog.changeset(%SeriesViewLog{}, attrs) |> Repo.insert() do
-        {:ok, view_log} ->
-          increment_view_count(series_id)
-          {:ok, view_log}
+    result =
+      in_transaction(fn ->
+        case SeriesViewLog.changeset(%SeriesViewLog{}, attrs) |> Repo.insert() do
+          {:ok, view_log} ->
+            increment_view_count(series_id)
+            {:ok, view_log}
 
-        {:error, changeset} ->
-          Repo.rollback(changeset)
-      end
-    end)
+          {:error, changeset} ->
+            Repo.rollback(changeset)
+        end
+      end)
+
+    case result do
+      {:ok, _} -> Crysa.Library.ViewBroadcaster.notify(series_id)
+      _ -> :ok
+    end
+
+    result
   end
 
   @doc "Deletes view log rows up to and including `cutoff`; returns the number removed."

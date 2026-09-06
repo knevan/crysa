@@ -250,26 +250,24 @@ defmodule Crysa.Catalog do
   end
 
   def admin_delete_series(%Series{} = series) do
-    cond do
-      series.processing_status in ["pending_deletion", "deleting"] ->
-        {:error, :already_pending_deletion}
+    if series.processing_status in ["pending_deletion", "deleting"] do
+      {:error, :already_pending_deletion}
+    else
+      changeset = Series.update_changeset(series, %{processing_status: "pending_deletion"})
 
-      true ->
-        changeset = Series.update_changeset(series, %{processing_status: "pending_deletion"})
+      case Repo.update(changeset) do
+        {:ok, pending} ->
+          # Enqueue durable deletion; uniqueness prevents duplicate jobs.
+          job = Crysa.Processing.Jobs.SeriesDeletionWorker.new(%{series_id: pending.id})
 
-        case Repo.update(changeset) do
-          {:ok, pending} ->
-            # Enqueue durable deletion; uniqueness prevents duplicate jobs.
-            job = Crysa.Processing.Jobs.SeriesDeletionWorker.new(%{series_id: pending.id})
+          case Oban.insert(job) do
+            {:ok, _job} -> {:ok, pending}
+            {:error, reason} -> {:error, reason}
+          end
 
-            case Oban.insert(job) do
-              {:ok, _job} -> {:ok, pending}
-              {:error, reason} -> {:error, reason}
-            end
-
-          {:error, cs} ->
-            {:error, cs}
-        end
+        {:error, cs} ->
+          {:error, cs}
+      end
     end
   end
 

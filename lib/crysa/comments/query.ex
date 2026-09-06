@@ -105,7 +105,11 @@ defmodule Crysa.Comments.Query do
     end
   end
 
-  defp fetch_thread_descendants(%Comment{id: root_id, series_id: series_id, chapter_id: chapter_id}) do
+  defp fetch_thread_descendants(%Comment{
+         id: root_id,
+         series_id: series_id,
+         chapter_id: chapter_id
+       }) do
     # Determine filter by series or chapter to keep thread within same target
     fetch_fun =
       cond do

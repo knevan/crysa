@@ -199,7 +199,12 @@ const votesText = computed(() => `${localRatingSummary.value.count} votes`)
 const displayDistribution = computed(() => localRatingDistribution.value)
 
 const hoverRating = ref<number | null>(null)
+const pressedStar = ref<number | null>(null)
 const displayRating = computed(() => hoverRating.value ?? localUserRating.value ?? 0)
+
+// Rating optimistic versioning + debounce (fix jeda progress bar saat tap cepat)
+let ratingVersion = 0
+const pendingRatingVersion = ref(0)
 
 function setHover(e: MouseEvent, star: number) {
   const target = e.currentTarget as HTMLElement
@@ -222,18 +227,34 @@ function handleStarClick(e: MouseEvent, star: number) {
   rate(value)
 }
 
-function applyRating(newRating: number | null) {
-  const prev = localUserRating.value
+// Mobile: tap-hold timbul + slide (pointer events cover mouse+touch)
+function handlePointerDown(e: PointerEvent, star: number) {
+  pressedStar.value = star
+  setHover(e as unknown as MouseEvent, star)
+  ;(e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId)
+}
+function handlePointerMove(e: PointerEvent, star: number) {
+  if (pressedStar.value !== null) setHover(e as unknown as MouseEvent, star)
+}
+function handlePointerUp(e: PointerEvent, star: number) {
+  if (pressedStar.value !== null) {
+    handleStarClick(e as unknown as MouseEvent, star)
+    pressedStar.value = null
+  }
+}
+function handlePointerCancel() {
+  pressedStar.value = null
+  clearHover()
+}
+
+function applyRating(prev: number | null, newRating: number | null) {
   const summary = { ...localRatingSummary.value }
   let dist = [...localRatingDistribution.value]
-  // helper to bucket star 1..5
   const bucket = (r: number) => Math.min(5, Math.max(1, Math.ceil(r)))
   if (prev == null && newRating != null) {
-    // first rating
     summary.count += 1
     summary.sum = (summary.sum || 0) + newRating
     summary.average = summary.sum / summary.count
-    // distribution
     const b = bucket(newRating)
     dist = dist.map(row => row.rating === b ? { ...row, count: row.count + 1 } : row)
   } else if (prev != null && newRating != null) {
@@ -255,55 +276,61 @@ function applyRating(newRating: number | null) {
     const b = bucket(prev)
     dist = dist.map(row => row.rating === b ? { ...row, count: Math.max(0, row.count - 1) } : row)
   }
-  // recompute percents
   const total = dist.reduce((s, r) => s + r.count, 0)
   dist = dist.map(r => ({ ...r, percent: total > 0 ? Math.round((r.count / total) * 1000) / 10 : 0 }))
-  // keep sorted 5..1
   dist.sort((a, b) => b.rating - a.rating)
   localRatingSummary.value = summary
   localRatingDistribution.value = dist
 }
+
+// Debounced server sync — last-write-wins, progress bar tetap instant (optimistic)
+const debouncedSyncRating = useDebounceFn(async (value: number | null, version: number) => {
+  try {
+    const payload: any =
+      value == null ? live.pushEvent('unrate_series', {}) : live.pushEvent('rate_series', { rating: value })
+    await Promise.resolve(payload)
+    // Only clear pending if this is still the latest version
+    if (pendingRatingVersion.value === version) ratingPending.value = false
+  } catch {
+    if (pendingRatingVersion.value !== version) return
+    // Revert optimistic on error for the latest version only
+    const stillPending = pendingRatingVersion.value === version
+    if (stillPending) {
+      // Revert will be handled by watcher from server props; keep pending false
+      ratingPending.value = false
+    }
+  }
+}, 250)
 
 function rate(value: number) {
   if (!props.currentUser) {
     window.location.href = '/auth/login'
     return
   }
-  if (ratingPending.value) return
-  // clamp to 0.5 steps 1..5
   const v = Math.round(value * 2) / 2
   if (v < 1 || v > 5) return
   const prev = localUserRating.value
+  // Optimistic instantly — progress bar tidak nunggu WS diff
   localUserRating.value = v
-  applyRating(v)
+  applyRating(prev, v)
+  ratingVersion += 1
+  const version = ratingVersion
+  pendingRatingVersion.value = version
   ratingPending.value = true
-  const payload: any = live.pushEvent('rate_series', { rating: v })
-  Promise.resolve(payload).catch(() => {
-    localUserRating.value = prev
-    localRatingSummary.value = { ...props.ratingSummary }
-    localRatingDistribution.value = [...props.ratingDistribution]
-  }).finally(() => {
-    ratingPending.value = false
-  })
+  // Debounced server sync — tap cepat cuma kirim yang terakhir
+  debouncedSyncRating(v, version)
 }
 
 function unrate() {
   if (!props.currentUser) return
-  if (ratingPending.value) return
   const prev = localUserRating.value
-  const prevSummary = { ...localRatingSummary.value }
-  const prevDist = [...localRatingDistribution.value]
   localUserRating.value = null
-  applyRating(null)
+  applyRating(prev, null)
+  ratingVersion += 1
+  const version = ratingVersion
+  pendingRatingVersion.value = version
   ratingPending.value = true
-  const payload: any = live.pushEvent('unrate_series', {})
-  Promise.resolve(payload).catch(() => {
-    localUserRating.value = prev
-    localRatingSummary.value = prevSummary
-    localRatingDistribution.value = prevDist
-  }).finally(() => {
-    ratingPending.value = false
-  })
+  debouncedSyncRating(null, version)
 }
 
 // Ellipsis dropdown for rating card
@@ -647,36 +674,40 @@ function authorDisplay(): string {
               </div>
             </div>
 
-            <!-- Rate Input Inline — half-star support (feedback #3) -->
+            <!-- Rate Input Inline — half-star support -->
             <div class="rounded-xl border bg-card p-3 flex flex-col gap-2 items-center overflow-visible">
-              <span class="text-[11px] font-semibold text-muted-foreground">Tap a star to rate (half star with left side)</span>
-              <div class="flex w-full items-center justify-between gap-2">
-                <div class="w-7 hidden sm:block" />
-                <div class="flex items-center gap-1">
+              <span class="text-[11px] font-semibold text-muted-foreground">Tap a star to rate</span>
+              <div class="flex w-full items-center justify-center gap-2 relative">
+                <div class="flex items-center gap-0 justify-center">
                   <button
                     v-for="n in 5"
                     :key="n"
                     type="button"
-                    class="size-9 rounded-lg border flex items-center justify-center transition-colors relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
-                    :class="displayRating >= n ? 'bg-amber-100 border-amber-200 dark:bg-amber-900/30 dark:border-amber-800' : displayRating >= n - 0.5 ? 'bg-amber-50 border-amber-200 dark:bg-amber-900/20' : 'bg-card border-muted hover:bg-muted'"
+                    class="size-10 p-2 bg-transparent border-0 flex items-center justify-center transition-all duration-150 ease-out touch-manipulation touch-pan-y select-none disabled:opacity-50 disabled:cursor-not-allowed hover:drop-shadow-md active:drop-shadow-lg"
+                    :class="pressedStar === n ? 'scale-[1.3] brightness-125 drop-shadow-md' : 'hover:scale-[1.3] active:scale-[0.85] active:brightness-125'"
                     :aria-label="`Rate ${n} stars`"
                     :disabled="ratingPending"
                     @mousemove="setHover($event, n)"
                     @mouseleave="clearHover"
                     @click="handleStarClick($event, n)"
+                    @pointerdown.prevent="handlePointerDown($event, n)"
+                    @pointermove="handlePointerMove($event, n)"
+                    @pointerup="handlePointerUp($event, n)"
+                    @pointercancel="handlePointerCancel"
+                    @pointerleave="handlePointerCancel"
                   >
                     <Star
                       v-if="displayRating >= n"
-                      class="size-4 fill-amber-500 text-amber-500"
+                      class="size-6 fill-amber-500 text-amber-500"
                     />
                     <StarHalf
                       v-else-if="displayRating >= n - 0.5"
-                      class="size-4 fill-amber-500 text-amber-500"
+                      class="size-6 fill-amber-500 text-amber-500"
                     />
-                    <Star v-else class="size-4 text-muted-foreground" />
+                    <Star v-else class="size-6 text-muted-foreground/40" />
                   </button>
                 </div>
-                <div class="relative" ref="ellipsisRef">
+                <div class="absolute right-0" ref="ellipsisRef">
                   <button
                     type="button"
                     class="size-7 rounded-lg border bg-card flex items-center justify-center hover:bg-accent"

@@ -10,6 +10,10 @@ defmodule Crysa.Application do
       Crysa.Repo,
       {DNSCluster, query: Application.get_env(:crysa, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Crysa.PubSub},
+      # Debounced rating broadcast for realtime progress bars
+      Crysa.Library.RatingBroadcaster,
+      # Coalesced view count broadcast (5s window) for realtime stats
+      Crysa.Library.ViewBroadcaster,
       # Per-host outbound rate gate shared by all scraping jobs.
       Crysa.Scraping.Throttle,
       # ETS owner for the published-config read-through cache.

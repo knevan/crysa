@@ -131,7 +131,7 @@ defmodule Crysa.Audit.AdminAuditLog do
   defp valid_metadata_value?(v) when is_atom(v), do: true
 
   defp valid_metadata_value?(v) when is_list(v) do
-    length(v) <= 20 and Enum.all?(v, &valid_metadata_value?/1)
+    Enum.count_until(v, 21) <= 20 and Enum.all?(v, &valid_metadata_value?/1)
   end
 
   defp valid_metadata_value?(_), do: false

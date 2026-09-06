@@ -22,3 +22,9 @@ erl_crash.dump
 *.ez
 crysa-*.
 npm-debug.log
+
+# ripgrep rules
+.ignore
+
+*.md
+!README.md

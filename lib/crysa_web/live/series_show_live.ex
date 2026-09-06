@@ -13,8 +13,8 @@ defmodule CrysaWeb.Live.SeriesShowLive do
       bounded pagination.
     * Comments: composer, sorting (newest/oldest/most_voted), bounded pagination,
       voting.
-    * View tracking: append-only log + atomic counter (fire-and-forget, never
-      inside the render path).
+    * View display: subscribes to `series:<id>` for coalesced view count
+      updates. Views are counted on chapter reads, not on this page.
 
   Notes on mobile design:
     * The component is centered `max-w-[390px]` on mobile and expands to
@@ -86,23 +86,11 @@ defmodule CrysaWeb.Live.SeriesShowLive do
         {:ok, assign(socket, not_found: true, slug: slug)}
 
       series ->
-        # Record view fire-and-forget — never block mount on storage/network.
         current_user = socket.assigns[:current_user]
 
-        # Best-effort view log; errors are logged but not surfaced to user.
-        spawn(fn ->
-          try do
-            Library.record_view(series, %{
-              user: current_user,
-              ip: nil,
-              user_agent: nil
-            })
-          rescue
-            _ -> :ok
-          catch
-            _, _ -> :ok
-          end
-        end)
+        if connected?(socket) do
+          Phoenix.PubSub.subscribe(Crysa.PubSub, "series:#{series.id}")
+        end
 
         chapter_query = parse_q(params, "q")
         chapter_sort = parse_chapter_sort(params)
@@ -130,10 +118,16 @@ defmodule CrysaWeb.Live.SeriesShowLive do
           })
 
         comment_tree = Enum.map(comment_tree_nodes, &to_comment_node_json/1)
+
         # Keep flat `comments` for backwards compat (flattened tree) and for tests that may inspect it
         flat_comments = flatten_comment_tree(comment_tree_nodes)
         vote_counts = Comments.vote_counts_for_comment_ids(Enum.map(flat_comments, & &1.id))
-        comments = Enum.map(flat_comments, &to_comment_json(&1, Map.get(vote_counts, &1.id, %{up: 0, down: 0})))
+
+        comments =
+          Enum.map(
+            flat_comments,
+            &to_comment_json(&1, Map.get(vote_counts, &1.id, %{up: 0, down: 0}))
+          )
 
         comment_count = Comments.count_comments_for_series(series.id)
         rating_summary = Library.rating_summary(series)
@@ -255,7 +249,8 @@ defmodule CrysaWeb.Live.SeriesShowLive do
           vote_counts = Comments.vote_counts_for_comment_ids(Enum.map(flat, & &1.id))
 
           assign(socket,
-            comments: Enum.map(flat, &to_comment_json(&1, Map.get(vote_counts, &1.id, %{up: 0, down: 0}))),
+            comments:
+              Enum.map(flat, &to_comment_json(&1, Map.get(vote_counts, &1.id, %{up: 0, down: 0}))),
             comment_tree: tree,
             comment_pagination: to_pagination_json(pagination),
             comment_sort: sort,
@@ -521,7 +516,11 @@ defmodule CrysaWeb.Live.SeriesShowLive do
 
               {:noreply,
                assign(socket,
-                 comments: Enum.map(flat, &to_comment_json(&1, Map.get(vote_counts, &1.id, %{up: 0, down: 0}))),
+                 comments:
+                   Enum.map(
+                     flat,
+                     &to_comment_json(&1, Map.get(vote_counts, &1.id, %{up: 0, down: 0}))
+                   ),
                  comment_tree: tree,
                  comment_pagination: to_pagination_json(pagination),
                  comment_count: count,
@@ -569,7 +568,11 @@ defmodule CrysaWeb.Live.SeriesShowLive do
 
             {:noreply,
              assign(socket,
-               comments: Enum.map(flat, &to_comment_json(&1, Map.get(vote_counts, &1.id, %{up: 0, down: 0}))),
+               comments:
+                 Enum.map(
+                   flat,
+                   &to_comment_json(&1, Map.get(vote_counts, &1.id, %{up: 0, down: 0}))
+                 ),
                comment_tree: tree,
                comment_pagination: to_pagination_json(pagination)
              )}
@@ -614,7 +617,8 @@ defmodule CrysaWeb.Live.SeriesShowLive do
 
         {:noreply,
          assign(socket,
-           comments: Enum.map(flat, &to_comment_json(&1, Map.get(vote_counts, &1.id, %{up: 0, down: 0}))),
+           comments:
+             Enum.map(flat, &to_comment_json(&1, Map.get(vote_counts, &1.id, %{up: 0, down: 0}))),
            comment_tree: tree,
            comment_pagination: to_pagination_json(pagination)
          )}
@@ -647,7 +651,8 @@ defmodule CrysaWeb.Live.SeriesShowLive do
 
     {:noreply,
      assign(socket,
-       comments: Enum.map(flat, &to_comment_json(&1, Map.get(vote_counts, &1.id, %{up: 0, down: 0}))),
+       comments:
+         Enum.map(flat, &to_comment_json(&1, Map.get(vote_counts, &1.id, %{up: 0, down: 0}))),
        comment_tree: tree,
        comment_pagination: to_pagination_json(pagination),
        comment_sort: sort,
@@ -679,7 +684,8 @@ defmodule CrysaWeb.Live.SeriesShowLive do
 
     {:noreply,
      assign(socket,
-       comments: Enum.map(flat, &to_comment_json(&1, Map.get(vote_counts, &1.id, %{up: 0, down: 0}))),
+       comments:
+         Enum.map(flat, &to_comment_json(&1, Map.get(vote_counts, &1.id, %{up: 0, down: 0}))),
        comment_tree: tree,
        comment_pagination: to_pagination_json(pagination),
        comment_page: pagination.page
@@ -707,35 +713,77 @@ defmodule CrysaWeb.Live.SeriesShowLive do
     {:noreply, push_patch(socket, to: ~p"/series/#{socket.assigns.slug}")}
   end
 
+  @impl true
+  def handle_info({:rating_updated, summary, dist, series_id}, socket) do
+    # Only for current series; broadcast is for all viewers of this series
+    if socket.assigns[:raw_series] && socket.assigns.raw_series.id == series_id do
+      # Always update LiveView assigns; Vue will skip overwriting optimistic if pendingRatingVersion != 0
+      updated_series = %{
+        socket.assigns.raw_series
+        | rating_count: summary.count,
+          rating_sum: summary.sum
+      }
+
+      {:noreply,
+       assign(socket,
+         rating_summary: rating_summary_to_json(summary),
+         rating_distribution: dist,
+         stats: to_stats_json(updated_series),
+         raw_series: updated_series,
+         series: to_series_json(updated_series)
+       )}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_info({:view_count_updated, view_count, series_id}, socket) do
+    if socket.assigns[:raw_series] && socket.assigns.raw_series.id == series_id do
+      updated_series = %{socket.assigns.raw_series | view_count: view_count}
+
+      {:noreply,
+       assign(socket,
+         raw_series: updated_series,
+         series: to_series_json(updated_series),
+         stats: to_stats_json(updated_series)
+       )}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_info(_msg, socket), do: {:noreply, socket}
+
   # Thread helpers
 
   defp parse_thread_id(nil), do: nil
   defp parse_thread_id(id) when is_integer(id) and id > 0, do: id
+
   defp parse_thread_id(id) when is_binary(id) do
     case Integer.parse(String.trim(id)) do
       {int, ""} when int > 0 -> int
       _ -> nil
     end
   end
+
   defp parse_thread_id(_), do: nil
 
   defp load_comment_tree(series, thread_id, params) do
-    cond do
-      is_integer(thread_id) ->
-        case Crysa.Comments.get_comment(thread_id) do
-          %Crysa.Comments.Comment{series_id: sid} = _c when sid == series.id ->
-            {tree, pagination} = Crysa.Comments.list_thread_tree(thread_id)
-            # Thread tree is single root; pagination is for that thread
-            {tree, pagination, true}
+    if is_integer(thread_id) do
+      case Crysa.Comments.get_comment(thread_id) do
+        %Crysa.Comments.Comment{series_id: sid} = _c when sid == series.id ->
+          {tree, pagination} = Crysa.Comments.list_thread_tree(thread_id)
+          # Thread tree is single root; pagination is for that thread
+          {tree, pagination, true}
 
-          _ ->
-            {tree, pagination} = Crysa.Comments.list_comment_tree_for_series(series.id, params)
-            {tree, pagination, false}
-        end
-
-      true ->
-        {tree, pagination} = Crysa.Comments.list_comment_tree_for_series(series.id, params)
-        {tree, pagination, false}
+        _ ->
+          {tree, pagination} = Crysa.Comments.list_comment_tree_for_series(series.id, params)
+          {tree, pagination, false}
+      end
+    else
+      {tree, pagination} = Crysa.Comments.list_comment_tree_for_series(series.id, params)
+      {tree, pagination, false}
     end
   end
 

@@ -1,0 +1,1383 @@
+{
+  "version": "2.17",
+  "children": [
+    {
+      "type": "frame",
+      "id": "Duj8V",
+      "x": 0,
+      "y": 0,
+      "name": "User Settings - Dekstop",
+      "clip": true,
+      "width": 1280,
+      "fill": "$bg",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "PpLAu",
+          "name": "Header",
+          "width": "fill_container",
+          "height": 64,
+          "fill": "$surface",
+          "stroke": "$border",
+          "strokeWidth": {
+            "bottom": 1
+          },
+          "padding": [
+            0,
+            28
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "Ohxhb",
+              "name": "Header Left",
+              "gap": 20,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "ureKx",
+                  "name": "Logo",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 8,
+                      "id": "VmuKL",
+                      "name": "Logo Mark",
+                      "fill": "#0F172A",
+                      "width": 32,
+                      "height": 32
+                    },
+                    {
+                      "type": "text",
+                      "id": "u97Dzf",
+                      "name": "Brand",
+                      "fill": "#0F172A",
+                      "content": "CRYSA",
+                      "fontFamily": "Inter",
+                      "fontSize": 16,
+                      "fontWeight": "800",
+                      "letterSpacing": 1.6
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "DPjPV",
+                  "name": "Nav",
+                  "gap": 24,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "w9Ph8",
+                      "name": "Nav Active",
+                      "fill": "$text-primary",
+                      "content": "MANGA UPDATES",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "700",
+                      "letterSpacing": 1.2
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 2,
+                      "id": "IVyZS",
+                      "name": "Nav Dot",
+                      "fill": "$primary",
+                      "width": 4,
+                      "height": 4
+                    },
+                    {
+                      "type": "text",
+                      "id": "w8vfP",
+                      "name": "Nav Browse",
+                      "fill": "$text-muted",
+                      "content": "BROWSE",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "600",
+                      "letterSpacing": 1.2
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "gLBtl",
+              "name": "Header Right",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "yT8On",
+                  "name": "Search Btn",
+                  "width": 36,
+                  "height": 36,
+                  "fill": "#F1F5F9",
+                  "cornerRadius": 10,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "uX4ka",
+                      "name": "Search",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "search",
+                      "library": "lucide",
+                      "fill": "$text-secondary"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "s1UB0d",
+                  "name": "Theme Btn",
+                  "width": 36,
+                  "height": 36,
+                  "fill": "#F1F5F9",
+                  "cornerRadius": 10,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "byuMz",
+                      "name": "Moon",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "moon",
+                      "library": "lucide",
+                      "fill": "$text-secondary"
+                    }
+                  ]
+                },
+                {
+                  "type": "rectangle",
+                  "id": "w78p9",
+                  "name": "Sep",
+                  "fill": "$border",
+                  "width": 1,
+                  "height": 20
+                },
+                {
+                  "type": "frame",
+                  "id": "G0usE",
+                  "name": "Sign In",
+                  "fill": "$surface",
+                  "cornerRadius": 10,
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "gap": 8,
+                  "padding": [
+                    8,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "jiziY",
+                      "name": "UserPlus",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "user-plus",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "QHxcE",
+                      "name": "SignIn Label",
+                      "fill": "$text-primary",
+                      "content": "SIGN IN",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "700",
+                      "letterSpacing": 0.8
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "e7FE3A",
+          "name": "Content",
+          "width": "fill_container",
+          "fill": "$bg",
+          "layout": "vertical",
+          "padding": [
+            36,
+            24,
+            64,
+            24
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "Mm4jT",
+              "name": "Settings Column",
+              "width": 800,
+              "layout": "vertical",
+              "gap": 36,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "A5gYkW",
+                  "name": "Title Block",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "b7tj4",
+                      "name": "Page Title",
+                      "fill": "$text-primary",
+                      "content": "Change Profile Settings",
+                      "fontFamily": "Inter",
+                      "fontSize": 26,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "XIxiQ",
+                      "name": "Hello Row",
+                      "gap": 4,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "yphyY",
+                          "name": "Hello",
+                          "fill": "$text-secondary",
+                          "content": "Hello,",
+                          "fontFamily": "Inter",
+                          "fontSize": 15
+                        },
+                        {
+                          "type": "text",
+                          "id": "edPsA",
+                          "name": "Username",
+                          "fill": "$text-primary",
+                          "content": "kainev.",
+                          "fontFamily": "Inter",
+                          "fontSize": 15,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "vNflB",
+                  "name": "Avatar Section",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Tg613",
+                      "name": "Section Title Avatar",
+                      "fill": "$text-primary",
+                      "content": "Change Avatar",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "z9VXT",
+                      "name": "Divider Avatar",
+                      "fill": "$border",
+                      "width": "fill_container",
+                      "height": 1
+                    },
+                    {
+                      "type": "text",
+                      "id": "XPE5c",
+                      "name": "Avatar Desc",
+                      "fill": "$text-secondary",
+                      "content": "Use the form below to change your avatar.",
+                      "fontFamily": "Inter",
+                      "fontSize": 13
+                    },
+                    {
+                      "type": "frame",
+                      "id": "qixsj",
+                      "name": "Avatar Picker",
+                      "layout": "vertical",
+                      "gap": 10,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "LJb0i",
+                          "name": "Avatar Circle",
+                          "width": 84,
+                          "height": 84,
+                          "fill": "#F1F5F9",
+                          "cornerRadius": 42,
+                          "stroke": "$border",
+                          "strokeWidth": 1,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "SswLG",
+                              "name": "Avatar Icon",
+                              "width": 48,
+                              "height": 48,
+                              "icon": "user-round",
+                              "library": "lucide",
+                              "fill": "$text-muted"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ngSbh",
+                          "name": "Choose File Btn",
+                          "fill": "#1E293B",
+                          "cornerRadius": 8,
+                          "padding": [
+                            6,
+                            12
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "s5a00",
+                              "name": "Choose File Label",
+                              "fill": "#FFFFFF",
+                              "content": "Choose File",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ZyGT6",
+                  "name": "Account Section",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "TqtWr",
+                      "name": "Section Title Account",
+                      "fill": "$text-primary",
+                      "content": "Account Information",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "fnAzT",
+                      "name": "Divider Account",
+                      "fill": "$border",
+                      "width": "fill_container",
+                      "height": 1
+                    },
+                    {
+                      "type": "frame",
+                      "id": "R9FsUa",
+                      "name": "Field Comment Name",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "t1nu0x",
+                          "name": "Label Comment",
+                          "fill": "$text-secondary",
+                          "content": "Comment Name",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "O9yYX5",
+                          "name": "Input Comment",
+                          "width": "fill_container",
+                          "height": 42,
+                          "fill": "$surface",
+                          "cornerRadius": 8,
+                          "stroke": "$border",
+                          "strokeWidth": 1,
+                          "padding": [
+                            0,
+                            12
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "TStQr",
+                              "name": "Placeholder Comment",
+                              "fill": "$text-muted",
+                              "content": "Enter your display name",
+                              "fontFamily": "Inter",
+                              "fontSize": 13
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "brnXx",
+                      "name": "Field Email",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "yC2Ni",
+                          "name": "Label Email",
+                          "fill": "$text-secondary",
+                          "content": "Change Email",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "IjPLv",
+                          "name": "Input Email",
+                          "width": "fill_container",
+                          "height": 42,
+                          "fill": "$surface",
+                          "cornerRadius": 8,
+                          "stroke": "$border",
+                          "strokeWidth": 1,
+                          "padding": [
+                            0,
+                            12
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "peY1x",
+                              "name": "Value Email",
+                              "fill": "$text-primary",
+                              "content": "kai@gmail.com",
+                              "fontFamily": "Inter",
+                              "fontSize": 13
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "U5JtY",
+                      "name": "Save Btn Account",
+                      "fill": "$primary",
+                      "cornerRadius": 8,
+                      "padding": [
+                        9,
+                        22
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "BU7XW",
+                          "name": "Save Label 1",
+                          "fill": "#FFFFFF",
+                          "content": "Save",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "IRL59",
+                  "name": "Password Section",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "cgG8f",
+                      "name": "Section Title Password",
+                      "fill": "$text-primary",
+                      "content": "Change Password",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "ahOUy",
+                      "name": "Divider Password",
+                      "fill": "$border",
+                      "width": "fill_container",
+                      "height": 1
+                    },
+                    {
+                      "type": "frame",
+                      "id": "tYR9r",
+                      "name": "Field New Password",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "H3pt4",
+                          "name": "Label New",
+                          "fill": "$text-secondary",
+                          "content": "New Password",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "p5Ejr",
+                          "name": "Input New",
+                          "width": "fill_container",
+                          "height": 42,
+                          "fill": "$surface",
+                          "cornerRadius": 8,
+                          "stroke": "$border",
+                          "strokeWidth": 1,
+                          "padding": [
+                            0,
+                            12
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ZopZx",
+                              "name": "Placeholder New",
+                              "fill": "$text-muted",
+                              "content": "More than 8 characters",
+                              "fontFamily": "Inter",
+                              "fontSize": 13
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "vQtcn",
+                      "name": "Field Confirm",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "w5JkG7",
+                          "name": "Label Confirm",
+                          "fill": "$text-secondary",
+                          "content": "Confirm Password",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "MiEBX",
+                          "name": "Input Confirm",
+                          "width": "fill_container",
+                          "height": 42,
+                          "fill": "$surface",
+                          "cornerRadius": 8,
+                          "stroke": "$border",
+                          "strokeWidth": 1,
+                          "padding": [
+                            0,
+                            12
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ZzqkH",
+                              "name": "Placeholder Confirm",
+                              "fill": "$text-muted",
+                              "content": "Confirm your new password",
+                              "fontFamily": "Inter",
+                              "fontSize": 13
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "K3GFW",
+                      "name": "Save Btn Password",
+                      "fill": "$primary",
+                      "cornerRadius": 8,
+                      "padding": [
+                        9,
+                        22
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "r4XId",
+                          "name": "Save Label 2",
+                          "fill": "#FFFFFF",
+                          "content": "Save",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "tiJvN",
+          "name": "Footer",
+          "width": "fill_container",
+          "fill": "$surface",
+          "stroke": "$border",
+          "strokeWidth": {
+            "top": 1
+          },
+          "gap": 12,
+          "padding": [
+            16,
+            24
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "DQqzC",
+              "name": "Footer Text",
+              "fill": "$text-muted",
+              "content": "\u00a9 2025 Crysa \u2022 Crafted for manga lovers  \u2022  Terms  \u2022  Privacy  \u2022  DMCA",
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "x7loa",
+      "x": 1360,
+      "y": 0,
+      "name": "User Settings - Mobile",
+      "clip": true,
+      "width": 390,
+      "fill": "$bg",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "CSI7Y",
+          "name": "Header Mobile",
+          "width": "fill_container",
+          "height": 56,
+          "fill": "$surface",
+          "stroke": "$border",
+          "strokeWidth": {
+            "bottom": 1
+          },
+          "padding": [
+            0,
+            16
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "L9Nft",
+              "name": "Header Left M",
+              "gap": 10,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 8,
+                  "id": "MprZa",
+                  "name": "Logo Mark M",
+                  "fill": "#0F172A",
+                  "width": 28,
+                  "height": 28
+                },
+                {
+                  "type": "text",
+                  "id": "RnuZD",
+                  "name": "Brand M",
+                  "fill": "#0F172A",
+                  "content": "CRYSA",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "800",
+                  "letterSpacing": 1.2
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "K2Vp8",
+              "name": "Header Right M",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "vz8C6",
+                  "name": "Search M",
+                  "width": 32,
+                  "height": 32,
+                  "fill": "#F1F5F9",
+                  "cornerRadius": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "PnWzS",
+                      "name": "Search M",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "search",
+                      "library": "lucide",
+                      "fill": "$text-secondary"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "CFbqA",
+                  "name": "Menu M",
+                  "width": 32,
+                  "height": 32,
+                  "fill": "#0F172A",
+                  "cornerRadius": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "PcSJ0",
+                      "name": "Menu Icon",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "menu",
+                      "library": "lucide",
+                      "fill": "#FFFFFF"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Elvk7",
+          "name": "Content M",
+          "width": "fill_container",
+          "fill": "$bg",
+          "layout": "vertical",
+          "padding": [
+            20,
+            16,
+            32,
+            16
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "J55Rhi",
+              "name": "Settings Column M",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 28,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "g3534",
+                  "name": "Title Block M",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "wCWmK",
+                      "name": "Page Title M",
+                      "fill": "$text-primary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Change Profile Settings",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 20,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Ke8Ev",
+                      "name": "Hello Row M",
+                      "gap": 4,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "t3jm9",
+                          "name": "Hello M",
+                          "fill": "$text-secondary",
+                          "content": "Hello,",
+                          "fontFamily": "Inter",
+                          "fontSize": 14
+                        },
+                        {
+                          "type": "text",
+                          "id": "uEXc5",
+                          "name": "Username M",
+                          "fill": "$text-primary",
+                          "content": "kainev.",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "xpSgb",
+                  "name": "Avatar Section M",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 10,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "T2J26G",
+                      "name": "Section Title Avatar M",
+                      "fill": "$text-primary",
+                      "content": "Change Avatar",
+                      "fontFamily": "Inter",
+                      "fontSize": 16,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "GTDoh",
+                      "name": "Divider Avatar M",
+                      "fill": "$border",
+                      "width": "fill_container",
+                      "height": 1
+                    },
+                    {
+                      "type": "text",
+                      "id": "cZ3T2",
+                      "name": "Avatar Desc M",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Use the form below to change your avatar.",
+                      "fontFamily": "Inter",
+                      "fontSize": 12
+                    },
+                    {
+                      "type": "frame",
+                      "id": "myP9M",
+                      "name": "Avatar Picker M",
+                      "layout": "vertical",
+                      "gap": 10,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "PoHZL",
+                          "name": "Avatar Circle M",
+                          "width": 76,
+                          "height": 76,
+                          "fill": "#F1F5F9",
+                          "cornerRadius": 38,
+                          "stroke": "$border",
+                          "strokeWidth": 1,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "FXc29",
+                              "name": "Avatar Icon M",
+                              "width": 42,
+                              "height": 42,
+                              "icon": "user-round",
+                              "library": "lucide",
+                              "fill": "$text-muted"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "vq6tq",
+                          "name": "Choose File Btn M",
+                          "fill": "#1E293B",
+                          "cornerRadius": 8,
+                          "padding": [
+                            8,
+                            16
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "pdn6k",
+                              "name": "Choose File Label M",
+                              "fill": "#FFFFFF",
+                              "content": "Choose File",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "S5SV9",
+                  "name": "Account Section M",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 10,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Yji08",
+                      "name": "Section Title Account M",
+                      "fill": "$text-primary",
+                      "content": "Account Information",
+                      "fontFamily": "Inter",
+                      "fontSize": 16,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "t7y6q",
+                      "name": "Divider Account M",
+                      "fill": "$border",
+                      "width": "fill_container",
+                      "height": 1
+                    },
+                    {
+                      "type": "frame",
+                      "id": "a4gLCh",
+                      "name": "Field Comment M",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "avywt",
+                          "name": "Label Comment M",
+                          "fill": "$text-secondary",
+                          "content": "Comment Name",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "K1TneT",
+                          "name": "Input Comment M",
+                          "width": "fill_container",
+                          "height": 44,
+                          "fill": "$surface",
+                          "cornerRadius": 8,
+                          "stroke": "$border",
+                          "strokeWidth": 1,
+                          "padding": [
+                            0,
+                            12
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ddtRW",
+                              "name": "Placeholder Comment M",
+                              "fill": "$text-muted",
+                              "content": "Enter your display name",
+                              "fontFamily": "Inter",
+                              "fontSize": 13
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ozyJ6",
+                      "name": "Field Email M",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "FUeX5",
+                          "name": "Label Email M",
+                          "fill": "$text-secondary",
+                          "content": "Change Email",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Up0WA",
+                          "name": "Input Email M",
+                          "width": "fill_container",
+                          "height": 44,
+                          "fill": "$surface",
+                          "cornerRadius": 8,
+                          "stroke": "$border",
+                          "strokeWidth": 1,
+                          "padding": [
+                            0,
+                            12
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "W25UD",
+                              "name": "Value Email M",
+                              "fill": "$text-primary",
+                              "content": "kai@gmail.com",
+                              "fontFamily": "Inter",
+                              "fontSize": 13
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "dYPJv",
+                      "name": "Save Btn Account M",
+                      "width": "fill_container",
+                      "height": 44,
+                      "fill": "$primary",
+                      "cornerRadius": 8,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "M8G6D",
+                          "name": "Save Label 1 M",
+                          "fill": "#FFFFFF",
+                          "content": "Save",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "kfnTB",
+                  "name": "Password Section M",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 10,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "R2jqJy",
+                      "name": "Section Title Password M",
+                      "fill": "$text-primary",
+                      "content": "Change Password",
+                      "fontFamily": "Inter",
+                      "fontSize": 16,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "xxrQ1",
+                      "name": "Divider Password M",
+                      "fill": "$border",
+                      "width": "fill_container",
+                      "height": 1
+                    },
+                    {
+                      "type": "frame",
+                      "id": "B13BD5",
+                      "name": "Field New M",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "FSrLG",
+                          "name": "Label New M",
+                          "fill": "$text-secondary",
+                          "content": "New Password",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "dLUqG",
+                          "name": "Input New M",
+                          "width": "fill_container",
+                          "height": 44,
+                          "fill": "$surface",
+                          "cornerRadius": 8,
+                          "stroke": "$border",
+                          "strokeWidth": 1,
+                          "padding": [
+                            0,
+                            12
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "wmx2k",
+                              "name": "Placeholder New M",
+                              "fill": "$text-muted",
+                              "content": "More than 8 characters",
+                              "fontFamily": "Inter",
+                              "fontSize": 13
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "NGOwL",
+                      "name": "Field Confirm M",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "KsbA4",
+                          "name": "Label Confirm M",
+                          "fill": "$text-secondary",
+                          "content": "Confirm Password",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "p6tLf1",
+                          "name": "Input Confirm M",
+                          "width": "fill_container",
+                          "height": 44,
+                          "fill": "$surface",
+                          "cornerRadius": 8,
+                          "stroke": "$border",
+                          "strokeWidth": 1,
+                          "padding": [
+                            0,
+                            12
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "kSxGl",
+                              "name": "Placeholder Confirm M",
+                              "fill": "$text-muted",
+                              "content": "Confirm your new password",
+                              "fontFamily": "Inter",
+                              "fontSize": 13
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "UZcra",
+                      "name": "Save Btn Password M",
+                      "width": "fill_container",
+                      "height": 44,
+                      "fill": "$primary",
+                      "cornerRadius": 8,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "BEpo1",
+                          "name": "Save Label 2 M",
+                          "fill": "#FFFFFF",
+                          "content": "Save",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "QgR7Y",
+          "name": "Footer M",
+          "width": "fill_container",
+          "fill": "$surface",
+          "stroke": "$border",
+          "strokeWidth": {
+            "top": 1
+          },
+          "padding": 12,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "NX1Ra",
+              "name": "Footer T M",
+              "fill": "$text-muted",
+              "content": "\u00a9 2025 Crysa \u2022 Terms \u2022 Privacy",
+              "fontFamily": "Inter",
+              "fontSize": 10,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variables": {
+    "bg": {
+      "type": "color",
+      "value": "#F8F9FB"
+    },
+    "surface": {
+      "type": "color",
+      "value": "#FFFFFF"
+    },
+    "text-primary": {
+      "type": "color",
+      "value": "#0F172A"
+    },
+    "text-secondary": {
+      "type": "color",
+      "value": "#64748B"
+    },
+    "text-muted": {
+      "type": "color",
+      "value": "#94A3B8"
+    },
+    "border": {
+      "type": "color",
+      "value": "#E2E8F0"
+    },
+    "primary": {
+      "type": "color",
+      "value": "#2563EB"
+    },
+    "primary-hover": {
+      "type": "color",
+      "value": "#1D4ED8"
+    },
+    "success": {
+      "type": "color",
+      "value": "#10B981"
+    },
+    "success-bg": {
+      "type": "color",
+      "value": "#ECFDF5"
+    },
+    "warning": {
+      "type": "color",
+      "value": "#F59E0B"
+    },
+    "radius-lg": {
+      "type": "number",
+      "value": 12
+    },
+    "radius-xl": {
+      "type": "number",
+      "value": 16
+    },
+    "shadow-card": {
+      "type": "string",
+      "value": "shadow"
+    }
+  },
+  "fileToken": "4c17d47e-5395-485d-87ac-17cd5cf3c53a"
+}

@@ -70,6 +70,7 @@ config :logger, :default_formatter,
     :host,
     :reason,
     :error,
+    :errors,
     :adapter,
     :url,
     :body,
@@ -78,7 +79,13 @@ config :logger, :default_formatter,
     :series_id,
     :chapter_id,
     :objects,
-    :operation
+    :operation,
+    :action,
+    :target_type,
+    :target_id,
+    :actor_id,
+    :actor_role,
+    :filename
   ]
 
 # Use Jason for JSON parsing in Phoenix
