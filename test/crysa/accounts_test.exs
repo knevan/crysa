@@ -429,6 +429,43 @@ defmodule Crysa.AccountsTest do
     end
   end
 
+  describe "update_user_email/2" do
+    setup do
+      %{user: AccountsFixtures.user_fixture()}
+    end
+
+    test "updates and normalizes the email", %{user: user} do
+      assert {:ok, updated} = Accounts.update_user_email(user, %{"email" => "  New@Example.COM "})
+      assert updated.email == "new@example.com"
+    end
+
+    test "rejects an invalid email", %{user: user} do
+      assert {:error, changeset} = Accounts.update_user_email(user, %{"email" => "bad"})
+      assert changeset.errors[:email]
+    end
+
+    test "rejects a duplicate email case-insensitively", %{user: user} do
+      other = AccountsFixtures.user_fixture(%{email: "taken@example.com"})
+
+      assert {:error, changeset} =
+               Accounts.update_user_email(user, %{"email" => String.upcase(other.email)})
+
+      assert changeset.errors[:email]
+    end
+
+    test "ignores non-email keys", %{user: user} do
+      assert {:ok, updated} =
+               Accounts.update_user_email(user, %{
+                 "email" => "kept@example.com",
+                 "role_id" => 999,
+                 "username" => "hacker"
+               })
+
+      assert updated.email == "kept@example.com"
+      assert updated.username == user.username
+    end
+  end
+
   defp register_params(attrs \\ %{}) do
     Map.merge(
       %{

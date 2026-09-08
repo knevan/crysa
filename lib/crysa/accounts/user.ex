@@ -89,6 +89,22 @@ defmodule Crysa.Accounts.User do
   end
 
   @doc """
+  Builds a changeset for a user updating their own email address.
+
+  Only `:email` is permitted. The value is trimmed, downcased, validated,
+  and checked for uniqueness (case-insensitive).
+  """
+  @spec email_changeset(t(), map()) :: Ecto.Changeset.t()
+  def email_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:email])
+    |> normalize_email_and_username()
+    |> validate_required([:email])
+    |> validate_email_format()
+    |> unique_constraint(:email, name: :users_lower_email_index)
+  end
+
+  @doc """
   Admin changeset for updating user metadata.
 
   Allows `username`, `email`, `active` and `role_id`. Validates presence

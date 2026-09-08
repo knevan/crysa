@@ -54,7 +54,11 @@ defmodule CrysaWeb.CatalogController do
         not_found(conn)
 
       series ->
-        {chapters, pagination} = Catalog.list_chapters(series.id, params)
+        # Visibility gate is forced server-side: user params must never
+        # opt back into unreadable (non-available) chapters.
+        {chapters, pagination} =
+          Catalog.list_chapters(series.id, Map.put(params, "status", "available"))
+
         latest_chapter = Catalog.get_latest_chapter(series.id)
 
         render(conn, :show,

@@ -38,7 +38,7 @@ defmodule CrysaWeb.Live.SeriesShowLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div :if={@not_found} class="mx-auto max-w-[680px] px-4 py-16 text-center">
+    <div :if={@not_found} class="mx-auto max-w-170 px-4 py-16 text-center">
       <h1 class="text-2xl font-bold">Series not found</h1>
       <p class="mt-2 text-sm text-muted-foreground">The series you are looking for does not exist.</p>
       <a
@@ -97,7 +97,7 @@ defmodule CrysaWeb.Live.SeriesShowLive do
         chapter_page = parse_page(params, "page")
 
         {chapters, chapter_pagination} =
-          Catalog.list_chapters(series.id, %{
+          list_public_chapters(series.id, %{
             "q" => chapter_query,
             "sort" => chapter_sort,
             "page" => chapter_page,
@@ -199,7 +199,7 @@ defmodule CrysaWeb.Live.SeriesShowLive do
             end
 
           {chapters, pagination} =
-            Catalog.list_chapters(series.id, %{
+            list_public_chapters(series.id, %{
               "q" => q,
               "sort" => sort,
               "page" => page,
@@ -402,7 +402,7 @@ defmodule CrysaWeb.Live.SeriesShowLive do
     sort = socket.assigns.chapter_sort
 
     {chapters, pagination} =
-      Catalog.list_chapters(series.id, %{
+      list_public_chapters(series.id, %{
         "q" => query,
         "sort" => sort,
         "page" => 1,
@@ -424,7 +424,7 @@ defmodule CrysaWeb.Live.SeriesShowLive do
     q = socket.assigns.chapter_query
 
     {chapters, pagination} =
-      Catalog.list_chapters(series.id, %{
+      list_public_chapters(series.id, %{
         "q" => q,
         "sort" => sort,
         "page" => 1,
@@ -447,7 +447,7 @@ defmodule CrysaWeb.Live.SeriesShowLive do
     sort = socket.assigns.chapter_sort
 
     {chapters, pagination} =
-      Catalog.list_chapters(series.id, %{
+      list_public_chapters(series.id, %{
         "q" => q,
         "sort" => sort,
         "page" => page,
@@ -756,6 +756,12 @@ defmodule CrysaWeb.Live.SeriesShowLive do
   def handle_info(_msg, socket), do: {:noreply, socket}
 
   # Thread helpers
+
+  # Public chapter listing always hides unreadable chapters; the gate is
+  # forced server-side so client params can never opt back into them.
+  defp list_public_chapters(series_id, params) do
+    Catalog.list_chapters(series_id, Map.put(params, "status", "available"))
+  end
 
   defp parse_thread_id(nil), do: nil
   defp parse_thread_id(id) when is_integer(id) and id > 0, do: id

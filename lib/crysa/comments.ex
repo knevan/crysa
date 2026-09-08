@@ -457,7 +457,7 @@ defmodule Crysa.Comments do
     case Repo.insert(changeset) do
       {:ok, inserted} ->
         adjust_vote_score(comment, vote)
-        maybe_notify_upvote(comment, user_id, vote)
+        maybe_notify_vote(comment, user_id, vote)
         {:ok, inserted}
 
       {:error, changeset} ->
@@ -469,10 +469,7 @@ defmodule Crysa.Comments do
     case existing |> Vote.changeset(%{vote: vote}) |> Repo.update() do
       {:ok, updated} ->
         adjust_vote_score(comment, vote - previous)
-
-        if vote == 1 and previous != 1 do
-          maybe_notify_upvote(comment, updated.user_id, vote)
-        end
+        maybe_notify_vote(comment, updated.user_id, vote)
 
         {:ok, updated}
 
@@ -487,31 +484,39 @@ defmodule Crysa.Comments do
     case Repo.get(Comment, parent_id) do
       %Comment{user_id: recipient_id}
       when not is_nil(recipient_id) and recipient_id != actor_id ->
-        Notifications.create_notification(%{
-          recipient_id: recipient_id,
-          actor_id: actor_id,
-          comment_id: comment_id,
-          action: "comment_reply"
-        })
+        case Notifications.create_notification(%{
+               recipient_id: recipient_id,
+               actor_id: actor_id,
+               comment_id: comment_id,
+               action: "comment_reply"
+             }) do
+          {:ok, notification} -> Notifications.broadcast_notification(notification)
+          {:error, _} -> :ok
+        end
 
       _ ->
         :ok
     end
   end
 
-  defp maybe_notify_upvote(%Comment{user_id: recipient_id, id: comment_id}, actor_id, 1)
-       when not is_nil(recipient_id) and recipient_id != actor_id do
-    Notifications.create_notification(%{
-      recipient_id: recipient_id,
-      actor_id: actor_id,
-      comment_id: comment_id,
-      action: "comment_upvote"
-    })
+  defp maybe_notify_vote(%Comment{user_id: recipient_id, id: comment_id}, actor_id, vote)
+       when not is_nil(recipient_id) and recipient_id != actor_id and vote in [-1, 1] do
+    action = if vote == 1, do: "comment_upvote", else: "comment_downvote"
+
+    case Notifications.create_notification(%{
+           recipient_id: recipient_id,
+           actor_id: actor_id,
+           comment_id: comment_id,
+           action: action
+         }) do
+      {:ok, notification} -> Notifications.broadcast_notification(notification)
+      {:error, _} -> :ok
+    end
   rescue
     _ -> :ok
   end
 
-  defp maybe_notify_upvote(_comment, _actor_id, _vote), do: :ok
+  defp maybe_notify_vote(_comment, _actor_id, _vote), do: :ok
 
   defp lock_comment!(id) do
     Repo.one!(from(c in Comment, where: c.id == ^id, lock: "FOR UPDATE"))

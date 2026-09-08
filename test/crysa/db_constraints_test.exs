@@ -123,6 +123,78 @@ defmodule Crysa.DbConstraintsTest do
         ])
       end
     end
+
+    test "notification target integrity is enforced by the database", %{
+      user: user,
+      series: series
+    } do
+      comment = insert_comment(series, %{user_id: user.id})
+      chapter = insert_chapter(series, %{})
+
+      # Comment action without a comment.
+      assert_raise Postgrex.Error, ~r/check constraint.*notifications_target_check/i, fn ->
+        now = DateTime.utc_now()
+
+        Repo.insert_all(Notification, [
+          %{
+            recipient_id: user.id,
+            action: "comment_reply",
+            inserted_at: now,
+            updated_at: now
+          }
+        ])
+      end
+
+      # Series action without series and chapter.
+      assert_raise Postgrex.Error, ~r/check constraint.*notifications_target_check/i, fn ->
+        now = DateTime.utc_now()
+
+        Repo.insert_all(Notification, [
+          %{
+            recipient_id: user.id,
+            comment_id: comment.id,
+            action: "series_chapter",
+            inserted_at: now,
+            updated_at: now
+          }
+        ])
+      end
+
+      # Well-formed series notification passes both checks.
+      now = DateTime.utc_now()
+
+      assert {1, _} =
+               Repo.insert_all(Notification, [
+                 %{
+                   recipient_id: user.id,
+                   series_id: series.id,
+                   chapter_id: chapter.id,
+                   action: "series_chapter",
+                   inserted_at: now,
+                   updated_at: now
+                 }
+               ])
+    end
+
+    test "series fan-out dedupe is enforced by the database", %{user: user, series: series} do
+      chapter = insert_chapter(series, %{})
+      now = DateTime.utc_now()
+
+      row = %{
+        recipient_id: user.id,
+        series_id: series.id,
+        chapter_id: chapter.id,
+        action: "series_chapter",
+        inserted_at: now,
+        updated_at: now
+      }
+
+      assert {1, _} = Repo.insert_all(Notification, [row])
+
+      assert_raise Postgrex.Error, ~r/notifications_series_dedupe_index/i, fn ->
+        Repo.insert_all(Notification, [row])
+      end
+    end
   end
 
   describe "single target constraints" do

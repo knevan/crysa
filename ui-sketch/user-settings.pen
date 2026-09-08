@@ -267,7 +267,8 @@
                           "fill": "$text-secondary",
                           "content": "Hello,",
                           "fontFamily": "Inter",
-                          "fontSize": 15
+                          "fontSize": 15,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "text",
@@ -316,7 +317,8 @@
                       "fill": "$text-secondary",
                       "content": "Use the form below to change your avatar.",
                       "fontFamily": "Inter",
-                      "fontSize": 13
+                      "fontSize": 13,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "frame",
@@ -446,7 +448,8 @@
                               "fill": "$text-muted",
                               "content": "Enter your display name",
                               "fontFamily": "Inter",
-                              "fontSize": 13
+                              "fontSize": 13,
+                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -493,7 +496,8 @@
                               "fill": "$text-primary",
                               "content": "kai@gmail.com",
                               "fontFamily": "Inter",
-                              "fontSize": 13
+                              "fontSize": 13,
+                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -593,7 +597,8 @@
                               "fill": "$text-muted",
                               "content": "More than 8 characters",
                               "fontFamily": "Inter",
-                              "fontSize": 13
+                              "fontSize": 13,
+                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -640,7 +645,8 @@
                               "fill": "$text-muted",
                               "content": "Confirm your new password",
                               "fontFamily": "Inter",
-                              "fontSize": 13
+                              "fontSize": 13,
+                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -700,7 +706,7 @@
               "id": "DQqzC",
               "name": "Footer Text",
               "fill": "$text-muted",
-              "content": "\u00a9 2025 Crysa \u2022 Crafted for manga lovers  \u2022  Terms  \u2022  Privacy  \u2022  DMCA",
+              "content": "© 2025 Crysa • Crafted for manga lovers  •  Terms  •  Privacy  •  DMCA",
               "fontFamily": "Inter",
               "fontSize": 11,
               "fontWeight": "normal"
@@ -883,7 +889,8 @@
                           "fill": "$text-secondary",
                           "content": "Hello,",
                           "fontFamily": "Inter",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "text",
@@ -934,7 +941,8 @@
                       "width": "fill_container",
                       "content": "Use the form below to change your avatar.",
                       "fontFamily": "Inter",
-                      "fontSize": 12
+                      "fontSize": 12,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "frame",
@@ -1065,7 +1073,8 @@
                               "fill": "$text-muted",
                               "content": "Enter your display name",
                               "fontFamily": "Inter",
-                              "fontSize": 13
+                              "fontSize": 13,
+                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -1112,7 +1121,8 @@
                               "fill": "$text-primary",
                               "content": "kai@gmail.com",
                               "fontFamily": "Inter",
-                              "fontSize": 13
+                              "fontSize": 13,
+                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -1210,7 +1220,8 @@
                               "fill": "$text-muted",
                               "content": "More than 8 characters",
                               "fontFamily": "Inter",
-                              "fontSize": 13
+                              "fontSize": 13,
+                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -1257,7 +1268,8 @@
                               "fill": "$text-muted",
                               "content": "Confirm your new password",
                               "fontFamily": "Inter",
-                              "fontSize": 13
+                              "fontSize": 13,
+                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -1311,7 +1323,7 @@
               "id": "NX1Ra",
               "name": "Footer T M",
               "fill": "$text-muted",
-              "content": "\u00a9 2025 Crysa \u2022 Terms \u2022 Privacy",
+              "content": "© 2025 Crysa • Terms • Privacy",
               "fontFamily": "Inter",
               "fontSize": 10,
               "fontWeight": "normal"

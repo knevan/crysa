@@ -16,6 +16,7 @@ defmodule CrysaWeb.Router do
 
   pipeline :auth do
     plug :plug_fetch_current_user
+    plug :plug_fetch_notification_badge
   end
 
   pipeline :require_authenticated_user do
@@ -31,6 +32,19 @@ defmodule CrysaWeb.Router do
   end
 
   defp plug_fetch_current_user(conn, _opts), do: CrysaWeb.UserAuth.fetch_current_user(conn, [])
+
+  # Snapshot badge for the header bell. One indexed count query, skipped
+  # for guests. Live navigation does not re-render the root layout, so
+  # the badge refreshes on full page loads; the panel itself is realtime.
+  defp plug_fetch_notification_badge(conn, _opts) do
+    count =
+      case conn.assigns[:current_user] do
+        %{id: id} -> Crysa.Notifications.unread_count(id)
+        _ -> 0
+      end
+
+    assign(conn, :unread_notifications_count, count)
+  end
 
   defp plug_require_authenticated_user(conn, _opts),
     do: CrysaWeb.UserAuth.require_authenticated_user(conn, [])
@@ -66,6 +80,8 @@ defmodule CrysaWeb.Router do
 
     # Websocket - auth pages
     live_session :current_user, on_mount: [{CrysaWeb.UserAuth, :mount_current_user}] do
+      live "/notifications", Live.NotificationsLive, :index
+
       scope "/auth" do
         live "/login", UserLoginLive, :new
         live "/register", UserRegistrationLive, :new

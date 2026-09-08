@@ -168,4 +168,8 @@
 /* Make LiveView wrapper divs transparent for layout */
 [data-phx-session], [data-phx-teleported-src] { display: contents }
 
+/* Notification dropdown: while the loading skeleton is present the island
+   shell (empty state) stays hidden, so first opens never flash "empty". */
+#notif-dropdown .notif-skeleton + .notif-island { display: none; }
+
 /* This file is for your main application CSS */

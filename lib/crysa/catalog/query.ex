@@ -25,6 +25,7 @@ defmodule Crysa.Catalog.Query do
 
   @sort_options ~w(new most_viewed latest_updates title)
   @publication_statuses Catalog.publication_statuses()
+  @chapter_statuses Catalog.chapter_statuses()
 
   @spec browse_series(map()) :: {[Series.t()], Pagination.t()}
   def browse_series(params) when is_map(params) do
@@ -66,9 +67,11 @@ defmodule Crysa.Catalog.Query do
     page_size = parse_page_size(params, @default_chapter_page_size, @max_chapter_page_size)
     search = parse_search(params)
     sort = parse_chapter_sort(params)
+    status = parse_chapter_status(params)
 
     base =
       from(c in Chapter, where: c.series_id == ^series_id)
+      |> filter_chapters_status(status)
       |> filter_chapters_search(search)
       |> order_chapters(sort)
 
@@ -92,6 +95,20 @@ defmodule Crysa.Catalog.Query do
   end
 
   defp parse_chapter_sort(_), do: :newest
+
+  # Visibility gate input: only exact known statuses pass; anything else
+  # (including user-supplied values) means "no status filter". Public
+  # call sites must force "available" server-side, never from user params.
+  defp parse_chapter_status(%{"status" => status}) when status in @chapter_statuses,
+    do: status
+
+  defp parse_chapter_status(_), do: nil
+
+  defp filter_chapters_status(query, nil), do: query
+
+  defp filter_chapters_status(query, status) do
+    where(query, [c], c.status == ^status)
+  end
 
   defp filter_chapters_search(query, nil), do: query
 
@@ -148,7 +165,7 @@ defmodule Crysa.Catalog.Query do
   @spec get_latest_chapter(integer()) :: Chapter.t() | nil
   def get_latest_chapter(series_id) when is_integer(series_id) do
     from(c in Chapter,
-      where: c.series_id == ^series_id,
+      where: c.series_id == ^series_id and c.status == "available",
       order_by: [desc: c.sort_key, desc: c.id],
       limit: 1
     )
@@ -160,7 +177,9 @@ defmodule Crysa.Catalog.Query do
     images_query = from(i in ChapterImage, order_by: i.image_order)
 
     from(c in Chapter,
-      where: c.series_id == ^series_id and c.chapter_key == ^chapter_key,
+      where:
+        c.series_id == ^series_id and c.chapter_key == ^chapter_key and
+          c.status == "available",
       preload: [images: ^images_query],
       limit: 1
     )
@@ -223,7 +242,9 @@ defmodule Crysa.Catalog.Query do
 
   defp chapter_position(series_id, chapter_key) do
     from(c in Chapter,
-      where: c.series_id == ^series_id and c.chapter_key == ^chapter_key,
+      where:
+        c.series_id == ^series_id and c.chapter_key == ^chapter_key and
+          c.status == "available",
       select: %{sort_key: c.sort_key, id: c.id},
       limit: 1
     )
@@ -233,7 +254,7 @@ defmodule Crysa.Catalog.Query do
   defp nearby_chapter(series_id, sort_key, id, :previous) do
     from(c in Chapter,
       where:
-        c.series_id == ^series_id and
+        c.series_id == ^series_id and c.status == "available" and
           (c.sort_key < ^sort_key or (c.sort_key == ^sort_key and c.id < ^id)),
       order_by: [desc: c.sort_key, desc: c.id],
       select: %{chapter_key: c.chapter_key, display_number: c.display_number},
@@ -245,7 +266,7 @@ defmodule Crysa.Catalog.Query do
   defp nearby_chapter(series_id, sort_key, id, :next) do
     from(c in Chapter,
       where:
-        c.series_id == ^series_id and
+        c.series_id == ^series_id and c.status == "available" and
           (c.sort_key > ^sort_key or (c.sort_key == ^sort_key and c.id > ^id)),
       order_by: [asc: c.sort_key, asc: c.id],
       select: %{chapter_key: c.chapter_key, display_number: c.display_number},

@@ -122,7 +122,7 @@ defmodule CrysaWeb.AuthFlowTest do
 
     test "renders settings for an authenticated user", %{conn: conn} do
       conn = conn |> log_in() |> get(~p"/users/settings")
-      assert html_response(conn, 200) =~ "Account settings"
+      assert html_response(conn, 200) =~ "Change Profile Settings"
     end
 
     test "renders profile for an authenticated user", %{conn: conn} do
@@ -262,22 +262,20 @@ defmodule CrysaWeb.AuthFlowTest do
   end
 
   describe "password change" do
-    test "changes the password from the settings page", %{conn: conn} do
+    test "changes the password from the settings island", %{conn: conn} do
       user = AccountsFixtures.user_fixture()
 
-      conn = conn |> log_in(user) |> get(~p"/users/settings")
-      assert html_response(conn, 200) =~ "Account settings"
+      {:ok, view, _html} = conn |> log_in(user) |> live(~p"/users/settings")
 
-      {:ok, view, html} = live(conn, ~p"/users/settings")
-      assert html =~ "Account settings"
+      vue = LiveVue.Test.get_vue(view)
+      assert vue.component == "UserSettings"
+      assert vue.props["username"] == user.username
 
-      view
-      |> form("#password_form", user: %{})
-      |> render_submit(%{
-        user: %{
-          current_password: AccountsFixtures.password(),
-          password: "newpassword456",
-          password_confirmation: "newpassword456"
+      render_hook(view, "update_password", %{
+        "user" => %{
+          "current_password" => AccountsFixtures.password(),
+          "password" => "newpassword456",
+          "password_confirmation" => "newpassword456"
         }
       })
 
@@ -289,18 +287,146 @@ defmodule CrysaWeb.AuthFlowTest do
 
       {:ok, view, _html} = conn |> log_in(user) |> live(~p"/users/settings")
 
-      html =
-        view
-        |> form("#password_form", user: %{})
-        |> render_submit(%{
-          user: %{
-            current_password: "wrongpassword",
-            password: "newpassword456",
-            password_confirmation: "newpassword456"
-          }
-        })
+      render_hook(view, "update_password", %{
+        "user" => %{
+          "current_password" => "wrongpassword",
+          "password" => "newpassword456",
+          "password_confirmation" => "newpassword456"
+        }
+      })
 
-      assert html =~ "is incorrect"
+      # LiveVue prop diffs are applied client-side, so assert server assigns directly.
+      state = :sys.get_state(view.pid)
+      assert state.socket.assigns.password.errors.currentPassword != []
+
+      refute Accounts.valid_password?(
+               "newpassword456",
+               Accounts.get_user!(user.id).password_hash
+             )
+    end
+
+    test "validates password without saving", %{conn: conn} do
+      user = AccountsFixtures.user_fixture()
+
+      {:ok, view, _html} = conn |> log_in(user) |> live(~p"/users/settings")
+
+      render_hook(view, "validate_password", %{
+        "user" => %{
+          "current_password" => AccountsFixtures.password(),
+          "password" => "short",
+          "password_confirmation" => "short"
+        }
+      })
+
+      state = :sys.get_state(view.pid)
+      assert state.socket.assigns.password.errors.password != []
+
+      assert Accounts.valid_password?(
+               AccountsFixtures.password(),
+               Accounts.get_user!(user.id).password_hash
+             )
+    end
+  end
+
+  describe "account information" do
+    test "renders the UserSettings island with account props", %{conn: conn} do
+      user = AccountsFixtures.user_fixture()
+      {:ok, view, _html} = conn |> log_in(user) |> live(~p"/users/settings")
+
+      vue = LiveVue.Test.get_vue(view)
+      assert vue.component == "UserSettings"
+      assert vue.props["username"] == user.username
+      assert vue.props["account"]["email"] == user.email
+      assert vue.props["account"]["emailErrors"] == []
+      assert vue.props["account"]["displayNameErrors"] == []
+    end
+
+    test "updates display name and email together", %{conn: conn} do
+      user = AccountsFixtures.user_fixture()
+
+      {:ok, view, _html} = conn |> log_in(user) |> live(~p"/users/settings")
+
+      render_hook(view, "update_account", %{
+        "user" => %{"email" => "newaddress@example.com"},
+        "user_profile" => %{"display_name" => "Manga Fan"}
+      })
+
+      assert Accounts.get_user_by_email("newaddress@example.com").id == user.id
+      assert Accounts.get_or_create_profile(user).display_name == "Manga Fan"
+    end
+
+    test "rejects a duplicate email without changing the profile", %{conn: conn} do
+      user = AccountsFixtures.user_fixture()
+      other = AccountsFixtures.user_fixture(%{email: "taken@example.com"})
+
+      {:ok, view, _html} = conn |> log_in(user) |> live(~p"/users/settings")
+
+      render_hook(view, "update_account", %{
+        "user" => %{"email" => other.email},
+        "user_profile" => %{"display_name" => "Should Not Save"}
+      })
+
+      state = :sys.get_state(view.pid)
+      assert state.socket.assigns.account.emailErrors != []
+      assert Accounts.get_user!(user.id).email == user.email
+      assert Accounts.get_or_create_profile(user).display_name != "Should Not Save"
+    end
+
+    test "rejects an invalid email", %{conn: conn} do
+      user = AccountsFixtures.user_fixture()
+      {:ok, view, _html} = conn |> log_in(user) |> live(~p"/users/settings")
+
+      render_hook(view, "update_account", %{
+        "user" => %{"email" => "bad"},
+        "user_profile" => %{"display_name" => "Still Me"}
+      })
+
+      state = :sys.get_state(view.pid)
+
+      assert Enum.any?(
+               state.socket.assigns.account.emailErrors,
+               &String.contains?(&1, "@ sign")
+             )
+
+      assert Accounts.get_user!(user.id).email == user.email
+    end
+
+    test "validates account without saving", %{conn: conn} do
+      user = AccountsFixtures.user_fixture()
+      {:ok, view, _html} = conn |> log_in(user) |> live(~p"/users/settings")
+
+      render_hook(view, "validate_account", %{
+        "user" => %{"email" => "bad"},
+        "user_profile" => %{"display_name" => "Draft Name"}
+      })
+
+      state = :sys.get_state(view.pid)
+      assert state.socket.assigns.account.emailErrors != []
+      # Draft input is echoed back without persisting.
+      assert state.socket.assigns.account.displayName == "Draft Name"
+      assert Accounts.get_user!(user.id).email == user.email
+    end
+  end
+
+  describe "settings avatar island" do
+    test "validate_avatar reports no error initially", %{conn: conn} do
+      user = AccountsFixtures.user_fixture()
+      {:ok, view, _html} = conn |> log_in(user) |> live(~p"/users/settings")
+
+      render_hook(view, "validate_avatar", %{})
+
+      state = :sys.get_state(view.pid)
+      assert state.socket.assigns.avatar_error == nil
+    end
+
+    test "save_avatar without entries reports a missing file", %{conn: conn} do
+      user = AccountsFixtures.user_fixture()
+      {:ok, view, _html} = conn |> log_in(user) |> live(~p"/users/settings")
+
+      render_hook(view, "save_avatar", %{})
+
+      state = :sys.get_state(view.pid)
+      assert state.socket.assigns.avatar_error == "No file was uploaded."
     end
   end
 
@@ -347,6 +473,35 @@ defmodule CrysaWeb.AuthFlowTest do
     test "requires authentication", %{conn: conn} do
       conn = post(conn, ~p"/users/profile/avatar")
       assert redirected_to(conn) == ~p"/auth/login"
+    end
+
+    test "redirects back to settings when return_to is settings", %{conn: conn} do
+      user = AccountsFixtures.user_fixture()
+      path = Path.join(System.tmp_dir!(), "avatar-#{System.unique_integer([:positive])}.png")
+      File.write!(path, "fake-image-bytes")
+
+      upload = %Plug.Upload{path: path, content_type: "image/png", filename: "avatar.png"}
+
+      conn =
+        conn
+        |> log_in(user)
+        |> post(~p"/users/profile/avatar", %{avatar: upload, return_to: "/users/settings"})
+
+      File.rm(path)
+
+      assert redirected_to(conn) == ~p"/users/settings"
+      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Avatar updated"
+    end
+
+    test "ignores an unallowlisted return_to", %{conn: conn} do
+      user = AccountsFixtures.user_fixture()
+
+      conn =
+        conn
+        |> log_in(user)
+        |> post(~p"/users/profile/avatar", %{return_to: "https://evil.example/"})
+
+      assert redirected_to(conn) == ~p"/users/profile"
     end
   end
 

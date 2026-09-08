@@ -26,6 +26,7 @@ defmodule Crysa.Processing.ChapterDownload do
   alias Crysa.Catalog.Chapter
   alias Crysa.Images.Encoder
   alias Crysa.Images.Limits
+  alias Crysa.Notifications
   alias Crysa.Repo
   alias Crysa.Scraping.Config
   alias Crysa.Storage
@@ -261,12 +262,31 @@ defmodule Crysa.Processing.ChapterDownload do
       count: length(rows)
     )
 
+    fan_out_series_notifications(chapter, series)
+
     {:ok, :available}
   end
 
   defp finalize(chapter, :no_images_found, []) do
     update_chapter!(chapter.id, %{status: "no_images_found", locked_at: nil})
     {:ok, :no_images_found}
+  end
+
+  # Fan-out after the chapter is readable: notification
+  # failure must never fail an already downloaded chapter. Repair
+  # re-runs are safe — the dedupe index absorbs them as zero new rows.
+  defp fan_out_series_notifications(chapter, series) do
+    Notifications.notify_series_chapter(series.id, chapter.id)
+    :ok
+  rescue
+    error ->
+      Logger.warning("series notification fan-out failed",
+        series_id: chapter.series_id,
+        chapter_id: chapter.id,
+        error: inspect(error)
+      )
+
+      :ok
   end
 
   defp fail(chapter, message) do

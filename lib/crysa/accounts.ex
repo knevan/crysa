@@ -370,6 +370,29 @@ defmodule Crysa.Accounts do
     User.password_changeset(user, attrs)
   end
 
+  @doc "Builds the self-service email changeset for form rendering."
+  @spec change_user_email(User.t(), map()) :: Ecto.Changeset.t()
+  def change_user_email(%User{} = user, attrs \\ %{}) do
+    User.email_changeset(user, attrs)
+  end
+
+  @doc """
+  Updates the email address for a logged-in user.
+
+  Returns `{:ok, user}` on success, or `{:error, changeset}` when the
+  address is invalid or already taken.
+  """
+  @spec update_user_email(User.t(), map()) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
+  def update_user_email(%User{} = user, attrs) do
+    user
+    |> User.email_changeset(attrs)
+    |> Repo.update()
+    |> case do
+      {:ok, updated} -> {:ok, preload_user(updated)}
+      {:error, changeset} -> {:error, changeset}
+    end
+  end
+
   ## Password reset token CRUD
 
   @spec create_password_reset_token(map()) ::

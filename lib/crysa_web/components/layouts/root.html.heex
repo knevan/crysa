@@ -49,7 +49,7 @@
   <body class="min-h-screen bg-base-200">
     <.flash_messages />
     <nav class="bg-base-100 shadow">
-      <div class="navbar max-w-[980px] mx-auto w-full px-2">
+      <div class="navbar max-w-245 mx-auto w-full px-2">
         <div class="navbar-start">
           <a href={~p"/"} class="btn btn-ghost text-xl">
             Crysa
@@ -63,6 +63,13 @@
           </ul>
         </div>
         <div class="navbar-end">
+          <!-- Notification bell: same-page dropdown, live in every page via a
+               sticky child LiveView. Guests render nothing. -->
+          {live_render(@conn, CrysaWeb.Live.NotificationBellLive,
+            id: "notification-bell",
+            session: %{},
+            sticky: true
+          )}
           <!-- Desktop: Sign in / @admin, hidden on mobile -->
           <div :if={@current_user} class="hidden lg:flex items-center gap-2">
             <div class="dropdown dropdown-end">
@@ -105,6 +112,16 @@
             >
               <li><a href={~p"/series"}>Browse</a></li>
               <li :if={moderator?(@current_user)}><a href={~p"/admin"}>Admin Panel</a></li>
+              <li :if={@current_user}>
+                <a href={~p"/notifications"}>
+                  Notifications
+                  <span :if={@unread_notifications_count > 0} class="badge badge-error badge-sm">
+                    {if @unread_notifications_count > 99,
+                      do: "99+",
+                      else: @unread_notifications_count}
+                  </span>
+                </a>
+              </li>
               <li :if={@current_user}><a href={~p"/users/profile"}>Profile</a></li>
               <li :if={@current_user}><a href={~p"/users/settings"}>Settings</a></li>
               <li :if={@current_user}>
@@ -118,7 +135,7 @@
         </div>
       </div>
     </nav>
-    <main class="max-w-[980px] mx-auto w-full p-6">
+    <main class="max-w-245 mx-auto w-full p-6">
       {@inner_content}
     </main>
   </body>

@@ -7,6 +7,7 @@ defmodule Crysa.Notifications.Notification do
 
   import Ecto.Changeset
   alias Crysa.Accounts.User
+  alias Crysa.Catalog.{Chapter, Series}
   alias Crysa.Comments.Comment
   alias Crysa.Notifications
 
@@ -19,6 +20,8 @@ defmodule Crysa.Notifications.Notification do
     belongs_to :recipient, User
     belongs_to :actor, User
     belongs_to :comment, Comment
+    belongs_to :series, Series
+    belongs_to :chapter, Chapter
 
     timestamps(type: :utc_datetime_usec)
   end
@@ -26,12 +29,23 @@ defmodule Crysa.Notifications.Notification do
   @spec changeset(t(), map()) :: Ecto.Changeset.t()
   def changeset(notification, attrs) do
     notification
-    |> cast(attrs, [:recipient_id, :actor_id, :comment_id, :action, :read_at])
+    |> cast(attrs, [
+      :recipient_id,
+      :actor_id,
+      :comment_id,
+      :series_id,
+      :chapter_id,
+      :action,
+      :read_at
+    ])
     |> validate_required([:recipient_id, :action])
     |> validate_inclusion(:action, Notifications.actions())
     |> check_constraint(:action, name: :notifications_action_check)
+    |> check_constraint(:comment_id, name: :notifications_target_check)
     |> foreign_key_constraint(:recipient_id)
     |> foreign_key_constraint(:actor_id)
     |> foreign_key_constraint(:comment_id)
+    |> foreign_key_constraint(:series_id)
+    |> foreign_key_constraint(:chapter_id)
   end
 end

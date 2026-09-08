@@ -282,6 +282,8 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
       add :recipient_id, references(:users, on_delete: :delete_all), null: false
       add :actor_id, references(:users, on_delete: :nilify_all)
       add :comment_id, references(:comments, on_delete: :delete_all)
+      add :series_id, references(:series, on_delete: :delete_all)
+      add :chapter_id, references(:series_chapters, on_delete: :delete_all)
       add :action, :string, null: false
       add :read_at, :utc_datetime_usec
 
@@ -290,6 +292,8 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
 
     create index(:notifications, [:recipient_id, :read_at])
     create index(:notifications, [:comment_id])
+    create index(:notifications, [:series_id])
+    create index(:notifications, [:chapter_id])
 
     create table(:reports) do
       add :reporter_id, references(:users, on_delete: :nilify_all)
@@ -336,7 +340,22 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
            )
 
     create constraint(:notifications, :notifications_action_check,
-             check: "action IN ('comment_reply', 'comment_upvote')"
+             check:
+               "action IN ('comment_reply', 'comment_upvote', 'comment_downvote', 'series_chapter')"
+           )
+
+    # Comment actions reference exactly one comment; series actions reference
+    # exactly one series + chapter. No half-pointed rows.
+    create constraint(:notifications, :notifications_target_check,
+             check:
+               "(action IN ('comment_reply', 'comment_upvote', 'comment_downvote') AND comment_id IS NOT NULL AND series_id IS NULL AND chapter_id IS NULL) OR (action = 'series_chapter' AND comment_id IS NULL AND series_id IS NOT NULL AND chapter_id IS NOT NULL)"
+           )
+
+    # Fan-out idempotency: worker retries must never duplicate a series
+    # notification for the same recipient and chapter.
+    create unique_index(:notifications, [:recipient_id, :series_id, :chapter_id],
+             name: :notifications_series_dedupe_index,
+             where: "action = 'series_chapter'"
            )
 
     create index(:notifications, [:recipient_id, :inserted_at],
