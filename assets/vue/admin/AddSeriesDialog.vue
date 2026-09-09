@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, computed, onMounted } from 'vue'
-import { useLiveUpload } from 'live_vue'
+import { useLiveUpload, type UploadConfig, type UploadEntry, type UploadOptions } from 'live_vue'
 import {
   DialogRoot,
   DialogPortal,
@@ -18,7 +18,7 @@ type Tag = { id: number; name: string }
 const props = defineProps<{
   open: boolean
   tags: Tag[]
-  coverUpload?: any
+  coverUpload?: UploadConfig
 }>()
 
 const emit = defineEmits<{
@@ -48,9 +48,12 @@ const coverPreviewUrl = ref<string | null>(null)
 const coverInputKey = ref(0)
 
 // LiveView upload — file is buffered in LiveView temp (RAM/disk) via allow_upload, then moved to Object Storage on create
+// The getter cast documents that LiveView always assigns the upload config
+// before mount (allow_upload in mount); the prop stays optional only for
+// the first patch timing.
 const { entries: coverEntries, showFilePicker, addFiles, cancel, progress: coverProgress } = useLiveUpload(
-  () => props.coverUpload,
-  { changeEvent: 'validate_cover', submitEvent: undefined } as any,
+  () => props.coverUpload as UploadConfig,
+  { changeEvent: 'validate_cover', submitEvent: undefined } as unknown as UploadOptions,
 )
 
 // True once Create was pushed; guards the close watcher from cancelling
@@ -71,7 +74,7 @@ function resetCoverState() {
 // dialog never leaks an entry into the next open (max_entries is 1, and a
 // stale entry could otherwise attach to the wrong series).
 function cancelStagedCover() {
-  if ((coverEntries.value as any[])?.length) {
+  if (coverEntries.value?.length) {
     try { cancel() } catch (_) {}
   }
   resetCoverState()
@@ -117,7 +120,7 @@ const isValid = computed(() => {
 // entry (which the server would otherwise have to reject as pending).
 const isCoverUploading = computed(() => {
   if (!coverFileName.value) return false
-  const entry = (coverEntries.value as any[])?.[0] as { progress?: number } | undefined
+  const entry: UploadEntry | undefined = coverEntries.value?.[0]
   if (!entry) return true
   return (entry.progress ?? 0) < 100
 })

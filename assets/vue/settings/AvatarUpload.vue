@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref, watch, onBeforeUnmount } from 'vue'
-import { useLiveUpload, useLiveVue } from 'live_vue'
+import { useLiveUpload, useLiveVue, type UploadConfig, type UploadOptions } from 'live_vue'
 import { UserRound } from '@lucide/vue'
 
 const props = defineProps<{
   avatarUrl: string | null
-  // LiveView upload config (`@uploads.avatar`); typed as any like AdminDashboard's coverUpload.
-  uploadConfig: any
+  // LiveView upload config (`@uploads.avatar`).
+  uploadConfig: UploadConfig
   serverError: string | null
 }>()
 
@@ -24,7 +24,7 @@ const savePushedFor = ref<string | null>(null)
 const { entries, addFiles } = useLiveUpload(() => props.uploadConfig, {
   changeEvent: 'validate_avatar',
   submitEvent: undefined,
-} as any)
+} as unknown as UploadOptions)
 
 const activeEntry = () => entries.value?.[0] as
   | { ref?: string; client_name?: string; progress?: number }

@@ -180,7 +180,7 @@ function getThreadLink(id: number) {
         <!-- Body -->
         <div
           v-if="!collapsed"
-          class="prose prose-sm max-w-none text-xs leading-5 prose-p:my-1 prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:underline prose-a:underline-offset-2 break-words"
+          class="prose prose-sm max-w-none text-xs leading-5 prose-p:my-1 prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:underline prose-a:underline-offset-2 wrap-break-word"
           :class="isDeleted ? 'opacity-60' : ''"
           v-html="node.bodyHtml"
         />
@@ -195,11 +195,11 @@ function getThreadLink(id: number) {
         <div v-if="!collapsed && !isDeleted" class="flex items-center gap-1">
           <div class="flex items-center gap-0.5">
             <Button variant="ghost" size="xs" class="h-6 w-6 p-0 text-[11px] leading-none" aria-label="Upvote" @click="handleVote(1)">▲</Button>
-            <span class="text-xs font-bold tabular-nums min-w-[14px] text-center">{{ node.upCount ?? 0 }}</span>
+            <span class="text-xs font-bold tabular-nums min-w-3.5 text-center">{{ node.upCount ?? 0 }}</span>
           </div>
           <div class="flex items-center gap-0.5">
             <Button variant="ghost" size="xs" class="h-6 w-6 p-0 text-[11px] leading-none" aria-label="Downvote" @click="handleVote(-1)">▼</Button>
-            <span class="text-xs font-bold tabular-nums min-w-[14px] text-center">{{ node.downCount ?? 0 }}</span>
+            <span class="text-xs font-bold tabular-nums min-w-3.5 text-center">{{ node.downCount ?? 0 }}</span>
           </div>
           <Button variant="ghost" size="xs" class="h-6 px-2.5 text-[11px] ml-1" @click="toggleReply">Reply</Button>
         </div>
@@ -209,14 +209,14 @@ function getThreadLink(id: number) {
           <textarea
             v-model="replyBody"
             placeholder="Write a reply..."
-            class="min-h-[56px] w-full resize-none rounded-md border bg-card p-2 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            class="min-h-14 w-full resize-none rounded-md border bg-card p-2 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
             :maxlength="maxReplyLength"
             @keydown="handleReplyKeydown"
           />
         <!-- Preview exactly below input -->
         <div v-if="previewHtmlReply" class="mt-2 rounded-lg border border-dashed bg-card p-2">
           <div class="text-[10px] font-bold tracking-wide text-muted-foreground uppercase mb-1">Preview</div>
-          <div class="prose prose-sm max-w-none text-xs break-words prose-p:my-1 prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:underline prose-a:underline-offset-2" v-html="previewHtmlReply" />
+          <div class="prose prose-sm max-w-none text-xs wrap-break-word prose-p:my-1 prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:underline prose-a:underline-offset-2" v-html="previewHtmlReply" />
         </div>
         <div class="mt-2 flex items-center gap-1">
           <button type="button" class="size-6 rounded-md flex items-center justify-center hover:bg-accent" title="Bold" @click="replyBody += '**bold**'">
@@ -254,7 +254,7 @@ function getThreadLink(id: number) {
     <!-- Reply form when this node is parent and has existing replies: also show connector line above form (Castra) -->
     <div v-if="showReply && !collapsed && !isDeleted && hasChildren" class="flex gap-0 mt-2 relative">
       <div class="relative w-9 shrink-0">
-        <div class="absolute -top-2 bottom-0 left-[17px] w-px border-l border-muted" />
+        <div class="absolute -top-2 bottom-0 left-4.25 w-px border-l border-muted" />
       </div>
       <div class="flex-1 min-w-0" />
     </div>
@@ -270,7 +270,7 @@ function getThreadLink(id: number) {
               style="height: 30px; width: 18px"
             />
           </div>
-          <div class="flex-1 min-w-0 flex h-[30px] text-center items-center">
+          <div class="flex-1 min-w-0 flex h-7.5 text-center items-center">
             <a :href="getThreadLink(node.id)" class="text-foreground font-bold text-xs hover:underline flex items-center gap-1" data-sveltekit-noscroll>
               <CirclePlus class="size-4" />
               <span>{{ node.replyCount }} More {{ node.replyCount === 1 ? 'reply' : 'replies' }}</span>

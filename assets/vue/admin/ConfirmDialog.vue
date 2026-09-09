@@ -49,7 +49,7 @@ function onConfirm() {
     <DialogPortal>
       <DialogOverlay class="fixed inset-0 z-50 bg-black/40 backdrop-blur-[1px]" />
       <DialogContent
-        class="fixed left-1/2 top-1/2 z-50 w-full max-w-[440px] -translate-x-1/2 -translate-y-1/2 rounded-xl border bg-card shadow-xl focus:outline-none p-0 overflow-hidden"
+        class="fixed left-1/2 top-1/2 z-50 w-full max-w-110 -translate-x-1/2 -translate-y-1/2 rounded-xl border bg-card shadow-xl focus:outline-none p-0 overflow-hidden"
         @escape-key-down="emit('update:open', false)"
       >
         <div class="px-6 pt-6 pb-4 space-y-2">

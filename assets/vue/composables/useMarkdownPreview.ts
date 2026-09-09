@@ -22,7 +22,7 @@ export function useMarkdownPreview(source: () => string) {
     isPreviewLoading.value = true
     try {
       // LiveView handle_event replies with %{html: ...}
-      const result: any = await (live.pushEvent as any)('preview_markdown', {
+      const result: { html?: unknown } = await live.pushEvent('preview_markdown', {
         markdown: trimmed.slice(0, 10_000),
       })
 

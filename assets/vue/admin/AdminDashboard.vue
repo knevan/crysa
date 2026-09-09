@@ -15,6 +15,7 @@ import ChapterListDialog, { type ChapterRow } from '@/assets/vue/admin/ChapterLi
 import EditUserDialog from '@/assets/vue/admin/EditUserDialog.vue'
 import SeriesScheduleDialog from '@/assets/vue/admin/SeriesScheduleDialog.vue'
 import ConfirmDialog from '@/assets/vue/admin/ConfirmDialog.vue'
+import type { UploadConfig } from 'live_vue'
 
 type Pagination = {
   page: number
@@ -35,7 +36,7 @@ const props = defineProps<{
   userQuery: string
   userPageSize: number
   tags: Array<{ id: number; name: string }>
-  coverUpload?: any
+  coverUpload?: UploadConfig
   reportRows: ReportRow[]
   reportPagination: Pagination
   reportStatus: string
@@ -443,7 +444,7 @@ const tabInactive =
 
           <select
             :value="String(pageSize)"
-            class="flex h-8 w-[72px] items-center justify-between rounded-lg border bg-card px-2.5 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+            class="flex h-8 w-18 items-center justify-between rounded-lg border bg-card px-2.5 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
             aria-label="Rows per page"
             @change="onPageSizeChange"
           >
@@ -524,7 +525,7 @@ const tabInactive =
           </div>
           <select
             :value="String(userPageSize)"
-            class="flex h-8 w-[72px] items-center justify-between rounded-lg border bg-card px-2.5 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+            class="flex h-8 w-18 items-center justify-between rounded-lg border bg-card px-2.5 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
             aria-label="Rows per page"
             @change="onUserPageSizeChange"
           >
@@ -564,7 +565,7 @@ const tabInactive =
             <span class="text-xs text-muted-foreground hidden sm:inline">{{ reportPagination.totalEntries }} total</span>
             <select
               :value="reportStatus"
-              class="flex h-8 w-[130px] items-center justify-between rounded-lg border bg-card px-2.5 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              class="flex h-8 w-32.5 items-center justify-between rounded-lg border bg-card px-2.5 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
               aria-label="Filter by status"
               @change="onReportStatusChange"
             >
@@ -580,7 +581,7 @@ const tabInactive =
           <p class="text-xs text-muted-foreground">Moderation queue — resolve or reject pending reports</p>
           <select
             :value="String(reportPagination.pageSize)"
-            class="flex h-8 w-[72px] items-center justify-between rounded-lg border bg-card px-2.5 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+            class="flex h-8 w-18 items-center justify-between rounded-lg border bg-card px-2.5 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
             aria-label="Rows per page"
             @change="onReportPageSizeChange"
           >
@@ -620,7 +621,7 @@ const tabInactive =
             <span class="text-xs text-muted-foreground hidden sm:inline">{{ auditPagination.totalEntries }} total</span>
             <select
               :value="auditAction"
-              class="flex h-8 w-[160px] items-center justify-between rounded-lg border bg-card px-2.5 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              class="flex h-8 w-40 items-center justify-between rounded-lg border bg-card px-2.5 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
               aria-label="Filter by action"
               @change="onAuditActionChange"
             >
@@ -641,7 +642,7 @@ const tabInactive =
             </select>
             <select
               :value="auditTargetType"
-              class="flex h-8 w-[120px] items-center justify-between rounded-lg border bg-card px-2.5 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              class="flex h-8 w-30 items-center justify-between rounded-lg border bg-card px-2.5 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
               aria-label="Filter by target"
               @change="onAuditTargetTypeChange"
             >
@@ -659,7 +660,7 @@ const tabInactive =
           <p class="text-xs text-muted-foreground">Traceable history of every mutating admin action — actor, target, IP and metadata.</p>
           <select
             :value="String(auditPagination.pageSize)"
-            class="flex h-8 w-[72px] items-center justify-between rounded-lg border bg-card px-2.5 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+            class="flex h-8 w-18 items-center justify-between rounded-lg border bg-card px-2.5 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
             aria-label="Rows per page"
             @change="onAuditPageSizeChange"
           >

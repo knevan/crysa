@@ -236,7 +236,7 @@ watch(dataRef, (v) => {
           :key="row.id"
           class="border-b transition-colors hover:bg-muted/50"
         >
-          <td v-for="cell in row.getVisibleCells()" :key="cell.id" class="p-3 align-middle border-r border-border [&:last-child]:border-r-0">
+          <td v-for="cell in row.getVisibleCells()" :key="cell.id" class="p-3 align-middle border-r border-border last:border-r-0">
             <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
           </td>
         </tr>

@@ -106,7 +106,7 @@ function handleKeydown(e: KeyboardEvent) {
           <div class="h-px bg-border" />
 
           <!-- Tags pills — sorted A-Z -->
-          <div class="flex flex-wrap gap-1.5 min-h-[28px]">
+          <div class="flex flex-wrap gap-1.5 min-h-7">
             <span
               v-for="tag in sortedTags"
               :key="tag.id"

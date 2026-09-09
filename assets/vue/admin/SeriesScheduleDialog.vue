@@ -82,7 +82,7 @@ watch(
 )
 
 function validate(): string | null {
-  if (!statuses.includes(publicationStatus.value as any)) return 'Invalid publication status'
+  if (!(statuses as readonly string[]).includes(publicationStatus.value)) return 'Invalid publication status'
   const trimmed = manualInterval.value.trim()
   if (trimmed === '' || trimmed.toLowerCase() === 'auto') return null
   const n = Number(trimmed)

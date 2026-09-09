@@ -3,14 +3,15 @@ import AccountForm from '@/assets/vue/settings/AccountForm.vue'
 import PasswordForm from '@/assets/vue/settings/PasswordForm.vue'
 import AvatarUpload from '@/assets/vue/settings/AvatarUpload.vue'
 import type { AccountState, PasswordState } from '@/assets/vue/settings/types'
+import type { UploadConfig } from 'live_vue'
 
 // Composition surface for the UserSettings island. \
 // The LiveView owns all state
 defineProps<{
   username: string
   avatarUrl: string | null
-  // LiveView upload config (`@uploads.avatar`); typed as any like AdminDashboard's coverUpload.
-  avatarUpload: any
+  // LiveView upload config (`@uploads.avatar`).
+  avatarUpload: UploadConfig
   avatarError: string | null
   account: AccountState
   password: PasswordState

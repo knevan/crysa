@@ -119,14 +119,14 @@ function goCommentPage(page: number) {
             ref="commentTextareaRef"
             v-model="commentBody"
             placeholder="Share your thoughts..."
-            class="min-h-[72px] w-full resize-none rounded-lg border bg-card p-2.5 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            class="min-h-18 w-full resize-none rounded-lg border bg-card p-2.5 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
             :maxlength="maxCommentLength"
             @keydown="handleCommentKeydown"
           />
           <!-- Preview exactly below input (dashed, like image) -->
           <div v-if="previewHtmlRoot" class="mt-2 rounded-lg border border-dashed bg-card p-2.5">
             <div class="text-[10px] font-bold tracking-wide text-muted-foreground uppercase mb-1">Preview</div>
-            <div class="prose prose-sm max-w-none text-xs break-words prose-p:my-1 prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:underline prose-a:underline-offset-2" v-html="previewHtmlRoot" />
+            <div class="prose prose-sm max-w-none text-xs wrap-break-word prose-p:my-1 prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:underline prose-a:underline-offset-2" v-html="previewHtmlRoot" />
           </div>
           <div class="mt-2 flex items-center justify-between">
             <div class="flex items-center gap-1">
@@ -209,7 +209,7 @@ function goCommentPage(page: number) {
       <div class="size-11 rounded-xl bg-muted flex items-center justify-center border">
         <MessageCircle class="size-5 text-muted-foreground" />
       </div>
-      <p class="text-xs text-muted-foreground text-center max-w-[260px]">No comments yet. Be the first to share your thoughts!</p>
+      <p class="text-xs text-muted-foreground text-center max-w-65">No comments yet. Be the first to share your thoughts!</p>
       <p v-if="!currentUser" class="text-[11px] text-muted-foreground">
         Please <a href="/auth/login" class="font-bold text-primary">login</a> to join.
       </p>

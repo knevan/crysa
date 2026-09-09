@@ -75,7 +75,7 @@ function validate(): string | null {
   if (!e) return 'Email is required'
   if (!/^[^\s]+@[^\s]+$/.test(e)) return 'Email must contain @ and no spaces'
   if (e.length > 254) return 'Email too long'
-  if (!roles.includes(role.value as any)) return 'Invalid role'
+  if (!(roles as readonly string[]).includes(role.value)) return 'Invalid role'
   return null
 }
 

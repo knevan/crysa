@@ -230,15 +230,15 @@ function handleStarClick(e: MouseEvent, star: number) {
 // Mobile: tap-hold timbul + slide (pointer events cover mouse+touch)
 function handlePointerDown(e: PointerEvent, star: number) {
   pressedStar.value = star
-  setHover(e as unknown as MouseEvent, star)
+  setHover(e, star)
   ;(e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId)
 }
 function handlePointerMove(e: PointerEvent, star: number) {
-  if (pressedStar.value !== null) setHover(e as unknown as MouseEvent, star)
+  if (pressedStar.value !== null) setHover(e, star)
 }
 function handlePointerUp(e: PointerEvent, star: number) {
   if (pressedStar.value !== null) {
-    handleStarClick(e as unknown as MouseEvent, star)
+    handleStarClick(e, star)
     pressedStar.value = null
   }
 }
@@ -286,7 +286,7 @@ function applyRating(prev: number | null, newRating: number | null) {
 // Debounced server sync — last-write-wins, progress bar tetap instant (optimistic)
 const debouncedSyncRating = useDebounceFn(async (value: number | null, version: number) => {
   try {
-    const payload: any =
+    const payload: Promise<unknown> =
       value == null ? live.pushEvent('unrate_series', {}) : live.pushEvent('rate_series', { rating: value })
     await Promise.resolve(payload)
     // Only clear pending if this is still the latest version
@@ -463,7 +463,7 @@ function authorDisplay(): string {
 <template>
   <div class="min-h-screen bg-background">
     <!-- Content container: mobile 390, expand to 680 on larger screens -->
-    <div class="mx-auto w-full max-w-[390px] px-3 py-4 md:max-w-[680px] md:px-4 lg:max-w-[720px]">
+    <div class="mx-auto w-full max-w-97.5 px-3 py-4 md:max-w-170 md:px-4 lg:max-w-180">
       <!-- Series Card M — overflow-visible so ellipsis dropdown is not clipped (feedback #1) -->
       <div class="rounded-2xl border bg-card shadow-[0_8px_20px_rgba(15,23,42,0.06)] overflow-visible">
         <div class="p-4 flex flex-col gap-3.5">
@@ -478,10 +478,10 @@ function authorDisplay(): string {
 
           <div class="flex flex-col gap-3.5 md:flex-row md:gap-6">
             <!-- Cover Wrap M — full width on mobile (345x328), fixed 236 on desktop -->
-            <div class="flex flex-col items-center gap-2 md:w-[236px] md:shrink-0">
+            <div class="flex flex-col items-center gap-2 md:w-59 md:shrink-0">
               <div class="relative w-full overflow-hidden rounded-xl border bg-muted">
                 <!-- Mobile 345/328, desktop 3/4 aspect via md -->
-                <div class="aspect-[345/328] md:aspect-[3/4] w-full relative">
+                <div class="aspect-345/328 md:aspect-3/4 w-full relative">
                   <img
                     v-if="coverUrl"
                     :src="coverUrl"
@@ -642,7 +642,7 @@ function authorDisplay(): string {
 
             <!-- Rating Dist M -->
             <div class="rounded-xl border bg-card p-3.5 flex gap-3">
-              <div class="flex w-[90px] flex-col items-center justify-center gap-1">
+              <div class="flex w-22.5 flex-col items-center justify-center gap-1">
                 <span class="text-[40px] font-extrabold leading-none text-amber-500">{{ averageDisplay }}</span>
                 <div class="flex items-center gap-0.5">
                   <template v-for="i in 5" :key="i">
@@ -774,7 +774,7 @@ function authorDisplay(): string {
           </button>
         </div>
         <Separator />
-        <p class="text-xs leading-5 text-muted-foreground whitespace-pre-wrap break-words">
+        <p class="text-xs leading-5 text-muted-foreground whitespace-pre-wrap wrap-break-word">
           {{ displayDescription }}
         </p>
       </div>
@@ -784,7 +784,7 @@ function authorDisplay(): string {
         <div class="flex items-center justify-between px-3.5 py-3 border-b">
           <div class="flex items-center gap-2">
             <h2 class="text-sm font-extrabold">Chapters</h2>
-            <span class="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-2.5 py-0.5 text-[11px] font-bold leading-none min-w-[22px] text-center shadow-sm">
+            <span class="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-2.5 py-0.5 text-[11px] font-bold leading-none min-w-5.5 text-center shadow-sm">
               {{ chapterPagination.totalEntries }}
             </span>
           </div>
@@ -815,7 +815,7 @@ function authorDisplay(): string {
             <BookOpen class="size-5 text-muted-foreground" />
           </div>
           <p class="text-sm font-bold">No chapters available</p>
-          <p class="text-center text-xs text-muted-foreground max-w-[300px] leading-4">
+          <p class="text-center text-xs text-muted-foreground max-w-75 leading-4">
             This series hasn't published any chapters yet. Follow to get notified.
           </p>
           <Button variant="outline" size="sm" class="h-8 gap-1.5 rounded-xl text-xs" @click="toggleBookmark">
