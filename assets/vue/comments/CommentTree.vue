@@ -166,7 +166,7 @@ function goCommentPage(page: number) {
       </p>
     </div>
 
-    <!-- See full comments — Reddit-like: align right, no border, blend with comment section bg, blue text -->
+    <!-- See full comments: align right, no border, blend with comment section bg, blue text -->
     <div v-if="isThreadView" class="px-3.5 py-2 flex justify-end bg-card">
       <button type="button" class="text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:underline" @click="clearThread">
         ← See full comments

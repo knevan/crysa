@@ -78,9 +78,10 @@
               </div>
               <ul
                 tabindex="0"
-                class="dropdown-content menu bg-base-100 rounded-box z-10 w-52 p-2 shadow"
+                class="dropdown-content menu bg-white rounded-box z-10 w-52 p-2 shadow"
               >
                 <li><a href={~p"/users/profile"}>Profile</a></li>
+                <li><a href={~p"/bookmarks"}>Bookmarks</a></li>
                 <li><a href={~p"/users/settings"}>Settings</a></li>
                 <li :if={moderator?(@current_user)}>
                   <a href={~p"/admin"}>Dashboard</a>
@@ -123,6 +124,7 @@
                 </a>
               </li>
               <li :if={@current_user}><a href={~p"/users/profile"}>Profile</a></li>
+              <li :if={@current_user}><a href={~p"/bookmarks"}>Bookmarks</a></li>
               <li :if={@current_user}><a href={~p"/users/settings"}>Settings</a></li>
               <li :if={@current_user}>
                 <.form for={%{}} action={~p"/auth/logout"} method="delete" class="contents">

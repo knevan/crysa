@@ -81,6 +81,7 @@ defmodule CrysaWeb.Router do
     # Websocket - auth pages
     live_session :current_user, on_mount: [{CrysaWeb.UserAuth, :mount_current_user}] do
       live "/notifications", Live.NotificationsLive, :index
+      live "/bookmarks", Live.BookmarkLive, :index
 
       scope "/auth" do
         live "/login", UserLoginLive, :new

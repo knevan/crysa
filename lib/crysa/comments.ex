@@ -74,7 +74,7 @@ defmodule Crysa.Comments do
   @max_tree_depth 10
 
   @doc """
-  Returns a threaded comment tree for a series page (Reddit-style).
+  Returns a threaded comment tree for a series page.
 
   Roots are paginated by `params` (`sort`/`page`/`page_size`), descendants are
   loaded breadth-first up to `@max_tree_depth`. Result is `{tree, pagination}`

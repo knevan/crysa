@@ -83,6 +83,7 @@ defmodule CrysaWeb.CatalogController do
 
           chapter ->
             record_chapter_read(conn, series)
+            record_reading_progress(conn, series, chapter)
             {previous, next} = Catalog.chapter_navigation(series.id, chapter_key)
 
             render(conn, :reader,
@@ -119,6 +120,40 @@ defmodule CrysaWeb.CatalogController do
     e ->
       Logger.warning("chapter view tracking crashed",
         series_id: series.id,
+        error: inspect(e)
+      )
+
+      :ok
+  end
+
+  # Persists "continue reading" progress for logged-in readers. Guests have
+  # no row to update, so they skip silently. Best-effort like view tracking:
+  # the reader render must never fail due to progress writes.
+  defp record_reading_progress(conn, series, chapter) do
+    case conn.assigns[:current_user] do
+      nil ->
+        :ok
+
+      user ->
+        case Library.record_reading_progress(user, series, chapter) do
+          {:ok, _} ->
+            :ok
+
+          {:error, reason} ->
+            Logger.warning("reading progress tracking failed",
+              series_id: series.id,
+              chapter_id: chapter.id,
+              error: inspect(reason)
+            )
+
+            :ok
+        end
+    end
+  rescue
+    e ->
+      Logger.warning("reading progress tracking crashed",
+        series_id: series.id,
+        chapter_id: chapter.id,
         error: inspect(e)
       )
 

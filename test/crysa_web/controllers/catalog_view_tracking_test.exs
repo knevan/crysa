@@ -8,7 +8,10 @@ defmodule CrysaWeb.CatalogViewTrackingTest do
 
   use CrysaWeb.ConnCase, async: false
 
+  alias Crysa.Accounts
+  alias Crysa.AccountsFixtures
   alias Crysa.CatalogFixtures
+  alias Crysa.Library
   alias Crysa.Repo
 
   test "GET reader counts a view on the parent series", %{conn: conn} do
@@ -35,6 +38,35 @@ defmodule CrysaWeb.CatalogViewTrackingTest do
     {:ok, _view, _html} = live(conn, ~p"/series/#{series.slug}")
 
     assert Repo.get!(Crysa.Catalog.Series, series.id).view_count == 0
+  end
+
+  test "GET reader records reading progress for logged-in users", %{conn: conn} do
+    user = AccountsFixtures.user_fixture()
+    series = CatalogFixtures.series_fixture()
+    chapter = CatalogFixtures.chapter_fixture(series, %{chapter_key: "10", sort_key: "000010"})
+
+    conn = conn |> log_in(user) |> get(~p"/series/#{series.slug}/#{chapter.chapter_key}")
+    assert html_response(conn, 200) =~ series.title
+
+    progress = Library.get_reading_progress(user, series)
+    assert progress.last_chapter_id == chapter.id
+  end
+
+  test "GET reader records nothing for guests", %{conn: conn} do
+    user = AccountsFixtures.user_fixture()
+    series = CatalogFixtures.series_fixture()
+    chapter = CatalogFixtures.chapter_fixture(series, %{chapter_key: "10", sort_key: "000010"})
+
+    conn = get(conn, ~p"/series/#{series.slug}/#{chapter.chapter_key}")
+    assert html_response(conn, 200) =~ series.title
+
+    assert Library.get_reading_progress(user, series) == nil
+    assert Repo.aggregate(Crysa.Library.ReadingProgress, :count, :id) == 0
+  end
+
+  defp log_in(conn, user) do
+    token = Accounts.generate_user_session_token(user)
+    conn |> Plug.Test.init_test_session(%{}) |> put_session(:user_token, token)
   end
 
   defp eventually(fun, attempts \\ 20)

@@ -14,8 +14,9 @@ defmodule Crysa.Library do
   """
 
   alias Crysa.Accounts.User
+  alias Crysa.Catalog.Chapter
   alias Crysa.Catalog.Series
-  alias Crysa.Library.{Bookmark, Query, Rating, RatingChange, SeriesViewLog}
+  alias Crysa.Library.{Bookmark, Query, Rating, RatingChange, ReadingProgress, SeriesViewLog}
   alias Crysa.Repo
 
   import Ecto.Query
@@ -74,6 +75,18 @@ defmodule Crysa.Library do
   @spec list_user_bookmarks(User.t(), map()) :: {[Series.t()], Crysa.Pagination.t()}
   def list_user_bookmarks(%User{id: user_id}, params \\ %{}) when is_map(params),
     do: Query.list_user_bookmarks(user_id, params)
+
+  @doc """
+  Enriched bookmark library entries for the bookmark page.
+
+  Each entry is `%{bookmark: ..., series: ..., latest_chapter: ... | nil}`.
+  Accepts the same filter/sort params as `Query.list_user_bookmark_entries/2`
+  (`"status"`, `"sort_by"`, `"order"`, `"page"`, `"page_size"`).
+  """
+  @spec list_user_bookmark_entries(User.t(), map()) ::
+          {[Query.bookmark_entry()], Crysa.Pagination.t()}
+  def list_user_bookmark_entries(%User{id: user_id}, params \\ %{}) when is_map(params),
+    do: Query.list_user_bookmark_entries(user_id, params)
 
   @doc """
   Creates or updates a user's rating for a series.
@@ -258,6 +271,39 @@ defmodule Crysa.Library do
   @doc "Counts view log rows up to `cutoff` grouped by series."
   @spec count_views_before(DateTime.t()) :: [{integer(), non_neg_integer()}]
   def count_views_before(cutoff), do: Query.count_views_before(cutoff)
+
+  @doc """
+  Records the last chapter a user opened for a series.
+
+  Upserts the single `(user, series)` row in one statement, so concurrent
+  chapter opens cannot create duplicates. Returns `{:ok, progress}`.
+  """
+  @spec record_reading_progress(User.t(), Series.t(), Chapter.t()) ::
+          {:ok, ReadingProgress.t()} | {:error, Ecto.Changeset.t()}
+  def record_reading_progress(
+        %User{id: user_id},
+        %Series{id: series_id},
+        %Chapter{id: chapter_id}
+      ) do
+    attrs = %{user_id: user_id, series_id: series_id, last_chapter_id: chapter_id}
+    changeset = ReadingProgress.changeset(%ReadingProgress{}, attrs)
+
+    if changeset.valid? do
+      now = DateTime.utc_now() |> DateTime.truncate(:microsecond)
+
+      Repo.insert(changeset,
+        on_conflict: [set: [last_chapter_id: chapter_id, updated_at: now]],
+        conflict_target: [:user_id, :series_id]
+      )
+    else
+      {:error, changeset}
+    end
+  end
+
+  @spec get_reading_progress(User.t(), Series.t()) :: ReadingProgress.t() | nil
+  def get_reading_progress(%User{id: user_id}, %Series{id: series_id}) do
+    Repo.get_by(ReadingProgress, user_id: user_id, series_id: series_id)
+  end
 
   defp insert_bookmark(%Series{} = series, user_id, series_id) do
     case Bookmark.changeset(%Bookmark{}, %{user_id: user_id, series_id: series_id})

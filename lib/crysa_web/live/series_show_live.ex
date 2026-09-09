@@ -888,7 +888,7 @@ defmodule CrysaWeb.Live.SeriesShowLive do
     }
   end
 
-  # Tree JSON for Recursive CommentThread (Reddit-style)
+  # Tree JSON for Recursive CommentThread
   defp to_comment_node_json(%{
          comment: c,
          depth: depth,

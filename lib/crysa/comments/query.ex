@@ -164,7 +164,7 @@ defmodule Crysa.Comments.Query do
     |> Repo.aggregate(:count, :id)
   end
 
-  # Tree — threaded view (Reddit-style)
+  # Tree — threaded view
 
   @doc """
   Returns all comment nodes for a series page as a flat list plus pagination for roots.

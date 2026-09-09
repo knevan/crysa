@@ -366,9 +366,11 @@ defmodule CrysaWeb.NotificationsLiveTest do
 
       # Mobile: fixed to the viewport with side margins so the panel can
       # never clip; desktop: anchored dropdown next to the bell.
+      # Width follows the template (`sm:w-95` = 380px in Tailwind v4
+      # dynamic spacing); the test tracks the template, not vice versa.
       assert html =~ "fixed inset-x-2"
       assert html =~ "sm:absolute"
-      assert html =~ "sm:w-[380px]"
+      assert html =~ "sm:w-95"
     end
 
     test "bell refreshes a preloaded feed on realtime arrival", %{conn: conn} do
