@@ -52,7 +52,7 @@ defmodule CrysaWeb.UserSettingsLive do
 
     {:ok,
      assign(socket,
-       avatar_url: profile.avatar_url,
+       avatar_url: Accounts.avatar_url(profile),
        avatar_error: nil,
        account: account_state(user.email, profile.display_name),
        password: password_state(),
@@ -204,7 +204,7 @@ defmodule CrysaWeb.UserSettingsLive do
         }
 
         case Storage.store_avatar(upload, user) do
-          {:ok, %{url: _} = stored} ->
+          {:ok, %{key: _} = stored} ->
             {:ok, {:stored, stored}}
 
           {:error, message} when is_binary(message) ->
@@ -222,8 +222,8 @@ defmodule CrysaWeb.UserSettingsLive do
           Phoenix.LiveView.Socket.t()
   defp persist_avatar_save(socket, user, consumed) do
     case resolve_avatar_outcome(consumed, socket.assigns.uploads.avatar.errors) do
-      {:saved, avatar_url} ->
-        persist_avatar_url(socket, user, avatar_url)
+      {:saved, avatar_key} ->
+        persist_avatar_key(socket, user, avatar_key)
 
       {:failed, message} ->
         socket
@@ -248,20 +248,20 @@ defmodule CrysaWeb.UserSettingsLive do
           {:saved, String.t()} | {:failed, String.t()} | {:missing, String.t()}
   def resolve_avatar_outcome(consumed, upload_errors) do
     case {consumed, upload_errors} do
-      {[{:stored, %{url: url}}], _} -> {:saved, url}
+      {[{:stored, %{key: key}}], _} -> {:saved, key}
       {[{:storage_error, message}], _} -> {:failed, message}
       {[], []} -> {:missing, "No file was uploaded."}
       {[], [{_ref, reason} | _]} -> {:failed, upload_reason_message(reason)}
     end
   end
 
-  @spec persist_avatar_url(Phoenix.LiveView.Socket.t(), Accounts.User.t(), String.t()) ::
+  @spec persist_avatar_key(Phoenix.LiveView.Socket.t(), Accounts.User.t(), String.t()) ::
           Phoenix.LiveView.Socket.t()
-  defp persist_avatar_url(socket, user, avatar_url) do
-    case Accounts.update_profile(user, %{avatar_url: avatar_url}) do
+  defp persist_avatar_key(socket, user, avatar_key) do
+    case Accounts.update_profile(user, %{avatar_key: avatar_key}) do
       {:ok, _profile} ->
         socket
-        |> assign(avatar_url: avatar_url, avatar_error: nil)
+        |> assign(avatar_url: Storage.url_for(avatar_key), avatar_error: nil)
         |> put_flash(:info, "Avatar updated.")
 
       {:error, _changeset} ->
@@ -273,7 +273,7 @@ defmodule CrysaWeb.UserSettingsLive do
 
   # Account payload carries two namespaces: `user[email]` and
   # `user_profile[display_name]`. Slice to an allowlist so extra keys
-  # (e.g. avatar_url, role_id) can never be mass-assigned here.
+  # (e.g. avatar_key, role_id) can never be mass-assigned here.
   @spec split_account_params(map()) :: {map(), map()}
   defp split_account_params(params) when is_map(params) do
     email_attrs =

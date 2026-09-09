@@ -213,7 +213,7 @@ watch(dataRef, (v) => {
             >
               <div
                 class="h-full w-px bg-border transition-colors group-hover/handle:bg-foreground"
-                :class="{ '!bg-foreground': header.column.getIsResizing() }"
+                :class="{ 'bg-foreground!': header.column.getIsResizing() }"
               />
             </div>
             <div v-else-if="idx < headerGroup.headers.length - 1 && !header.isPlaceholder" class="absolute right-0 top-0 h-full w-px bg-border" />

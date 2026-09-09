@@ -39,7 +39,7 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
     create table(:user_profiles) do
       add :user_id, references(:users, on_delete: :delete_all), null: false
       add :display_name, :string
-      add :avatar_url, :text
+      add :avatar_key, :text
 
       timestamps(type: :utc_datetime_usec)
     end
@@ -81,7 +81,7 @@ defmodule Crysa.Repo.Migrations.CreateDomainFoundation do
       add :title, :string, null: false
       add :slug, :string, null: false
       add :description, :text
-      add :cover_url, :text
+      add :cover_key, :text
       add :source_url, :text, null: false
       add :publication_status, :string, null: false, default: "ongoing"
       add :processing_status, :string, null: false, default: "pending"

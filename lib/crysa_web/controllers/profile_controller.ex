@@ -22,8 +22,8 @@ defmodule CrysaWeb.ProfileController do
     return_to = redirect_target(params)
 
     case Storage.store_avatar(upload, conn.assigns.current_user) do
-      {:ok, %{url: avatar_url}} ->
-        case Accounts.update_profile(conn.assigns.current_user, %{avatar_url: avatar_url}) do
+      {:ok, %{key: avatar_key}} ->
+        case Accounts.update_profile(conn.assigns.current_user, %{avatar_key: avatar_key}) do
           {:ok, _profile} ->
             conn
             |> put_flash(:info, "Avatar updated.")

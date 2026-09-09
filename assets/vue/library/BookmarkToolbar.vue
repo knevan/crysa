@@ -33,11 +33,11 @@ const orderModel = computed({
 })
 
 const statusOptions: SelectOption[] = [
-  { value: 'all', label: 'Status: All' },
-  { value: 'ongoing', label: 'Status: Ongoing' },
-  { value: 'completed', label: 'Status: Completed' },
-  { value: 'hiatus', label: 'Status: Hiatus' },
-  { value: 'discontinued', label: 'Status: Discontinued' },
+  { value: 'all', label: 'All' },
+  { value: 'ongoing', label: 'Ongoing' },
+  { value: 'completed', label: 'Completed' },
+  { value: 'hiatus', label: 'Hiatus' },
+  { value: 'discontinued', label: 'Discontinued' },
 ]
 
 const sortOptions: SelectOption[] = [

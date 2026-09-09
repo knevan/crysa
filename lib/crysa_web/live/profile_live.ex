@@ -24,7 +24,7 @@ defmodule CrysaWeb.ProfileLive do
       <div class="flex justify-center">
         <div class="avatar">
           <div class="w-28 rounded-full ring ring-primary ring-offset-2">
-            <img src={@profile.avatar_url || ~p"/images/placeholder.png"} alt="avatar" />
+            <img src={Accounts.avatar_url(@profile) || ~p"/images/placeholder.png"} alt="avatar" />
           </div>
         </div>
       </div>

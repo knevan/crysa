@@ -13,13 +13,13 @@ defmodule CrysaWeb.UserSettingsLiveTest do
   alias CrysaWeb.UserSettingsLive
 
   describe "resolve_avatar_outcome/2" do
-    test "resolves a stored entry to its url" do
+    test "resolves a stored entry to its storage key" do
       consumed = [
         {:stored, %{key: "avatars/user_1_abc.jpg", url: "https://cdn.example/avatars/x.jpg"}}
       ]
 
       assert UserSettingsLive.resolve_avatar_outcome(consumed, []) ==
-               {:saved, "https://cdn.example/avatars/x.jpg"}
+               {:saved, "avatars/user_1_abc.jpg"}
     end
 
     test "resolves a storage failure to its message" do

@@ -338,7 +338,12 @@ defmodule Crysa.Notifications do
   defp series_json(nil), do: nil
 
   defp series_json(series),
-    do: %{id: series.id, title: series.title, slug: series.slug, cover_url: series.cover_url}
+    do: %{
+      id: series.id,
+      title: series.title,
+      slug: series.slug,
+      cover_url: Crysa.Catalog.cover_url(series)
+    }
 
   defp chapter_json(nil), do: nil
 

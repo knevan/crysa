@@ -7,6 +7,7 @@ defmodule Crysa.Accounts do
 
   alias Crysa.Accounts.{PasswordResetToken, Role, User, UserProfile, UsersToken}
   alias Crysa.Repo
+  alias Crysa.Storage
 
   @role_names ~w(superadmin admin moderator user)
   @reset_token_validity_in_hours 1
@@ -457,6 +458,19 @@ defmodule Crysa.Accounts do
     get_or_create_profile(user)
     |> UserProfile.changeset(attrs)
   end
+
+  @doc """
+  Resolves the public avatar URL for a profile from its stored storage key.
+
+  The database holds the opaque storage key; URL construction happens here
+  at the presentation boundary so stored data stays identical across
+  environments.
+  """
+  @spec avatar_url(UserProfile.t() | nil) :: String.t() | nil
+  def avatar_url(%UserProfile{avatar_key: key}) when is_binary(key) and key != "",
+    do: Storage.url_for(key)
+
+  def avatar_url(_), do: nil
 
   @admin_default_page_size 25
   @admin_max_page_size 100

@@ -10,9 +10,9 @@ defmodule CrysaWeb.CatalogComponents do
   def series_card(assigns) do
     ~H"""
     <a href={~p"/series/#{@series.slug}"} class="card bg-base-100 shadow hover:shadow-lg transition">
-      <figure class="aspect-[3/4] overflow-hidden">
+      <figure class="aspect-3/4 overflow-hidden">
         <img
-          src={@series.cover_url || ~p"/images/placeholder-cover.svg"}
+          src={Crysa.Catalog.cover_url(@series) || ~p"/images/placeholder-cover.svg"}
           alt={@series.title}
           loading="lazy"
           class="h-full w-full object-cover"

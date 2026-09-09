@@ -5,6 +5,7 @@ defmodule CrysaWeb.AdminDashboardLiveTest do
 
   alias Crysa.AccountsFixtures
   alias Crysa.CatalogFixtures
+  alias CrysaWeb.Live.AdminDashboardLive
 
   describe "GET /admin (LiveView)" do
     test "redirects unauthenticated users to login", %{conn: conn} do
@@ -81,6 +82,47 @@ defmodule CrysaWeb.AdminDashboardLiveTest do
       render_hook(view, "admin:users_page_size_change", %{"page_size" => 10})
       state = :sys.get_state(view.pid)
       assert state.socket.assigns.user_pagination.pageSize == 10
+    end
+  end
+
+  describe "resolve_cover_outcome/3" do
+    test "resolves a stored entry to its storage key" do
+      assert AdminDashboardLive.resolve_cover_outcome(
+               [{:stored, "covers/x.jpg"}],
+               [],
+               ""
+             ) ==
+               {"covers/x.jpg", nil}
+    end
+
+    test "resolves a storage failure" do
+      assert AdminDashboardLive.resolve_cover_outcome([{:storage_error, "boom"}], [], "a.jpg") ==
+               {nil, {:storage, "boom"}}
+    end
+
+    test "empty entries without a file name stays optional" do
+      assert AdminDashboardLive.resolve_cover_outcome([], [], "") == {nil, nil}
+    end
+
+    test "claimed file with empty entries is pending, never silent success" do
+      assert AdminDashboardLive.resolve_cover_outcome([], [], "d73cb2d3.jpg") ==
+               {nil, {:pending, "d73cb2d3.jpg"}}
+    end
+
+    test "resolves upload validation errors" do
+      errors = [{"0", :too_large}]
+
+      assert AdminDashboardLive.resolve_cover_outcome([], errors, "a.jpg") ==
+               {nil, {:validation, errors}}
+    end
+  end
+
+  describe "cover_url/1 key boundary" do
+    test "resolves a stored key to its public url" do
+      series = CatalogFixtures.series_fixture(%{cover_key: "covers/x.jpg"})
+
+      assert Crysa.Catalog.cover_url(series) == "/uploads/covers/x.jpg"
+      assert Crysa.Catalog.cover_url(%{series | cover_key: nil}) == nil
     end
   end
 

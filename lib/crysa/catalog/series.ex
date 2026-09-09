@@ -16,7 +16,7 @@ defmodule Crysa.Catalog.Series do
     :title,
     :slug,
     :description,
-    :cover_url,
+    :cover_key,
     :source_url,
     :publication_status,
     :processing_status,
@@ -38,7 +38,7 @@ defmodule Crysa.Catalog.Series do
     field :title, :string
     field :slug, :string
     field :description, :string
-    field :cover_url, :string
+    field :cover_key, :string
     field :source_url, :string
     field :publication_status, :string, default: "ongoing"
     field :processing_status, :string, default: "pending"
@@ -98,6 +98,7 @@ defmodule Crysa.Catalog.Series do
       less_than_or_equal_to: 10_080
     )
     |> validate_number(:check_retry_count, greater_than_or_equal_to: 0)
+    |> validate_length(:cover_key, max: 1_024)
     |> validate_length(:last_error, max: 2_000)
     |> check_constraint(:publication_status, name: :series_publication_status_check)
     |> check_constraint(:processing_status, name: :series_processing_status_check)

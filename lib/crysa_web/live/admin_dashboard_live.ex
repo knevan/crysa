@@ -273,13 +273,33 @@ defmodule CrysaWeb.Live.AdminDashboardLive do
   end
 
   @impl true
+  def handle_event("validate_cover", _params, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  # Drops a staged cover entry when the admin dismisses the dialog without
+  # creating. Idempotent: unknown refs (already consumed or never staged)
+  # are ignored so a late cancel after a successful create is harmless.
+  def handle_event("cancel-upload", %{"ref" => ref}, socket) do
+    {:noreply, maybe_cancel_cover_upload(socket, ref)}
+  end
+
+  def handle_event("cancel-upload", _params, socket), do: {:noreply, socket}
+
+  @impl true
   def handle_event("admin:create_series", params, socket) do
     title = params["title"] |> to_string() |> String.trim()
     description = params["description"] |> to_string() |> String.trim()
     source_url = params["sourceUrl"] |> to_string() |> String.trim()
     authors = Map.get(params, "authors", [])
     tag_ids = Map.get(params, "selectedTagIds", [])
+    cover_file_name = params["coverFileName"] |> to_string() |> String.trim()
 
+    # NOTE: `consume_uploaded_entries/3` returns UNWRAPPED `{:ok, value}`
+    # payloads (bare values, never `{:ok, ...}` tuples), so the fun tags its
+    # own outcomes (`:stored` / `:storage_error`) — same pattern as
+    # `UserSettingsLive` avatar upload.
     cover_result =
       consume_uploaded_entries(socket, :cover, fn %{path: path}, entry ->
         upload = %Plug.Upload{
@@ -289,8 +309,8 @@ defmodule CrysaWeb.Live.AdminDashboardLive do
         }
 
         case Crysa.Storage.store_cover(upload) do
-          {:ok, %{url: url}} ->
-            {:ok, url}
+          {:ok, %{key: key}} ->
+            {:ok, {:stored, key}}
 
           {:error, reason} ->
             require Logger
@@ -300,31 +320,15 @@ defmodule CrysaWeb.Live.AdminDashboardLive do
               filename: entry.client_name
             )
 
-            {:postpone, reason}
+            {:ok, {:storage_error, reason}}
         end
       end)
 
     # Detect upload validation or storage errors
     upload_errors = socket.assigns.uploads.cover.errors
 
-    {cover_url, cover_error} =
-      case {cover_result, upload_errors} do
-        {[], []} ->
-          # No file selected — cover is optional for now, but log adapter
-          {nil, nil}
-
-        {[], errors} when errors != [] ->
-          {nil, {:validation, errors}}
-
-        {[{:ok, url}], _} ->
-          {url, nil}
-
-        {[{:postpone, reason}], _} ->
-          {nil, {:storage, reason}}
-
-        _ ->
-          {nil, {:unknown, cover_result}}
-      end
+    {cover_key, cover_error} =
+      resolve_cover_outcome(cover_result, upload_errors, cover_file_name)
 
     if cover_error do
       {:noreply,
@@ -337,6 +341,9 @@ defmodule CrysaWeb.Live.AdminDashboardLive do
 
            {:storage, reason} ->
              "Cover upload to R2 failed: #{inspect(reason)} — check S3 config and bucket"
+
+           {:pending, _} ->
+             "Cover upload was not received yet — wait until 100% uploaded, then try again"
 
            _ ->
              "Cover upload failed"
@@ -354,7 +361,7 @@ defmodule CrysaWeb.Live.AdminDashboardLive do
           publication_status: "ongoing",
           processing_status: "available"
         }
-        |> maybe_put_cover(cover_url)
+        |> maybe_put_cover_key(cover_key)
 
       case Catalog.create_series(attrs) do
         {:ok, series} ->
@@ -1410,8 +1417,66 @@ defmodule CrysaWeb.Live.AdminDashboardLive do
 
   defp slugify(_), do: ""
 
-  defp maybe_put_cover(attrs, nil), do: attrs
-  defp maybe_put_cover(attrs, url) when is_binary(url), do: Map.put(attrs, :cover_url, url)
+  defp maybe_put_cover_key(attrs, nil), do: attrs
+
+  defp maybe_put_cover_key(attrs, key) when is_binary(key),
+    do: Map.put(attrs, :cover_key, key)
+
+  @spec maybe_cancel_cover_upload(Phoenix.LiveView.Socket.t(), term()) ::
+          Phoenix.LiveView.Socket.t()
+  defp maybe_cancel_cover_upload(socket, ref) when is_binary(ref) do
+    staged_refs = Enum.map(socket.assigns.uploads.cover.entries, & &1.ref)
+
+    if ref in staged_refs do
+      cancel_upload(socket, :cover, ref)
+    else
+      socket
+    end
+  end
+
+  defp maybe_cancel_cover_upload(socket, _ref), do: socket
+
+  @doc """
+  Resolves an `admin:create_series` cover outcome from consumed entry results,
+  upload errors and the client-declared file name.
+
+  Pure decision function, extracted for direct testing. `consumed` holds the
+  unwrapped `{:ok, value}` payloads returned by `consume_uploaded_entries/3`
+  (bare values, never `{:ok, ...}` tuples). A stored entry resolves to its
+  opaque storage key; URL construction happens at the presentation boundary
+  (`Catalog.cover_url/1`).
+  """
+  @spec resolve_cover_outcome(list(), list(), String.t()) ::
+          {String.t() | nil,
+           nil
+           | {:validation, list()}
+           | {:storage, term()}
+           | {:pending, term()}
+           | {:unknown, term()}}
+  def resolve_cover_outcome(consumed, upload_errors, cover_file_name \\ "") do
+    case {consumed, upload_errors} do
+      {[{:stored, key}], _} when is_binary(key) ->
+        {key, nil}
+
+      {[{:storage_error, reason}], _} ->
+        {nil, {:storage, reason}}
+
+      {[], []} when cover_file_name == "" ->
+        # No file selected — cover is optional for now
+        {nil, nil}
+
+      {[], []} ->
+        # Client claimed a file but none reached the server (still uploading
+        # or never enqueued) — fail loudly instead of saving without cover.
+        {nil, {:pending, cover_file_name}}
+
+      {[], errors} when errors != [] ->
+        {nil, {:validation, errors}}
+
+      _ ->
+        {nil, {:unknown, consumed}}
+    end
+  end
 
   defp format_series_error(changeset) do
     changeset
@@ -1519,7 +1584,7 @@ defmodule CrysaWeb.Live.AdminDashboardLive do
       publicationStatus: series.publication_status,
       processingStatus: series.processing_status,
       sourceUrl: series.source_url,
-      coverUrl: series.cover_url,
+      coverUrl: Catalog.cover_url(series),
       updatedAt: format_datetime(series.updated_at),
       insertedAt: format_datetime(series.inserted_at),
       manualCheckIntervalMinutes: series.manual_check_interval_minutes,

@@ -48,10 +48,34 @@ const coverPreviewUrl = ref<string | null>(null)
 const coverInputKey = ref(0)
 
 // LiveView upload — file is buffered in LiveView temp (RAM/disk) via allow_upload, then moved to Object Storage on create
-const { entries: coverEntries, showFilePicker, addFiles, progress: coverProgress } = useLiveUpload(
+const { entries: coverEntries, showFilePicker, addFiles, cancel, progress: coverProgress } = useLiveUpload(
   () => props.coverUpload,
-  { changeEvent: undefined, submitEvent: undefined } as any,
+  { changeEvent: 'validate_cover', submitEvent: undefined } as any,
 )
+
+// True once Create was pushed; guards the close watcher from cancelling
+// entries that the server just consumed.
+const submitted = ref(false)
+
+function resetCoverState() {
+  coverFileName.value = null
+  coverFile.value = null
+  if (coverPreviewUrl.value) {
+    URL.revokeObjectURL(coverPreviewUrl.value)
+    coverPreviewUrl.value = null
+  }
+  coverInputKey.value++
+}
+
+// Drop a staged-but-unsubmitted cover from LiveView temp so a dismissed
+// dialog never leaks an entry into the next open (max_entries is 1, and a
+// stale entry could otherwise attach to the wrong series).
+function cancelStagedCover() {
+  if ((coverEntries.value as any[])?.length) {
+    try { cancel() } catch (_) {}
+  }
+  resetCoverState()
+}
 
 watch(() => props.open, open => {
   if (open) {
@@ -63,13 +87,14 @@ watch(() => props.open, open => {
     description.value = ''
     sourceUrl.value = ''
     selectedTagIds.value = new Set()
-    coverFileName.value = null
-    coverFile.value = null
-    if (coverPreviewUrl.value) {
-      URL.revokeObjectURL(coverPreviewUrl.value)
-      coverPreviewUrl.value = null
-    }
-    coverInputKey.value++
+    submitted.value = false
+    // Defensive: drop any entry left by a close whose cancel never arrived.
+    cancelStagedCover()
+  } else if (!submitted.value) {
+    // Dismissed without creating (Cancel, X, overlay, Escape) — clean staging.
+    cancelStagedCover()
+  } else {
+    resetCoverState()
   }
 })
 
@@ -85,6 +110,16 @@ const isValid = computed(() => {
   return title.value.trim().length > 0 &&
     description.value.trim().length > 0 &&
     sourceUrl.value.trim().length > 0
+})
+
+// True while a chosen cover hasn't finished buffering to LiveView temp.
+// Blocks Create so `admin:create_series` never runs with an empty server
+// entry (which the server would otherwise have to reject as pending).
+const isCoverUploading = computed(() => {
+  if (!coverFileName.value) return false
+  const entry = (coverEntries.value as any[])?.[0] as { progress?: number } | undefined
+  if (!entry) return true
+  return (entry.progress ?? 0) < 100
 })
 
 function addAuthor() {
@@ -146,7 +181,8 @@ function onCoverBoxClick() {
 }
 
 function handleCreate() {
-  if (!isValid.value) return
+  if (!isValid.value || isCoverUploading.value) return
+  submitted.value = true
   emit('createSeries', {
     title: title.value.trim(),
     originalTitle: originalTitle.value.trim(),
@@ -212,7 +248,7 @@ function handleCreate() {
                   v-model="description"
                   placeholder="Series Description"
                   rows="4"
-                  class="flex min-h-[90px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  class="flex min-h-22.5 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 />
               </div>
 
@@ -223,7 +259,7 @@ function handleCreate() {
 
               <div class="space-y-1.5">
                 <label class="text-sm font-medium">Tags</label>
-                <div class="flex flex-wrap gap-1.5 min-h-[28px] rounded-md border bg-muted/20 p-2">
+                <div class="flex flex-wrap gap-1.5 min-h-7 rounded-md border bg-muted/20 p-2">
                   <span v-if="selectedTagIds.size===0" class="text-xs text-muted-foreground py-0.5">No tags selected</span>
                   <span
                     v-for="id in [...selectedTagIds]"
@@ -253,7 +289,7 @@ function handleCreate() {
             <div class="lg:col-span-2 space-y-1.5">
               <label class="text-sm font-medium">Cover Image <span class="text-destructive">*</span></label>
               <div
-                class="relative flex h-[280px] lg:h-[360px] w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-lg border border-dashed bg-muted/20 p-4 text-center hover:bg-muted/30 transition-colors"
+                class="relative flex h-70 lg:h-90 w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-lg border border-dashed bg-muted/20 p-4 text-center hover:bg-muted/30 transition-colors"
                 @click="onCoverBoxClick"
               >
                 <!-- Hidden native fallback input (LiveView also injects its own hidden input via useLiveUpload) -->
@@ -275,7 +311,7 @@ function handleCreate() {
                   </div>
                 </template>
                 <template v-else-if="coverFileName">
-                  <span class="text-sm font-medium truncate max-w-[180px]">{{ coverFileName }}</span>
+                  <span class="text-sm font-medium truncate max-w-45">{{ coverFileName }}</span>
                   <span class="text-xs text-muted-foreground mt-1">Click to change</span>
                   <span v-if="coverEntries[0]" class="text-xs text-muted-foreground">{{ coverEntries[0].progress }}% uploaded — buffered in RAM/disk</span>
                 </template>
@@ -284,7 +320,7 @@ function handleCreate() {
                   <span class="text-sm text-muted-foreground">Choose file</span>
                 </template>
               </div>
-              <p class="text-xs text-muted-foreground">PNG, JPG, WebP up to 5MB — buffered in temp then stored to {{ coverEntries[0]?.progress != null ? coverEntries[0].progress + '% • ' : '' }}S3/R2 on Create</p>
+              <p class="text-xs text-muted-foreground">PNG, JPG, WebP up to 5MB {{ coverEntries[0]?.progress != null ? coverEntries[0].progress + '%' : '' }}</p>
             </div>
           </div>
         </div>
@@ -292,7 +328,7 @@ function handleCreate() {
         <!-- Footer -->
         <div class="flex justify-end gap-2 px-6 py-4 border-t bg-muted/10">
           <Button variant="outline" class="h-8" @click="emit('update:open', false)">Cancel</Button>
-          <Button class="h-8" :disabled="!isValid" @click="handleCreate">Create Series</Button>
+          <Button class="h-8" :disabled="!isValid || isCoverUploading" @click="handleCreate">Create Series</Button>
         </div>
       </DialogContent>
     </DialogPortal>

@@ -179,9 +179,9 @@ const pageSizeOptions = [25, 50, 75, 100] as const
               </thead>
               <tbody>
                 <tr v-for="ch in chapters" :key="ch.id" class="border-b hover:bg-muted/30">
-                  <td class="px-3 py-2 font-mono text-xs truncate max-w-[110px]" :title="ch.chapterKey">{{ ch.chapterKey }}</td>
+                  <td class="px-3 py-2 font-mono text-xs truncate max-w-27.5" :title="ch.chapterKey">{{ ch.chapterKey }}</td>
                   <td class="px-3 py-2 font-medium">{{ ch.displayNumber }}</td>
-                  <td class="px-3 py-2 truncate max-w-[180px] hidden md:table-cell" :title="ch.title || ''">{{ ch.title || '—' }}</td>
+                  <td class="px-3 py-2 truncate max-w-45 hidden md:table-cell" :title="ch.title || ''">{{ ch.title || '—' }}</td>
                   <td class="px-3 py-2">
                     <span :class="`inline-flex rounded-full px-2 py-0.5 text-xs font-medium capitalize ${statusClass(ch.status)}`">{{ ch.status.replace('_', ' ') }}</span>
                   </td>

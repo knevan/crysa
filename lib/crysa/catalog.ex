@@ -11,6 +11,7 @@ defmodule Crysa.Catalog do
   alias Crysa.Pagination
   alias Crysa.Processing.CheckSchedule
   alias Crysa.Repo
+  alias Crysa.Storage
 
   import Ecto.Query
 
@@ -46,6 +47,19 @@ defmodule Crysa.Catalog do
     changeset = maybe_reschedule(changeset, series)
     Repo.update(changeset)
   end
+
+  @doc """
+  Resolves the public cover URL for a series from its stored storage key.
+
+  The database holds the opaque storage key; URL construction (adapter
+  prefix or CDN base) happens here at the presentation boundary so stored
+  data stays identical across environments.
+  """
+  @spec cover_url(Series.t() | nil) :: String.t() | nil
+  def cover_url(%Series{cover_key: key}) when is_binary(key) and key != "",
+    do: Storage.url_for(key)
+
+  def cover_url(_), do: nil
 
   defp maybe_inject_next_check(attrs) do
     # Normalize once to avoid dual atom/string access (Credo warning)

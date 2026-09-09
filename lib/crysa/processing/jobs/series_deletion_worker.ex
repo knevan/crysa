@@ -80,10 +80,9 @@ defmodule Crysa.Processing.Jobs.SeriesDeletionWorker do
       )
 
     cover_key =
-      case series.cover_url && Storage.key_from_url(series.cover_url) do
-        {:ok, key} -> [key]
-        _ -> []
-      end
+      if is_binary(series.cover_key) and series.cover_key != "",
+        do: [series.cover_key],
+        else: []
 
     Enum.uniq(image_keys ++ cover_key)
   end

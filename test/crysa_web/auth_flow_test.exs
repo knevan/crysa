@@ -449,7 +449,8 @@ defmodule CrysaWeb.AuthFlowTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Avatar updated"
 
       profile = Accounts.get_or_create_profile(user)
-      assert profile.avatar_url =~ ~r{^/uploads/avatars/}
+      assert profile.avatar_key =~ ~r{^avatars/}
+      assert Accounts.avatar_url(profile) =~ ~r{^/uploads/avatars/}
     end
 
     test "rejects a non-image content type", %{conn: conn} do

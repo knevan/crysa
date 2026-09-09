@@ -5,7 +5,7 @@
       <div class="flex flex-wrap items-start gap-6">
         <figure class="w-40 shrink-0 overflow-hidden rounded-box">
           <img
-            src={@series.cover_url || ~p"/images/placeholder-cover.svg"}
+            src={Crysa.Catalog.cover_url(@series) || ~p"/images/placeholder-cover.svg"}
             alt={@series.title}
             class="aspect-[3/4] w-full object-cover"
           />

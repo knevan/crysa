@@ -328,7 +328,7 @@ const rows = computed(() => {
             >
               <div
                 class="h-full w-px bg-border transition-colors group-hover/handle:bg-foreground"
-                :class="{ '!bg-foreground': header.column.getIsResizing() }"
+                :class="{ 'bg-foreground!': header.column.getIsResizing() }"
               />
             </div>
             <div v-else-if="idx < headerGroup.headers.length - 1 && !header.isPlaceholder" class="absolute right-0 top-0 h-full w-px bg-border" />
@@ -344,7 +344,7 @@ const rows = computed(() => {
           <td
             v-for="cell in row.getVisibleCells()"
             :key="cell.id"
-            class="p-3 align-middle border-r border-border [&:last-child]:border-r-0"
+            class="p-3 align-middle border-r border-border last:border-r-0"
           >
             <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
           </td>

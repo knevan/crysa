@@ -122,7 +122,7 @@ defmodule Crysa.Processing.JobsTest do
       series =
         series_fixture(%{
           source_url: "https://deletion.example.test/s/1",
-          cover_url: "/uploads/covers/abc.jpg",
+          cover_key: "covers/abc.jpg",
           processing_status: "pending_deletion"
         })
 

@@ -223,7 +223,7 @@ defmodule CrysaWeb.Live.BookmarkLive do
       id: series.id,
       title: series.title,
       slug: series.slug,
-      coverUrl: series.cover_url,
+      coverUrl: Catalog.cover_url(series),
       status: series.publication_status || "ongoing",
       bookmarkedAt: bookmark.inserted_at && DateTime.to_iso8601(bookmark.inserted_at),
       lastChapterAt: series.last_chapter_at && DateTime.to_iso8601(series.last_chapter_at),
