@@ -7,19 +7,6 @@ defmodule CrysaWeb.CatalogController do
   alias Crysa.Catalog
   alias Crysa.Library
 
-  def index(conn, params) do
-    {series, pagination} = Catalog.browse_series(params)
-    categories = Catalog.list_categories_with_counts()
-
-    render(conn, :index,
-      page_title: "Browse Series",
-      series: series,
-      pagination: pagination,
-      categories: categories,
-      params: params
-    )
-  end
-
   def popular(conn, params) do
     {series, pagination} = Catalog.list_most_viewed(params)
 
@@ -40,12 +27,6 @@ defmodule CrysaWeb.CatalogController do
       pagination: pagination,
       params: params
     )
-  end
-
-  def tags(conn, _params) do
-    categories = Catalog.list_categories_with_counts()
-
-    render(conn, :tags, page_title: "Tags", categories: categories)
   end
 
   def show(conn, %{"slug" => slug} = params) do

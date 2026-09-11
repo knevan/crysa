@@ -172,6 +172,47 @@ defmodule Crysa.Catalog.Query do
     |> Repo.one()
   end
 
+  @doc """
+  Latest `available` chapter per series id in a single query.
+
+  Uses Postgres `DISTINCT ON (series_id)` ordered by `sort_key DESC, id DESC`,
+  mirroring `get_latest_chapter/1`. Empty input short-circuits to avoid an
+  `IN ()` query. Used by the browse page to render Latest/Last-Reading meta
+  without one query per card.
+  """
+  @spec latest_chapters_by_series([integer()]) :: %{integer() => Chapter.t()}
+  def latest_chapters_by_series([]), do: %{}
+
+  def latest_chapters_by_series(series_ids) when is_list(series_ids) do
+    from(c in Chapter,
+      where: c.series_id in ^series_ids and c.status == "available",
+      distinct: c.series_id,
+      order_by: [asc: c.series_id, desc: c.sort_key, desc: c.id]
+    )
+    |> Repo.all()
+    |> Map.new(fn chapter -> {chapter.series_id, chapter} end)
+  end
+
+  @doc """
+  First `available` chapter per series id in a single query.
+
+  Browse cards link their CTA to chapter 1 (discovery intent), so the
+  first chapter — not the latest — is the only per-card chapter needed.
+  Empty input short-circuits to avoid an `IN ()` query.
+  """
+  @spec first_chapters_by_series([integer()]) :: %{integer() => Chapter.t()}
+  def first_chapters_by_series([]), do: %{}
+
+  def first_chapters_by_series(series_ids) when is_list(series_ids) do
+    from(c in Chapter,
+      where: c.series_id in ^series_ids and c.status == "available",
+      distinct: c.series_id,
+      order_by: [asc: c.series_id, asc: c.sort_key, asc: c.id]
+    )
+    |> Repo.all()
+    |> Map.new(fn chapter -> {chapter.series_id, chapter} end)
+  end
+
   @spec get_reader_chapter(integer(), String.t()) :: Chapter.t() | nil
   def get_reader_chapter(series_id, chapter_key) when is_integer(series_id) do
     images_query = from(i in ChapterImage, order_by: i.image_order)

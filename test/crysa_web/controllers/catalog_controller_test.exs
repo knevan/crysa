@@ -1,7 +1,6 @@
 defmodule CrysaWeb.CatalogControllerTest do
   use CrysaWeb.ConnCase, async: true
 
-  alias Crysa.Catalog
   alias Crysa.CatalogFixtures
 
   describe "GET /" do
@@ -16,49 +15,16 @@ defmodule CrysaWeb.CatalogControllerTest do
   end
 
   describe "GET /series" do
-    test "renders the browse page with series", %{conn: conn} do
-      series = CatalogFixtures.series_fixture()
-
-      conn = get(conn, ~p"/series")
-
-      assert html_response(conn, 200) =~ "Browse Series"
-      assert html_response(conn, 200) =~ series.title
-    end
-
-    test "filters by search term", %{conn: conn} do
-      wanted = CatalogFixtures.series_fixture(%{title: "Unique Manga Story"})
-      CatalogFixtures.series_fixture(%{title: "Other Title"})
-
-      conn = get(conn, ~p"/series", q: "unique")
-
-      assert html_response(conn, 200) =~ wanted.title
-      refute html_response(conn, 200) =~ "Other Title"
-    end
-
-    test "filters by category", %{conn: conn} do
-      category = CatalogFixtures.category_fixture("Action")
-      tagged = CatalogFixtures.series_fixture()
-      {:ok, _} = Catalog.set_series_categories(tagged, [category])
-      untagged = CatalogFixtures.series_fixture()
-
-      conn = get(conn, ~p"/series", category: "Action")
-
-      assert html_response(conn, 200) =~ tagged.title
-      refute html_response(conn, 200) =~ untagged.title
-    end
-
-    test "renders an empty state when nothing matches", %{conn: conn} do
-      conn = get(conn, ~p"/series", q: "no such title")
-
-      assert html_response(conn, 200) =~ "No series match your filters"
-    end
-
-    test "clamps out-of-range pagination params without errors", %{conn: conn} do
+    # Browse is now a LiveView (`BrowseLive` rendering the full-Vue
+    # `BrowsePage`); coverage lives in `CrysaWeb.BrowseLiveTest`.
+    test "routes to the browse LiveView", %{conn: conn} do
       CatalogFixtures.series_fixture()
 
-      conn = get(conn, ~p"/series", page: "99999", page_size: "9999")
+      import Phoenix.LiveViewTest
+      {:ok, view, _html} = live(conn, ~p"/series")
 
-      assert html_response(conn, 200) =~ "Browse Series"
+      vue = LiveVue.Test.get_vue(view)
+      assert vue.component == "BrowsePage"
     end
   end
 
@@ -84,24 +50,14 @@ defmodule CrysaWeb.CatalogControllerTest do
     end
   end
 
-  describe "GET /tags" do
-    test "renders tags with series counts", %{conn: conn} do
-      category = CatalogFixtures.category_fixture("Fantasy")
-      series = CatalogFixtures.series_fixture()
-      {:ok, _} = Catalog.set_series_categories(series, [category])
+  describe "GET /series tri-state genre filter" do
+    # Covered in `CrysaWeb.BrowseLiveTest` (toggle cycle + include/exclude).
+    test "toggle cycle lives in the browse LiveView", %{conn: conn} do
+      import Phoenix.LiveViewTest
+      {:ok, view, _html} = live(conn, ~p"/series")
 
-      conn = get(conn, ~p"/tags")
-
-      assert html_response(conn, 200) =~ "Tags"
-      assert html_response(conn, 200) =~ "Fantasy"
-    end
-
-    test "omits categories without series", %{conn: conn} do
-      CatalogFixtures.category_fixture("Empty Tag")
-
-      conn = get(conn, ~p"/tags")
-
-      refute html_response(conn, 200) =~ "Empty Tag"
+      render_hook(view, "browse_toggle_tag", %{"name" => "Fantasy"})
+      assert_patch(view, "/series?category=Fantasy")
     end
   end
 

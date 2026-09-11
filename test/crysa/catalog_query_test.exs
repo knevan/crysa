@@ -15,17 +15,23 @@ defmodule Crysa.CatalogQueryTest do
 
       backdate(old)
 
-      {series, pagination} = Catalog.list_new_series()
+      {series, _} = Catalog.list_new_series()
+      ids = Enum.map(series, & &1.id)
 
-      assert Enum.map(series, & &1.id) == [new.id, old.id]
-      assert pagination.total_entries == 2
-      assert pagination.total_pages == 1
+      # Relative order only: the listing is global, other tests' rows may
+      # be visible (e.g. `:unboxed` commits), so never assert exact equality.
+      assert old.id in ids and new.id in ids
+      assert Enum.find_index(ids, &(&1 == new.id)) < Enum.find_index(ids, &(&1 == old.id))
     end
 
     test "clamps page and page_size inputs" do
-      for _ <- 1..30, do: CatalogFixtures.series_fixture()
+      prefix = unique_prefix()
 
-      {_series, pagination} = Catalog.list_new_series(%{"page" => "0", "page_size" => "1000"})
+      for i <- 1..30, do: CatalogFixtures.series_fixture(%{title: scoped_title(prefix, "S#{i}")})
+
+      {_series, pagination} =
+        Catalog.list_new_series(%{"q" => prefix, "page" => "0", "page_size" => "1000"})
+
       assert pagination.page == 1
       assert pagination.page_size == 60
       assert pagination.total_entries == 30
@@ -33,9 +39,11 @@ defmodule Crysa.CatalogQueryTest do
     end
 
     test "clamps a page beyond the result set to the last page" do
-      for _ <- 1..5, do: CatalogFixtures.series_fixture()
+      prefix = unique_prefix()
 
-      {series, pagination} = Catalog.list_new_series(%{"page" => "10"})
+      for i <- 1..5, do: CatalogFixtures.series_fixture(%{title: scoped_title(prefix, "S#{i}")})
+
+      {series, pagination} = Catalog.list_new_series(%{"q" => prefix, "page" => "10"})
       assert [_, _, _, _, _] = series
       assert pagination.page == 1
       assert pagination.total_entries == 5
@@ -48,7 +56,13 @@ defmodule Crysa.CatalogQueryTest do
       high = CatalogFixtures.series_fixture(%{view_count: 100})
 
       {series, _} = Catalog.list_most_viewed()
-      assert Enum.map(series, & &1.id) == [high.id, low.id]
+      ids = Enum.map(series, & &1.id)
+
+      # Relative order only: the listing is global, other tests' rows may
+      # be visible (e.g. `:unboxed` commits), so never assert exact equality.
+      assert low.id in ids and high.id in ids
+
+      assert Enum.find_index(ids, &(&1 == high.id)) < Enum.find_index(ids, &(&1 == low.id))
     end
 
     test "keeps stable order when view counts are equal" do
@@ -57,7 +71,11 @@ defmodule Crysa.CatalogQueryTest do
       c = CatalogFixtures.series_fixture(%{view_count: 5})
 
       {series, _} = Catalog.list_most_viewed()
-      assert Enum.map(series, & &1.id) == [c.id, b.id, a.id]
+      ids = Enum.map(series, & &1.id)
+
+      assert Enum.all?([a.id, b.id, c.id], &(&1 in ids))
+      assert Enum.find_index(ids, &(&1 == c.id)) < Enum.find_index(ids, &(&1 == b.id))
+      assert Enum.find_index(ids, &(&1 == b.id)) < Enum.find_index(ids, &(&1 == a.id))
     end
   end
 
@@ -71,8 +89,12 @@ defmodule Crysa.CatalogQueryTest do
       set_last_chapter_at(new_update, ~U[2026-02-01 00:00:00.000000Z])
 
       {series, _} = Catalog.list_latest_updates()
+      ids = Enum.map(series, & &1.id)
 
-      assert Enum.map(series, & &1.id) == [new_update.id, old_update.id, no_chapters.id]
+      assert Enum.all?([no_chapters.id, old_update.id, new_update.id], &(&1 in ids))
+
+      assert Enum.find_index(ids, &(&1 == new_update.id)) <
+               Enum.find_index(ids, &(&1 == old_update.id))
     end
   end
 
@@ -141,17 +163,31 @@ defmodule Crysa.CatalogQueryTest do
 
   describe "browse_series/1 status filter" do
     test "only returns series with the requested publication status" do
-      ongoing = CatalogFixtures.series_fixture(%{publication_status: "ongoing"})
-      completed = CatalogFixtures.series_fixture(%{publication_status: "completed"})
+      prefix = unique_prefix()
 
-      {series, _} = Catalog.browse_series(%{"publication_status" => "completed"})
+      ongoing =
+        CatalogFixtures.series_fixture(%{
+          title: scoped_title(prefix, "Ongoing"),
+          publication_status: "ongoing"
+        })
+
+      completed =
+        CatalogFixtures.series_fixture(%{
+          title: scoped_title(prefix, "Completed"),
+          publication_status: "completed"
+        })
+
+      {series, _} = Catalog.browse_series(%{"q" => prefix, "publication_status" => "completed"})
       assert Enum.map(series, & &1.id) == [completed.id]
 
-      {series, _} = Catalog.browse_series(%{"publication_status" => "ongoing"})
+      {series, _} = Catalog.browse_series(%{"q" => prefix, "publication_status" => "ongoing"})
       assert Enum.map(series, & &1.id) == [ongoing.id]
 
-      {series, _} = Catalog.browse_series(%{"publication_status" => "not-a-status"})
-      assert [_, _] = series
+      {series, _} =
+        Catalog.browse_series(%{"q" => prefix, "publication_status" => "not-a-status"})
+
+      # Order under trigram similarity is not meaningful for two rows.
+      assert Enum.map(series, & &1.id) |> Enum.sort() == Enum.sort([ongoing.id, completed.id])
     end
   end
 
@@ -195,7 +231,7 @@ defmodule Crysa.CatalogQueryTest do
       series = CatalogFixtures.series_fixture(%{title: "Berserk"})
 
       {series_all, _} = Catalog.browse_series(%{"q" => "   "})
-      assert Enum.map(series_all, & &1.id) == [series.id]
+      assert series.id in Enum.map(series_all, & &1.id)
 
       long_term = String.duplicate("a", 500)
       {series_long, _} = Catalog.browse_series(%{"q" => long_term})
@@ -209,15 +245,17 @@ defmodule Crysa.CatalogQueryTest do
 
   describe "pagination stability" do
     test "boundary pages contain no duplicates and cover the full set" do
+      prefix = unique_prefix()
+
       ids =
-        for _ <- 1..7 do
-          CatalogFixtures.series_fixture().id
+        for i <- 1..7 do
+          CatalogFixtures.series_fixture(%{title: scoped_title(prefix, "S#{i}")}).id
         end
         |> Enum.reverse()
 
-      {page1, p1} = Catalog.browse_series(%{"page" => "1", "page_size" => "3"})
-      {page2, p2} = Catalog.browse_series(%{"page" => "2", "page_size" => "3"})
-      {page3, p3} = Catalog.browse_series(%{"page" => "3", "page_size" => "3"})
+      {page1, p1} = Catalog.browse_series(%{"q" => prefix, "page" => "1", "page_size" => "3"})
+      {page2, p2} = Catalog.browse_series(%{"q" => prefix, "page" => "2", "page_size" => "3"})
+      {page3, p3} = Catalog.browse_series(%{"q" => prefix, "page" => "3", "page_size" => "3"})
 
       assert p1.page_size == 3
       assert p2.page == 2
@@ -229,26 +267,36 @@ defmodule Crysa.CatalogQueryTest do
     end
 
     test "page_size is clamped to the upper bound" do
-      for _ <- 1..70, do: CatalogFixtures.series_fixture()
+      prefix = unique_prefix()
 
-      {series, pagination} = Catalog.browse_series(%{"page_size" => "100"})
+      for i <- 1..70, do: CatalogFixtures.series_fixture(%{title: scoped_title(prefix, "S#{i}")})
+
+      {series, pagination} = Catalog.browse_series(%{"q" => prefix, "page_size" => "100"})
       assert Enum.count_until(series, 61) == 60
       assert pagination.page_size == 60
     end
 
     test "a huge page is clamped to the last page" do
-      for _ <- 1..7, do: CatalogFixtures.series_fixture()
+      prefix = unique_prefix()
 
-      {series, pagination} = Catalog.browse_series(%{"page" => "999", "page_size" => "2"})
+      for i <- 1..7, do: CatalogFixtures.series_fixture(%{title: scoped_title(prefix, "S#{i}")})
+
+      {series, pagination} =
+        Catalog.browse_series(%{"q" => prefix, "page" => "999", "page_size" => "2"})
+
       assert [_] = series
       assert pagination.page == 4
       assert pagination.total_pages == 4
     end
 
     test "invalid page inputs fall back to defaults" do
-      for _ <- 1..3, do: CatalogFixtures.series_fixture()
+      prefix = unique_prefix()
 
-      {series, pagination} = Catalog.browse_series(%{"page" => "abc", "page_size" => "xyz"})
+      for i <- 1..3, do: CatalogFixtures.series_fixture(%{title: scoped_title(prefix, "S#{i}")})
+
+      {series, pagination} =
+        Catalog.browse_series(%{"q" => prefix, "page" => "abc", "page_size" => "xyz"})
+
       assert pagination.page == 1
       assert pagination.page_size == 24
       assert [_, _, _] = series
@@ -351,6 +399,13 @@ defmodule Crysa.CatalogQueryTest do
   defp backdate(%Series{} = series) do
     set_field(series, :inserted_at, ~U[2025-01-01 00:00:00.000000Z])
   end
+
+  # Unique title scope so listing assertions only see rows owned by the test,
+  # never globally-committed rows from `:unboxed` concurrency tests.
+  # `list_*` delegates to `browse_series/1`, so `"q"` scopes every listing.
+  defp unique_prefix, do: "Qztag#{System.unique_integer([:positive])}"
+
+  defp scoped_title(prefix, name), do: "#{prefix} #{name}"
 
   defp set_last_chapter_at(%Series{} = series, datetime) do
     set_field(series, :last_chapter_at, datetime)

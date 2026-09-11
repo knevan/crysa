@@ -88,6 +88,21 @@ defmodule Crysa.Library do
   def list_user_bookmark_entries(%User{id: user_id}, params \\ %{}) when is_map(params),
     do: Query.list_user_bookmark_entries(user_id, params)
 
+  @doc """
+  Last read `available` chapter per series id for a user, in one query.
+
+  Thin wrapper over `Crysa.Library.Query.last_read_chapters_for_user/2` so
+  the browse page depends only on the context boundary. Returns `%{}` for
+  guests (nil user) — guests have no progress rows.
+  """
+  @spec last_read_chapters_for_user(User.t() | nil, [integer()]) :: %{
+          integer() => Crysa.Catalog.Chapter.t()
+        }
+  def last_read_chapters_for_user(nil, _series_ids), do: %{}
+
+  def last_read_chapters_for_user(%User{id: user_id}, series_ids) when is_list(series_ids),
+    do: Query.last_read_chapters_for_user(user_id, series_ids)
+
   # Minimum published chapters before a non-completed series can be rated.
   # Prevents premature ratings after 1 chapter. Completed shorts bypass the gate.
   # Raise to 15 later.

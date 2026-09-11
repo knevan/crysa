@@ -35,7 +35,7 @@ defmodule Crysa.MixProject do
 
   def cli do
     [
-      preferred_envs: [precommit: :test]
+      preferred_envs: [precommit: :test, retest: :test, "test.unboxed": :test]
     ]
   end
 
@@ -104,6 +104,7 @@ defmodule Crysa.MixProject do
         "assets.build"
       ],
       retest: ["format", "test"],
+      "test.unboxed": ["ecto.create --quiet", "ecto.migrate --quiet", "test --only unboxed"],
       precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"]
     ]
   end

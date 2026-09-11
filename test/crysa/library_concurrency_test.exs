@@ -6,9 +6,14 @@ defmodule Crysa.LibraryConcurrencyTest do
   real pooled connections and independent transactions, so concurrent callers
   genuinely compete for row locks. Because this bypasses the SQL sandbox,
   every test creates unique rows and cleans them up via `on_exit`.
-  """
 
+  Tagged `:unboxed` (excluded from the default suite in `test_helper.exs`):
+  committed rows are globally visible and would pollute concurrent tests
+  asserting on unfiltered listings. Run via `mix test.unboxed`.
+  """
   use ExUnit.Case, async: false
+
+  @moduletag :unboxed
 
   import Ecto.Query
 
@@ -141,8 +146,12 @@ defmodule Crysa.LibraryConcurrencyTest do
 
   defp seed_unboxed(count) do
     series = CatalogFixtures.series_fixture(%{chapter_count: 10})
+    # Register immediately so a mid-seed failure can never leak the series.
+    register_cleanup(series, [])
+
     for _ <- 1..10, do: CatalogFixtures.chapter_fixture(series)
     users = for _ <- 1..count, do: AccountsFixtures.user_fixture()
+    register_cleanup(series, users)
     {series, users}
   end
 
@@ -175,12 +184,14 @@ defmodule Crysa.LibraryConcurrencyTest do
     from(r in Rating, where: r.series_id == ^series_id)
   end
 
+  # Idempotent (`delete_all` never raises on missing rows): stacked `on_exit`
+  # cleanups from `seed_unboxed/1` are safe no-ops once rows are gone.
+  # Chapters/ratings/bookmarks/views cascade from the series FK (`delete_all`).
   defp cleanup(series, users) do
-    if users != [] do
-      Repo.delete_all(from(u in User, where: u.id in ^Enum.map(users, & &1.id)))
-    end
+    user_ids = Enum.map(users, & &1.id)
+    if user_ids != [], do: Repo.delete_all(from(u in User, where: u.id in ^user_ids))
 
-    Repo.delete!(series)
+    Repo.delete_all(from(s in Series, where: s.id == ^series.id))
     :ok
   end
 end

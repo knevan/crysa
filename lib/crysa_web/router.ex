@@ -57,12 +57,11 @@ defmodule CrysaWeb.Router do
 
     get "/", PageController, :home
 
-    # Series (browse)
-    get "/series", CatalogController, :index
+    # Series browse is a LiveView rendering the full-Vue `BrowsePage`
+    # (1:1 with `ui-sketch/browser-page.pen`); detail stays in `:series_show`.
     get "/series/:slug/:chapter_key", CatalogController, :reader
     get "/popular", CatalogController, :popular
     get "/updates", CatalogController, :updates
-    get "/tags", CatalogController, :tags
 
     # Authentication
     scope "/auth" do
@@ -82,6 +81,7 @@ defmodule CrysaWeb.Router do
     live_session :current_user, on_mount: [{CrysaWeb.UserAuth, :mount_current_user}] do
       live "/notifications", Live.NotificationsLive, :index
       live "/bookmarks", Live.BookmarkLive, :index
+      live "/series", Live.BrowseLive, :index
 
       scope "/auth" do
         live "/login", UserLoginLive, :new

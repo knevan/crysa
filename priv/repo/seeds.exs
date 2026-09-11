@@ -86,6 +86,27 @@ normal_user =
       Repo.preload(u, :role)
   end
 
+# Extra regular user for quick login (kai / kai12345), idempotent by email.
+kai_user =
+  case Accounts.get_user_by_email("kai@example.com") do
+    nil ->
+      user_role = Accounts.get_role_by_name("user")
+
+      {:ok, u} =
+        Accounts.create_bootstrap_user(%{
+          email: "kai@example.com",
+          username: "kai",
+          password_hash: Accounts.hash_password("kai12345"),
+          role_id: user_role.id,
+          active: true
+        })
+
+      u
+
+    %Accounts.User{} = u ->
+      Repo.preload(u, :role)
+  end
+
 # Seed avatar from the real R2 object (idempotent via avatar_key guard)
 profile = Accounts.get_or_create_profile(normal_user)
 
@@ -94,10 +115,8 @@ if is_nil(profile.avatar_key) or profile.avatar_key == "" do
 end
 
 # Ensure categories exist
-["Action", "Drama"]
-|> Enum.each(fn name ->
-  {:ok, _} = Catalog.get_or_create_category(name)
-end)
+{:ok, action_category} = Catalog.get_or_create_category("Action")
+{:ok, drama_category} = Catalog.get_or_create_category("Drama")
 
 # Helper to find or create series by slug (idempotent for ecto.reset)
 find_or_create_series = fn attrs ->
@@ -196,26 +215,53 @@ all_series =
     end
   end)
 
-# Ensure at least one chapter per series (for report target)
+# Link seed categories so browse filter shows tags (idempotent via put_assoc).
 for series <- all_series do
-  case Crysa.Repo.get_by(Crysa.Catalog.Chapter, series_id: series.id, chapter_key: "ch-1") do
-    nil ->
+  cond do
+    series.slug in ["solo-leveling", "jujutsu-kaisen", "shadow-slave", "omniscient-reader"] ->
+      {:ok, _} = Catalog.set_series_categories(series, [action_category])
+
+    series.slug in ["one-piece", "berserk", "the-boxer"] ->
+      {:ok, _} = Catalog.set_series_categories(series, [drama_category])
+
+    true ->
+      {:ok, _} = Catalog.set_series_categories(series, [action_category, drama_category])
+  end
+end
+
+# 16 available chapters per series so the rating gate (>= 10 published
+# chapters) unlocks on seed data. Idempotent per chapter_key. `create_chapter/1`
+# does not refresh the cached counter, so `chapter_count` is re-synced here.
+chapter_seed_total = 16
+
+for series <- all_series do
+  for n <- 1..chapter_seed_total do
+    key = "ch-#{n}"
+
+    unless Repo.get_by(Crysa.Catalog.Chapter, series_id: series.id, chapter_key: key) do
       {:ok, _} =
         Catalog.create_chapter(%{
           series_id: series.id,
-          chapter_key: "ch-1",
-          display_number: "1",
-          sort_key: "000001",
-          source_url: "https://example.test/series/#{series.slug}/ch-1",
+          chapter_key: key,
+          display_number: "#{n}",
+          sort_key: String.pad_leading("#{n}", 6, "0"),
+          source_url: "https://example.test/series/#{series.slug}/#{key}",
           status: "available",
-          title: "Chapter 1"
+          title: "Chapter #{n}"
         })
-
-      :ok
-
-    _ ->
-      :ok
+    end
   end
+
+  available =
+    Repo.aggregate(
+      from(c in Crysa.Catalog.Chapter,
+        where: c.series_id == ^series.id and c.status == "available"
+      ),
+      :count,
+      :id
+    )
+
+  {:ok, _} = Catalog.update_series(series, %{chapter_count: available})
 end
 
 # Seed view logs so the trending carousel tabs show distinct behavior.
@@ -277,10 +323,20 @@ for series <- all_series do
   end
 end
 
-# Seed series-update notifications for the normal user (idempotent:
+# Admin needs seeded notifications too: notification surfaces are strictly
+# recipient-scoped, so checking as admin showed an empty inbox while only
+# the normal user had rows. Bookmarking every series for the admin fans the
+# chapter notifications out to both demo users.
+admin_user = Accounts.get_user_by_email(admin_email) || normal_user
+
+# Seed series-update notifications for the demo users (idempotent:
 # bookmarking and chapter fan-out both dedupe, so reseeds insert nothing).
 for series <- all_series do
   {:ok, _} = Library.bookmark_series(normal_user, series)
+
+  if admin_user.id != normal_user.id do
+    {:ok, _} = Library.bookmark_series(admin_user, series)
+  end
 
   case Repo.get_by(Crysa.Catalog.Chapter, series_id: series.id, chapter_key: "ch-1") do
     nil -> :ok
@@ -313,7 +369,6 @@ new_chapter =
 {:ok, _} = Notifications.notify_series_chapter(series1.id, new_chapter.id)
 
 # Seed reports (1 pending, 1 resolved) — idempotent via reporter + target + reason
-admin_user = Accounts.get_user_by_email(admin_email) || normal_user
 chapter1 = Repo.get_by(Crysa.Catalog.Chapter, series_id: series1.id, chapter_key: "ch-1")
 chapter2 = Repo.get_by(Crysa.Catalog.Chapter, series_id: series2.id, chapter_key: "ch-1")
 
@@ -388,6 +443,43 @@ if seed_actor do
   # (Voting the same comment up then down would flip-flop and duplicate
   # notifications on every reseed, hence two root comments.)
   {:ok, _} = Comments.vote_comment(seed_actor, seed_root2, -1)
+
+  # Admin root + normal_user reply -> comment_reply notification for the
+  # admin, so the default comment tab is non-empty for both demo users.
+  admin_root =
+    case Repo.one(
+           from(c in Crysa.Comments.Comment,
+             where:
+               c.series_id == ^series1.id and c.user_id == ^seed_actor.id and
+                 is_nil(c.parent_id) and
+                 c.body_markdown == "Seed: admin note — enjoy the discussion."
+           )
+         ) do
+      nil ->
+        {:ok, comment} =
+          Comments.create_comment(%{
+            user_id: seed_actor.id,
+            series_id: series1.id,
+            body_markdown: "Seed: admin note — enjoy the discussion."
+          })
+
+        comment
+
+      %Crysa.Comments.Comment{} = comment ->
+        comment
+    end
+
+  if is_nil(
+       Repo.get_by(Crysa.Comments.Comment, parent_id: admin_root.id, user_id: normal_user.id)
+     ) do
+    {:ok, _} =
+      Comments.create_comment(%{
+        user_id: normal_user.id,
+        series_id: series1.id,
+        parent_id: admin_root.id,
+        body_markdown: "Seed: thanks, glad to be here!"
+      })
+  end
 end
 
 if chapter1 && chapter2 do
@@ -465,5 +557,5 @@ if existing < 2 do
 end
 
 IO.puts(
-  "Seeded: normal user (user@example.com, avatar), 18 series (covers), 19 chapters, view logs per trending window, 8 notifications, 3 comments, 2 reports, 2 audit logs"
+  "Seeded: normal user (user@example.com, avatar), 18 series (covers), 288 chapters (16/series, counters synced), 42 notifications across both demo users, 5 comments, 2 reports, 2 audit logs"
 )

@@ -94,7 +94,7 @@ defmodule Crysa.Library.Query do
 
     series_ids = rows |> Enum.map(fn {_b, s} -> s.id end) |> Enum.uniq()
     latest_by_series = latest_chapters_by_series(series_ids)
-    last_read_by_series = last_read_chapters_by_series(user_id, series_ids)
+    last_read_by_series = last_read_chapters_for_user(user_id, series_ids)
 
     entries =
       Enum.map(rows, fn {bookmark, series} ->
@@ -130,10 +130,17 @@ defmodule Crysa.Library.Query do
   # series. Progress rows whose chapter was deleted (`last_chapter_id` nil)
   # or became unreadable are dropped by the join, so the card falls back
   # to `—` instead of linking to a dead reader URL.
-  @spec last_read_chapters_by_series(integer(), [integer()]) :: %{integer() => Chapter.t()}
-  defp last_read_chapters_by_series(_user_id, []), do: %{}
+  @doc """
+  Last read `available` chapter per series id for a user, in one query.
 
-  defp last_read_chapters_by_series(user_id, series_ids) do
+  Public so the browse page can render Last-Reading meta without one query
+  per card. Empty input short-circuits to avoid an `IN ()` query.
+  """
+  @spec last_read_chapters_for_user(integer(), [integer()]) :: %{integer() => Chapter.t()}
+  def last_read_chapters_for_user(_user_id, []), do: %{}
+
+  def last_read_chapters_for_user(user_id, series_ids)
+      when is_integer(user_id) and is_list(series_ids) do
     from(p in ReadingProgress,
       where: p.user_id == ^user_id and p.series_id in ^series_ids,
       join: c in assoc(p, :last_chapter),

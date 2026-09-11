@@ -191,7 +191,8 @@ defmodule Crysa.Processing.JobsTest do
   # -- fixtures -----------------------------------------------------------------
 
   defp user_fixture do
-    role = Repo.get_by!(Crysa.Accounts.Role, name: "user")
+    # Get-or-create (never `get_by!`): roles must not leak in from other tests.
+    role = Crysa.AccountsFixtures.role("user")
 
     {:ok, user} =
       Repo.insert(%Crysa.Accounts.User{

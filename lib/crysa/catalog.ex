@@ -644,6 +644,26 @@ defmodule Crysa.Catalog do
   def get_latest_chapter(series_id) when is_integer(series_id),
     do: Query.get_latest_chapter(series_id)
 
+  @doc """
+  Latest `available` chapter per series id in a single batched query.
+
+  Thin wrapper over `Crysa.Catalog.Query.latest_chapters_by_series/1` so the
+  browse LiveView depends only on the context boundary.
+  """
+  @spec latest_chapters_by_series([integer()]) :: %{integer() => Chapter.t()}
+  def latest_chapters_by_series(series_ids) when is_list(series_ids),
+    do: Query.latest_chapters_by_series(series_ids)
+
+  @doc """
+  First `available` chapter per series id in a single batched query.
+
+  Browse cards CTA to chapter 1; thin wrapper so the LiveView depends
+  only on the context boundary.
+  """
+  @spec first_chapters_by_series([integer()]) :: %{integer() => Chapter.t()}
+  def first_chapters_by_series(series_ids) when is_list(series_ids),
+    do: Query.first_chapters_by_series(series_ids)
+
   @spec get_reader_chapter(integer(), String.t()) :: Chapter.t() | nil
   def get_reader_chapter(series_id, chapter_key) when is_integer(series_id),
     do: Query.get_reader_chapter(series_id, chapter_key)

@@ -2,9 +2,14 @@ defmodule Crysa.CommentsConcurrencyTest do
   @moduledoc """
   Concurrency test for comment votes – ensures vote_score stays consistent
   under concurrent writers (same pattern as LibraryConcurrencyTest).
-  """
 
+  Tagged `:unboxed` (excluded from the default suite in `test_helper.exs`):
+  work runs inside `Sandbox.unboxed_run/2` with globally-visible commits.
+  Run via `mix test.unboxed`.
+  """
   use ExUnit.Case, async: false
+
+  @moduletag :unboxed
 
   import Ecto.Query
 
@@ -84,6 +89,8 @@ defmodule Crysa.CommentsConcurrencyTest do
   defp seed_comment_with_users(count) do
     author = AccountsFixtures.user_fixture()
     series = CatalogFixtures.series_fixture()
+    # Register immediately so a mid-seed failure can never leak rows.
+    register_cleanup(nil, [], author, series)
 
     {:ok, comment} =
       Comments.create_comment(%{
@@ -106,7 +113,12 @@ defmodule Crysa.CommentsConcurrencyTest do
         Repo.delete_all(from(u in User, where: u.id in ^Enum.map(users, & &1.id)))
       end
 
-      Repo.delete_all(from(c in Crysa.Comments.Comment, where: c.id == ^comment.id))
+      # Idempotent: every branch tolerates already-deleted rows, and `comment`
+      # may be nil when cleanup runs after a mid-seed failure.
+      if comment do
+        Repo.delete_all(from(c in Crysa.Comments.Comment, where: c.id == ^comment.id))
+      end
+
       Repo.delete_all(from(u in User, where: u.id == ^author.id))
       Repo.delete_all(from(s in Crysa.Catalog.Series, where: s.id == ^series.id))
     end)

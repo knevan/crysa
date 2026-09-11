@@ -22,13 +22,14 @@ const rankClasses = computed(() => {
        CSS (JS-injected): SSR first paint already lays out the track. -->
   <div class="relative min-w-0 grow-0 shrink-0 basis-[31%] sm:basis-[23%] lg:basis-[15.5%]">
     <a :href="seriesHref" class="group block" :aria-label="props.item.title">
-      <div class="relative aspect-3/4 overflow-hidden rounded-lg shadow-sm">
+      <div class="relative aspect-3/4 overflow-hidden rounded-lg bg-base-200 shadow-sm">
         <img
           :src="props.item.coverUrl || '/images/placeholder-cover.svg'"
           :alt="props.item.title"
           loading="lazy"
           decoding="async"
           draggable="false"
+          @error="(e) => { const t = e.target as HTMLImageElement; t.onerror = null; t.src = '/images/placeholder-cover.svg' }"
           class="h-full w-full object-cover"
         />
         <span
