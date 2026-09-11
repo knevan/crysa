@@ -151,9 +151,40 @@ series4 =
     processing_status: "available"
   })
 
+# Extra series so the trending carousel (15 slots) and every period tab have
+# enough rows to scroll and reorder. Same shared R2 cover as the rest.
+extra_series_attrs = [
+  %{title: "Shadow Slave", slug: "shadow-slave", status: "ongoing"},
+  %{title: "SSS-Class Suicide Hunter", slug: "sss-class-suicide-hunter", status: "ongoing"},
+  %{title: "Omniscient Reader", slug: "omniscient-reader", status: "ongoing"},
+  %{title: "Tomb Raider King", slug: "tomb-raider-king", status: "ongoing"},
+  %{title: "The Boxer", slug: "the-boxer", status: "completed"},
+  %{title: "Wind Breaker", slug: "wind-breaker", status: "ongoing"},
+  %{title: "Lookism", slug: "lookism", status: "ongoing"},
+  %{title: "Eleceed", slug: "eleceed", status: "ongoing"},
+  %{title: "Nano Machine", slug: "nano-machine", status: "ongoing"},
+  %{title: "Return of the Mount Hua Sect", slug: "mount-hua-sect", status: "ongoing"},
+  %{title: "Infinite Mage", slug: "infinite-mage", status: "ongoing"},
+  %{title: "Pick Me Up", slug: "pick-me-up", status: "ongoing"},
+  %{title: "Reality Quest", slug: "reality-quest", status: "ongoing"},
+  %{title: "The Greatest Estate Developer", slug: "greatest-estate-developer", status: "hiatus"}
+]
+
+extra_series =
+  Enum.map(extra_series_attrs, fn %{title: title, slug: slug, status: status} ->
+    find_or_create_series.(%{
+      title: title,
+      slug: slug,
+      description: "Seed series for trending carousel behavior.",
+      source_url: "https://example.test/series/#{slug}",
+      publication_status: status,
+      processing_status: "available"
+    })
+  end)
+
 # All seed series share one real R2 cover (idempotent: only fills blank keys,
 # so rows created before this seed keep their existing covers).
-all_series = [series1, series2, series3, series4]
+all_series = [series1, series2, series3, series4] ++ extra_series
 
 all_series =
   Enum.map(all_series, fn series ->
@@ -184,6 +215,65 @@ for series <- all_series do
 
     _ ->
       :ok
+  end
+end
+
+# Seed view logs so the trending carousel tabs show distinct behavior.
+# Buckets are exclusive rolling windows: {last hour, rest of day, rest of
+# week, rest of month}. Idempotent per series: only series with zero views
+# are seeded, so reseeds never duplicate rows.
+view_plan = %{
+  "solo-leveling" => {20, 40, 60, 30},
+  "jujutsu-kaisen" => {25, 15, 20, 10},
+  "one-piece" => {5, 45, 30, 40},
+  "berserk" => {0, 5, 25, 80},
+  "shadow-slave" => {12, 10, 8, 6},
+  "sss-class-suicide-hunter" => {8, 12, 10, 5},
+  "omniscient-reader" => {15, 5, 5, 5},
+  "tomb-raider-king" => {3, 8, 15, 10},
+  "the-boxer" => {0, 3, 5, 25},
+  "wind-breaker" => {2, 2, 12, 12},
+  "lookism" => {6, 6, 6, 6},
+  "eleceed" => {10, 0, 4, 4},
+  "nano-machine" => {4, 10, 0, 8},
+  "mount-hua-sect" => {1, 4, 8, 15},
+  "infinite-mage" => {0, 0, 10, 20},
+  "pick-me-up" => {7, 3, 2, 2},
+  "reality-quest" => {2, 7, 3, 3},
+  "greatest-estate-developer" => {0, 2, 2, 18}
+}
+
+for series <- all_series do
+  case Map.fetch(view_plan, series.slug) do
+    :error ->
+      :ok
+
+    {:ok, {h, d, w, m}} ->
+      existing =
+        Repo.aggregate(
+          from(v in Crysa.Library.SeriesViewLog, where: v.series_id == ^series.id),
+          :count,
+          :id
+        )
+
+      if existing == 0 do
+        now = DateTime.utc_now()
+
+        # `1..0//1` is empty, so zero buckets insert nothing.
+        stamps =
+          Enum.map(1..h//1, fn i -> DateTime.add(now, -(rem(i * 7, 55) + 1), :minute) end) ++
+            Enum.map(1..d//1, fn i -> DateTime.add(now, -(rem(i * 5, 22) + 2), :hour) end) ++
+            Enum.map(1..w//1, fn i -> DateTime.add(now, -(rem(i * 11, 5) + 2), :day) end) ++
+            Enum.map(1..m//1, fn i -> DateTime.add(now, -(rem(i * 13, 22) + 8), :day) end)
+
+        Repo.insert_all(
+          Crysa.Library.SeriesViewLog,
+          Enum.map(stamps, fn ts -> %{series_id: series.id, inserted_at: ts} end)
+        )
+
+        # Keep the series page counter consistent with the seeded log rows.
+        {:ok, _} = Catalog.update_series(series, %{view_count: h + d + w + m})
+      end
   end
 end
 
@@ -375,5 +465,5 @@ if existing < 2 do
 end
 
 IO.puts(
-  "Seeded: normal user (user@example.com, avatar), 4 series (covers), 5 chapters, 8 notifications, 3 comments, 2 reports, 2 audit logs"
+  "Seeded: normal user (user@example.com, avatar), 18 series (covers), 19 chapters, view logs per trending window, 8 notifications, 3 comments, 2 reports, 2 audit logs"
 )

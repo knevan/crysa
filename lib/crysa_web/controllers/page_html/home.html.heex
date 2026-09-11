@@ -1,5 +1,9 @@
 <Layouts.flash_group flash={@flash} />
 <div class="space-y-6">
+  <section aria-label="Trending series">
+    <.vue v-component="TrendingSection" v-ssr={true} initialPeriod="day" lists={@trending} />
+  </section>
+
   <div class="flex flex-wrap items-center justify-between gap-4">
     <h1 class="text-2xl font-bold">New Series</h1>
     <a href={~p"/series"} class="link">Browse all series</a>

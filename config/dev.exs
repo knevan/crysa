@@ -73,3 +73,10 @@ config :phoenix_live_view,
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
+
+# LiveVue SSR via Vite dev server. Without this, `v-ssr={true}` renders an
+# empty placeholder and Vue mounts late on the client: above-the-fold islands
+# (homepage Trending) appear one paint after server HTML (New Series).
+config :live_vue,
+  vite_host: "http://localhost:5173",
+  ssr_module: LiveVue.SSR.ViteJS

@@ -85,7 +85,8 @@ config :logger, :default_formatter,
     :target_id,
     :actor_id,
     :actor_role,
-    :filename
+    :filename,
+    :period
   ]
 
 # Use Jason for JSON parsing in Phoenix

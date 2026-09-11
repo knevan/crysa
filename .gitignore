@@ -27,7 +27,8 @@ npm-debug.log
 .ignore
 
 # Dir and files
-.vscode
+.vscode/
+.agents/
 reach_report
 
 *.md

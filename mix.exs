@@ -75,6 +75,7 @@ defmodule Crysa.MixProject do
       {:req, "~> 0.5"},
       {:floki, "~> 0.37"},
       {:oban, "~> 2.19"},
+      {:cachex, "~> 4.0"},
       {:vix, "~> 0.41"},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},

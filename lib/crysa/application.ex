@@ -18,6 +18,9 @@ defmodule Crysa.Application do
       Crysa.Scraping.Throttle,
       # ETS owner for the published-config read-through cache.
       Crysa.Scraping.ConfigCache,
+      # In-memory TTL cache for windowed trending lists (4 small keys).
+      # Default expiration manager handles per-key TTLs set on fetch.
+      {Cachex, [Crysa.Trending.Cache]},
       # Durable background job processing.
       {Oban, Application.fetch_env!(:crysa, Oban)},
       CrysaWeb.Endpoint
@@ -26,7 +29,13 @@ defmodule Crysa.Application do
     # See https://elixir.hexdocs.pm/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Crysa.Supervisor]
-    Supervisor.start_link(children, opts)
+    {:ok, sup} = Supervisor.start_link(children, opts)
+
+    # Best-effort preload of trending lists; failures degrade to empty
+    # lists on first render and never block boot.
+    Task.start(&Crysa.Trending.warm/0)
+
+    {:ok, sup}
   end
 
   # Tell Phoenix to update the endpoint configuration
