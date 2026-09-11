@@ -45,6 +45,8 @@ type Series = {
   bookmarkCount: number
   ratingCount: number
   ratingSum: number
+  ratingEligible?: boolean
+  minChaptersForRating?: number
   lastChapterAt: string | null
   updatedAt: string | null
   insertedAt: string | null
@@ -198,6 +200,14 @@ const averageDisplay = computed(() => {
 const votesText = computed(() => `${localRatingSummary.value.count} votes`)
 const displayDistribution = computed(() => localRatingDistribution.value)
 
+// Rating gate: non-completed series need min published chapters. Completed bypasses.
+// Fail-closed when prop missing so stale JS never opens the gate.
+const ratingEligible = computed(() => props.series.ratingEligible ?? false)
+const minChaptersForRating = computed(() => props.series.minChaptersForRating ?? 10)
+const ratingGateText = computed(() =>
+  `Rating unlocks after ${minChaptersForRating.value} chapters`
+)
+
 const hoverRating = ref<number | null>(null)
 const pressedStar = ref<number | null>(null)
 const displayRating = computed(() => hoverRating.value ?? localUserRating.value ?? 0)
@@ -284,21 +294,25 @@ function applyRating(prev: number | null, newRating: number | null) {
 }
 
 // Debounced server sync — last-write-wins, progress bar tetap instant (optimistic)
-const debouncedSyncRating = useDebounceFn(async (value: number | null, version: number) => {
+// Reverts optimistic update when server rejects (gate/validation) or push fails.
+const debouncedSyncRating = useDebounceFn(async (value: number | null, prev: number | null, version: number) => {
   try {
-    const payload: Promise<unknown> =
-      value == null ? live.pushEvent('unrate_series', {}) : live.pushEvent('rate_series', { rating: value })
-    await Promise.resolve(payload)
-    // Only clear pending if this is still the latest version
-    if (pendingRatingVersion.value === version) ratingPending.value = false
+    const reply = (await (value == null
+      ? live.pushEvent('unrate_series', {})
+      : live.pushEvent('rate_series', { rating: value }))) as { ok?: boolean } | undefined
+    if (pendingRatingVersion.value !== version) return
+    ratingPending.value = false
+    if (reply && reply.ok === false) {
+      const cur = localUserRating.value
+      localUserRating.value = prev
+      applyRating(cur, prev)
+    }
   } catch {
     if (pendingRatingVersion.value !== version) return
-    // Revert optimistic on error for the latest version only
-    const stillPending = pendingRatingVersion.value === version
-    if (stillPending) {
-      // Revert will be handled by watcher from server props; keep pending false
-      ratingPending.value = false
-    }
+    const cur = localUserRating.value
+    localUserRating.value = prev
+    applyRating(cur, prev)
+    ratingPending.value = false
   }
 }, 250)
 
@@ -307,6 +321,7 @@ function rate(value: number) {
     window.location.href = '/auth/login'
     return
   }
+  if (!ratingEligible.value) return
   const v = Math.round(value * 2) / 2
   if (v < 1 || v > 5) return
   const prev = localUserRating.value
@@ -318,7 +333,7 @@ function rate(value: number) {
   pendingRatingVersion.value = version
   ratingPending.value = true
   // Debounced server sync — tap cepat cuma kirim yang terakhir
-  debouncedSyncRating(v, version)
+  debouncedSyncRating(v, prev, version)
 }
 
 function unrate() {
@@ -330,7 +345,7 @@ function unrate() {
   const version = ratingVersion
   pendingRatingVersion.value = version
   ratingPending.value = true
-  debouncedSyncRating(null, version)
+  debouncedSyncRating(null, prev, version)
 }
 
 // Ellipsis dropdown for rating card
@@ -676,7 +691,9 @@ function authorDisplay(): string {
 
             <!-- Rate Input Inline — half-star support -->
             <div class="rounded-xl border bg-card p-3 flex flex-col gap-2 items-center overflow-visible">
-              <span class="text-[11px] font-semibold text-muted-foreground">Tap a star to rate</span>
+              <span class="text-[11px] font-semibold text-muted-foreground">
+                {{ ratingEligible ? 'Tap a star to rate' : ratingGateText }}
+              </span>
               <div class="flex w-full items-center justify-center gap-2 relative">
                 <div class="flex items-center gap-0 justify-center">
                   <button
@@ -686,7 +703,8 @@ function authorDisplay(): string {
                     class="size-10 p-2 bg-transparent border-0 flex items-center justify-center transition-all duration-150 ease-out touch-manipulation touch-pan-y select-none disabled:opacity-50 disabled:cursor-not-allowed hover:drop-shadow-md active:drop-shadow-lg"
                     :class="pressedStar === n ? 'scale-[1.3] brightness-125 drop-shadow-md' : 'hover:scale-[1.3] active:scale-[0.85] active:brightness-125'"
                     :aria-label="`Rate ${n} stars`"
-                    :disabled="ratingPending"
+                    :disabled="ratingPending || !ratingEligible"
+                    :title="ratingEligible ? undefined : ratingGateText"
                     @mousemove="setHover($event, n)"
                     @mouseleave="clearHover"
                     @click="handleStarClick($event, n)"
@@ -824,12 +842,12 @@ function authorDisplay(): string {
           </Button>
         </div>
 
-        <div v-else class="divide-y">
+        <div v-else class="divide-y md:divide-y-0 md:grid md:grid-cols-2 md:gap-2 md:p-3">
           <a
             v-for="ch in chaptersForList"
             :key="ch.id"
             :href="`/series/${series.slug}/${ch.chapterKey}`"
-            class="flex items-center justify-between px-3.5 py-3 hover:bg-muted/50 transition-colors"
+            class="flex items-center justify-between px-3.5 py-3 hover:bg-muted/50 transition-colors md:rounded-lg md:border md:bg-card md:px-3 md:hover:bg-accent"
           >
             <span class="flex flex-col gap-0.5">
               <span class="text-sm font-medium">Chapter {{ ch.displayNumber }}</span>

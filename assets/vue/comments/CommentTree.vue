@@ -2,7 +2,7 @@
 import { ref, computed, watch } from 'vue'
 import { useLiveVue } from 'live_vue'
 import { Button } from '@/assets/vue/components/ui/button'
-import { MessageCircle, Bold, Italic, Link2, Smile, Send, EyeOff } from '@lucide/vue'
+import { MessageCircle, Bold, Italic, Link2, Smile, Send, EyeOff, MoveRight } from '@lucide/vue'
 import CommentNode, { type CommentNodeData } from './CommentNode.vue'
 import { useMarkdownPreview } from '@/assets/vue/composables/useMarkdownPreview'
 
@@ -54,14 +54,19 @@ const commentSort = ref(props.sort || 'newest')
 watch(() => props.sort, v => (commentSort.value = v))
 
 const treeNodes = computed(() => props.tree ?? [])
+const isGuest = computed(() => !props.currentUser)
+
+function goLogin() {
+  window.location.href = '/auth/login'
+}
 
 function submitRootComment() {
-  const body = commentBody.value.trim()
-  if (!body) return
   if (!props.currentUser) {
     window.location.href = '/auth/login'
     return
   }
+  const body = commentBody.value.trim()
+  if (!body) return
   live.pushEvent('create_comment', { body })
   commentBody.value = ''
 }
@@ -115,7 +120,24 @@ function goCommentPage(page: number) {
     <div class="p-3">
       <div class="rounded-xl border bg-card overflow-hidden">
         <div class="bg-muted/30 p-2.5">
+          <!-- Guest locked box: text + button stacked, both centered in box -->
+          <div
+            v-if="isGuest"
+            class="flex min-h-18 w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-lg border bg-card p-2.5"
+            @click="goLogin"
+          >
+            <span class="text-xs text-muted-foreground">Share your thoughts...</span>
+            <button
+              type="button"
+              aria-label="Login to comment"
+              class="flex size-8 items-center justify-center rounded-lg border border-primary bg-card text-primary shadow-sm hover:bg-accent"
+              @click.stop="goLogin"
+            >
+              <MoveRight class="size-4" />
+            </button>
+          </div>
           <textarea
+            v-else
             ref="commentTextareaRef"
             v-model="commentBody"
             placeholder="Share your thoughts..."
@@ -130,19 +152,19 @@ function goCommentPage(page: number) {
           </div>
           <div class="mt-2 flex items-center justify-between">
             <div class="flex items-center gap-1">
-              <button type="button" class="size-6 rounded-md flex items-center justify-center hover:bg-accent" title="Bold" @click="commentBody += '**bold**'">
+              <button type="button" class="size-6 rounded-md flex items-center justify-center hover:bg-accent disabled:opacity-40 disabled:pointer-events-none" title="Bold" :disabled="isGuest" @click="commentBody += '**bold**'">
                 <Bold class="size-3 text-muted-foreground" />
               </button>
-              <button type="button" class="size-6 rounded-md flex items-center justify-center hover:bg-accent" title="Italic" @click="commentBody += '*italic*'">
+              <button type="button" class="size-6 rounded-md flex items-center justify-center hover:bg-accent disabled:opacity-40 disabled:pointer-events-none" title="Italic" :disabled="isGuest" @click="commentBody += '*italic*'">
                 <Italic class="size-3 text-muted-foreground" />
               </button>
-              <button type="button" class="size-6 rounded-md flex items-center justify-center hover:bg-accent" title="Link" @click="commentBody += '[text](url)'">
+              <button type="button" class="size-6 rounded-md flex items-center justify-center hover:bg-accent disabled:opacity-40 disabled:pointer-events-none" title="Link" :disabled="isGuest" @click="commentBody += '[text](url)'">
                 <Link2 class="size-3 text-muted-foreground" />
               </button>
-              <button type="button" class="size-6 rounded-md flex items-center justify-center hover:bg-accent" title="Spoiler" @click="insertSpoiler">
+              <button type="button" class="size-6 rounded-md flex items-center justify-center hover:bg-accent disabled:opacity-40 disabled:pointer-events-none" title="Spoiler" :disabled="isGuest" @click="insertSpoiler">
                 <EyeOff class="size-3 text-muted-foreground" />
               </button>
-              <button type="button" class="size-6 rounded-md flex items-center justify-center hover:bg-accent" title="Emoji">
+              <button type="button" class="size-6 rounded-md flex items-center justify-center hover:bg-accent disabled:opacity-40 disabled:pointer-events-none" title="Emoji" :disabled="isGuest">
                 <Smile class="size-3 text-muted-foreground" />
               </button>
             </div>
@@ -151,7 +173,7 @@ function goCommentPage(page: number) {
               <Button
                 size="sm"
                 class="h-7 rounded-lg px-3 text-xs gap-1"
-                :disabled="!commentBody.trim() || commentLength > maxCommentLength"
+                :disabled="!isGuest && (!commentBody.trim() || commentLength > maxCommentLength)"
                 @click="submitRootComment"
               >
                 Send
@@ -161,9 +183,6 @@ function goCommentPage(page: number) {
           </div>
         </div>
       </div>
-      <p v-if="!currentUser" class="mt-2 text-center text-[11px] text-muted-foreground">
-        Please <a href="/auth/login" class="font-bold text-primary hover:underline">login</a> to join the discussion.
-      </p>
     </div>
 
     <!-- See full comments: align right, no border, blend with comment section bg, blue text -->

@@ -12,7 +12,8 @@ defmodule Crysa.LibraryTest do
   setup do
     user = AccountsFixtures.user_fixture()
     other_user = AccountsFixtures.user_fixture()
-    series = CatalogFixtures.series_fixture()
+    series = CatalogFixtures.series_fixture(%{chapter_count: 10})
+    for _ <- 1..10, do: CatalogFixtures.chapter_fixture(series)
     %{user: user, other_user: other_user, series: series}
   end
 
@@ -237,6 +238,71 @@ defmodule Crysa.LibraryTest do
       assert %Rating{rating: r5} = Library.get_rating(other_user, series)
       assert r5 == 5
     end
+
+    test "blocks ratings when published chapters are below minimum", %{
+      user: user
+    } do
+      series = CatalogFixtures.series_fixture(%{chapter_count: 3})
+      for _ <- 1..3, do: CatalogFixtures.chapter_fixture(series)
+
+      assert {:error, :not_enough_chapters} = Library.rate_series(user, series, 5)
+      assert is_nil(Library.get_rating(user, series))
+
+      summary = series |> reload_series() |> Library.rating_summary()
+      assert summary.count == 0
+      assert summary.sum == 0.0
+    end
+
+    test "blocks rating when cached count drifts above real available", %{
+      user: user
+    } do
+      series = CatalogFixtures.series_fixture(%{chapter_count: 10})
+      CatalogFixtures.chapter_fixture(series)
+
+      assert {:error, :not_enough_chapters} = Library.rate_series(user, series, 5)
+      assert is_nil(Library.get_rating(user, series))
+    end
+
+    test "blocks rating updates when chapters drop below minimum", %{
+      user: user,
+      series: series
+    } do
+      {:ok, _} = Library.rate_series(user, series, 4)
+      set_available_chapters(series, 5)
+
+      assert {:error, :not_enough_chapters} = Library.rate_series(user, series, 2)
+      assert %Rating{rating: 4.0} = Library.get_rating(user, series)
+
+      assert %{count: 1, sum: 4.0} =
+               series |> reload_series() |> Library.rating_summary()
+    end
+
+    test "completed series bypass the chapter minimum", %{user: user} do
+      series =
+        CatalogFixtures.series_fixture(%{chapter_count: 0, publication_status: "completed"})
+
+      assert {:ok, %RatingChange{created?: true}} = Library.rate_series(user, series, 5)
+      assert %{count: 1, sum: 5.0} = series |> reload_series() |> Library.rating_summary()
+    end
+
+    test "unrate stays allowed when chapters drop below minimum", %{
+      user: user,
+      series: series
+    } do
+      {:ok, _} = Library.rate_series(user, series, 5)
+      set_available_chapters(series, 2)
+
+      assert :ok = Library.unrate_series(user, series)
+      assert is_nil(Library.get_rating(user, series))
+      assert %{count: 0} = series |> reload_series() |> Library.rating_summary()
+    end
+
+    test "rating_eligible? follows minimum with completed bypass" do
+      assert Library.min_chapters_for_rating() == 10
+      assert Library.rating_eligible?(%Series{publication_status: "completed", chapter_count: 0})
+      assert Library.rating_eligible?(%Series{publication_status: "ongoing", chapter_count: 10})
+      refute Library.rating_eligible?(%Series{publication_status: "ongoing", chapter_count: 9})
+    end
   end
 
   describe "series views" do
@@ -329,6 +395,13 @@ defmodule Crysa.LibraryTest do
   end
 
   defp reload_series(%Series{} = series), do: Repo.get!(Series, series.id)
+
+  defp set_available_chapters(%Series{id: series_id} = series, count) do
+    alias Crysa.Catalog.Chapter
+    Repo.delete_all(from(c in Chapter, where: c.series_id == ^series_id))
+    if count > 0, do: for(_ <- 1..count, do: CatalogFixtures.chapter_fixture(series))
+    :ok
+  end
 
   defp count_bookmarks(series_id) do
     Repo.aggregate(

@@ -140,7 +140,8 @@ defmodule Crysa.LibraryConcurrencyTest do
   defp unboxed(fun), do: Ecto.Adapters.SQL.Sandbox.unboxed_run(Repo, fun)
 
   defp seed_unboxed(count) do
-    series = CatalogFixtures.series_fixture()
+    series = CatalogFixtures.series_fixture(%{chapter_count: 10})
+    for _ <- 1..10, do: CatalogFixtures.chapter_fixture(series)
     users = for _ <- 1..count, do: AccountsFixtures.user_fixture()
     {series, users}
   end

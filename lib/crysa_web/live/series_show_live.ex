@@ -333,7 +333,7 @@ defmodule CrysaWeb.Live.SeriesShowLive do
               summary = Library.rating_summary(updated)
               distribution = Library.rating_distribution(updated)
 
-              {:noreply,
+              {:reply, %{ok: true},
                assign(socket,
                  user_rating: rating,
                  series: to_series_json(updated),
@@ -343,12 +343,22 @@ defmodule CrysaWeb.Live.SeriesShowLive do
                  rating_distribution: distribution
                )}
 
+            {:error, :not_enough_chapters} ->
+              {:reply, %{ok: false, reason: "not_enough_chapters"},
+               put_flash(
+                 socket,
+                 :error,
+                 "Rating unlocks after #{Library.min_chapters_for_rating()} published chapters."
+               )}
+
             {:error, _cs} ->
-              {:noreply, put_flash(socket, :error, "Invalid rating.")}
+              {:reply, %{ok: false, reason: "invalid_rating"},
+               put_flash(socket, :error, "Invalid rating.")}
           end
         else
           _ ->
-            {:noreply, put_flash(socket, :error, "Rating must be between 1 and 5 in 0.5 steps.")}
+            {:reply, %{ok: false, reason: "invalid_rating"},
+             put_flash(socket, :error, "Rating must be between 1 and 5 in 0.5 steps.")}
         end
       rescue
         e ->
@@ -359,7 +369,8 @@ defmodule CrysaWeb.Live.SeriesShowLive do
             series_id: series.id
           )
 
-          {:noreply, put_flash(socket, :error, "Could not save rating. Please try again.")}
+          {:reply, %{ok: false, reason: "server_error"},
+           put_flash(socket, :error, "Could not save rating. Please try again.")}
       end
     end
   end
@@ -378,7 +389,7 @@ defmodule CrysaWeb.Live.SeriesShowLive do
           summary = Library.rating_summary(updated)
           distribution = Library.rating_distribution(updated)
 
-          {:noreply,
+          {:reply, %{ok: true},
            assign(socket,
              user_rating: user_rating,
              series: to_series_json(updated),
@@ -389,7 +400,8 @@ defmodule CrysaWeb.Live.SeriesShowLive do
            )}
 
         {:error, _} ->
-          {:noreply, put_flash(socket, :error, "Could not remove rating.")}
+          {:reply, %{ok: false, reason: "server_error"},
+           put_flash(socket, :error, "Could not remove rating.")}
       end
     end
   end
@@ -828,6 +840,8 @@ defmodule CrysaWeb.Live.SeriesShowLive do
       bookmarkCount: series.bookmark_count || 0,
       ratingCount: series.rating_count || 0,
       ratingSum: series.rating_sum || 0,
+      ratingEligible: Library.rating_eligible?(series),
+      minChaptersForRating: Library.min_chapters_for_rating(),
       lastChapterAt: series.last_chapter_at && DateTime.to_iso8601(series.last_chapter_at),
       updatedAt: series.updated_at && DateTime.to_iso8601(series.updated_at),
       insertedAt: series.inserted_at && DateTime.to_iso8601(series.inserted_at)

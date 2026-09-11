@@ -88,15 +88,45 @@ defmodule Crysa.Library do
   def list_user_bookmark_entries(%User{id: user_id}, params \\ %{}) when is_map(params),
     do: Query.list_user_bookmark_entries(user_id, params)
 
+  # Minimum published chapters before a non-completed series can be rated.
+  # Prevents premature ratings after 1 chapter. Completed shorts bypass the gate.
+  # Raise to 15 later.
+  @min_published_chapters_for_rating 10
+
+  @doc "Minimum published chapters required to rate a non-completed series."
+  @spec min_chapters_for_rating() :: pos_integer()
+  def min_chapters_for_rating, do: @min_published_chapters_for_rating
+
+  @doc """
+  Whether a series is eligible for new ratings.
+
+  Fast display path using cached `chapter_count`.
+  Completed series always pass (short oneshots stay ratable).
+  Otherwise `chapter_count` (available chapters only) must reach the minimum.
+  The authoritative write gate uses a live count (see `rating_gate_open?/1`)
+  so counter drift can never open the gate.
+  """
+  @spec rating_eligible?(Series.t()) :: boolean()
+  def rating_eligible?(%Series{publication_status: "completed"}), do: true
+
+  def rating_eligible?(%Series{chapter_count: count}) when is_integer(count),
+    do: count >= @min_published_chapters_for_rating
+
+  def rating_eligible?(_), do: false
+
   @doc """
   Creates or updates a user's rating for a series.
 
   Runs the rating upsert and the `rating_count`/`rating_sum` aggregate updates
   in one transaction. The resulting `Crysa.Library.RatingChange` tells the
   caller whether a rating was created, updated, or left unchanged.
+
+  Non-completed series with fewer than `min_chapters_for_rating/0` available
+  chapters are rejected with `{:error, :not_enough_chapters}`. `unrate_series/2`
+  stays allowed so users can always remove a rating.
   """
   @spec rate_series(User.t(), Series.t(), number()) ::
-          {:ok, RatingChange.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, RatingChange.t()} | {:error, Ecto.Changeset.t() | :not_enough_chapters}
   def rate_series(%User{id: user_id}, %Series{id: series_id}, rating) do
     changeset =
       %Rating{}
@@ -319,6 +349,11 @@ defmodule Crysa.Library do
 
   defp upsert_rating(changeset, user_id, series_id) do
     series = lock_series!(series_id)
+
+    unless rating_gate_open?(series) do
+      Repo.rollback(:not_enough_chapters)
+    end
+
     rating = changeset.changes[:rating]
 
     case find_rating_for_update(user_id, series_id) do
@@ -331,6 +366,20 @@ defmodule Crysa.Library do
       %Rating{rating: previous} = existing ->
         update_rating(existing, rating, previous, series)
     end
+  end
+
+  # Authoritative write gate uses live available count, not cached chapter_count.
+  defp rating_gate_open?(%Series{publication_status: "completed"}), do: true
+
+  defp rating_gate_open?(%Series{id: series_id}) do
+    available =
+      Repo.aggregate(
+        from(c in Chapter, where: c.series_id == ^series_id and c.status == "available"),
+        :count,
+        :id
+      )
+
+    available >= @min_published_chapters_for_rating
   end
 
   defp create_rating(changeset, %Series{} = series) do
