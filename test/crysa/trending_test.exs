@@ -134,5 +134,38 @@ defmodule Crysa.TrendingTest do
     end
   end
 
+  describe "patch_cached_rating/2" do
+    test "updates the badge on refresh without recompute" do
+      series = CatalogFixtures.series_fixture(%{rating_count: 0, rating_sum: 0})
+      log_view(series, minutes_ago(10))
+
+      assert [%{id: id, ratingAverage: nil}] = Trending.list_trending("day").items
+      assert id == series.id
+
+      assert :ok =
+               Trending.patch_cached_rating(series.id, %{count: 2, sum: 9.0, average: 4.5})
+
+      assert [%{id: ^id, ratingAverage: 4.5}] = Trending.list_trending("day").items
+    end
+
+    test "clears the badge when the last rating is removed" do
+      series = CatalogFixtures.series_fixture(%{rating_count: 1, rating_sum: 5.0})
+      log_view(series, minutes_ago(10))
+
+      assert [%{ratingAverage: 5.0}] = Trending.list_trending("day").items
+      assert :ok = Trending.patch_cached_rating(series.id, %{count: 0, sum: 0, average: nil})
+      assert [%{ratingAverage: nil}] = Trending.list_trending("day").items
+    end
+
+    test "is a no-op for series outside the list" do
+      series = CatalogFixtures.series_fixture()
+      log_view(series, minutes_ago(10))
+
+      assert [%{id: id}] = Trending.list_trending("day").items
+      assert :ok = Trending.patch_cached_rating(-1, %{count: 1, sum: 5.0, average: 5.0})
+      assert [%{id: ^id, ratingAverage: nil}] = Trending.list_trending("day").items
+    end
+  end
+
   defp minutes_ago(n), do: DateTime.add(DateTime.utc_now(), -n, :minute)
 end

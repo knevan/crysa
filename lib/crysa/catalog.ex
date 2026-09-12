@@ -38,7 +38,15 @@ defmodule Crysa.Catalog do
     # policy the workers use, plus proportional jitter. Discontinued series
     # remain unscheduled (`nil`).
     attrs = maybe_inject_next_check(attrs)
-    %Series{} |> Series.create_changeset(attrs) |> Repo.insert()
+
+    case %Series{} |> Series.create_changeset(attrs) |> Repo.insert() do
+      {:ok, _series} = ok ->
+        broadcast_catalog_updated()
+        ok
+
+      error ->
+        error
+    end
   end
 
   @spec update_series(Series.t(), map()) :: {:ok, Series.t()} | {:error, Ecto.Changeset.t()}
@@ -663,6 +671,30 @@ defmodule Crysa.Catalog do
   @spec first_chapters_by_series([integer()]) :: %{integer() => Chapter.t()}
   def first_chapters_by_series(series_ids) when is_list(series_ids),
     do: Query.first_chapters_by_series(series_ids)
+
+  @catalog_updates_topic "catalog:updates"
+
+  @doc "PubSub topic for order-changing catalog events (series/chapter arrivals)."
+  @spec catalog_updates_topic() :: String.t()
+  def catalog_updates_topic, do: @catalog_updates_topic
+
+  @doc """
+  Notifies browse viewers that the catalog order may have changed.
+
+  Best-effort fan-out: PubSub failure must never fail the caller (admin
+  writes, workers, seeds). Receivers only bump a counter — no query runs
+  until the viewer explicitly refreshes — so bulk scrapes degrade to one
+  capped pill instead of a broadcast storm.
+  """
+  @spec broadcast_catalog_updated() :: :ok
+  def broadcast_catalog_updated do
+    Phoenix.PubSub.broadcast(Crysa.PubSub, @catalog_updates_topic, :catalog_updated)
+    :ok
+  rescue
+    _ -> :ok
+  catch
+    _, _ -> :ok
+  end
 
   @spec get_reader_chapter(integer(), String.t()) :: Chapter.t() | nil
   def get_reader_chapter(series_id, chapter_key) when is_integer(series_id),

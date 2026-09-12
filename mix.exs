@@ -96,7 +96,9 @@ defmodule Crysa.MixProject do
     [
       setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
+      "ecto.devsetup": ["ecto.create", "ecto.migrate", "run priv/repo/devseeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
+      "ecto.devres": ["ecto.drop", "ecto.devsetup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["bun.install --if-missing", "bun assets install"],
       "assets.build": ["bun vite build"],

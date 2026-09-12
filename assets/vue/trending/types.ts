@@ -5,6 +5,8 @@ export interface TrendingItem {
   title: string
   slug: string
   coverUrl: string | null
+  ratingAverage: number | null
+  chapterCount: number
 }
 
 export interface TrendingList {

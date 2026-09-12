@@ -71,6 +71,17 @@ defmodule Crysa.Library.RatingBroadcaster do
           "series:#{series_id}",
           {:rating_updated, summary, dist, series_id}
         )
+
+        # Homepage carousel is a plain controller snapshot (no LiveView
+        # subscription), so refresh would serve the stale cached badge until
+        # the period TTL expires. Patch the display-only field in place.
+        try do
+          Crysa.Trending.patch_cached_rating(series_id, summary)
+        rescue
+          _ -> :ok
+        catch
+          _, _ -> :ok
+        end
       end
     rescue
       e ->

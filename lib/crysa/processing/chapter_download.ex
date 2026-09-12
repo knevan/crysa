@@ -264,6 +264,11 @@ defmodule Crysa.Processing.ChapterDownload do
 
     fan_out_series_notifications(chapter, series)
 
+    # Order-changing event for browse viewers (bumps `last_chapter_at`,
+    # reorders the Last Updated sort). Best-effort: receivers only bump a
+    # counter, so bulk scrapes degrade to one capped pill.
+    Crysa.Catalog.broadcast_catalog_updated()
+
     {:ok, :available}
   end
 

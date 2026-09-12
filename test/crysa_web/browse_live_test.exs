@@ -217,4 +217,71 @@ defmodule CrysaWeb.BrowseLiveTest do
     refute Map.has_key?(hd(vue.props["entries"]), "lastReading")
     refute Map.has_key?(hd(vue.props["entries"]), "latestChapter")
   end
+
+  test "catalog broadcasts bump the refresh pill counter", %{conn: conn} do
+    CatalogFixtures.series_fixture()
+
+    {:ok, view, _html} = live(conn, ~p"/series")
+    assert :sys.get_state(view.pid).socket.assigns.pending_updates == 0
+
+    Phoenix.PubSub.broadcast(Crysa.PubSub, "catalog:updates", :catalog_updated)
+    _ = render(view)
+    assert :sys.get_state(view.pid).socket.assigns.pending_updates == 1
+
+    Phoenix.PubSub.broadcast(Crysa.PubSub, "catalog:updates", :catalog_updated)
+    _ = render(view)
+    assert :sys.get_state(view.pid).socket.assigns.pending_updates == 2
+  end
+
+  test "refresh reloads at page 1 with filters kept and resets the pill", %{conn: conn} do
+    CatalogFixtures.series_fixture()
+
+    {:ok, view, _html} = live(conn, ~p"/series?q=quest&category=Action")
+
+    Phoenix.PubSub.broadcast(Crysa.PubSub, "catalog:updates", :catalog_updated)
+    _ = render(view)
+
+    render_hook(view, "browse_refresh", %{})
+    assert_patch(view, "/series?q=quest&category=Action")
+
+    assigns = :sys.get_state(view.pid).socket.assigns
+    assert assigns.pending_updates == 0
+    assert assigns.page == 1
+  end
+
+  test "view count broadcasts patch the card in place", %{conn: conn} do
+    series = CatalogFixtures.series_fixture(%{view_count: 10})
+
+    {:ok, view, _html} = live(conn, ~p"/series")
+
+    send(view.pid, {:view_count_updated, 28_551, series.id})
+    _ = render(view)
+
+    assert [%{viewCount: 28_551, trending: true}] =
+             :sys.get_state(view.pid).socket.assigns.entries
+  end
+
+  test "rating broadcasts patch the card average in place", %{conn: conn} do
+    series = CatalogFixtures.series_fixture()
+
+    {:ok, view, _html} = live(conn, ~p"/series")
+
+    send(view.pid, {:rating_updated, %{count: 4, sum: 18.0, average: 4.5}, [], series.id})
+    _ = render(view)
+
+    assert [%{ratingAverage: 4.5, ratingCount: 4}] =
+             :sys.get_state(view.pid).socket.assigns.entries
+  end
+
+  test "broadcasts for off-page series are ignored", %{conn: conn} do
+    CatalogFixtures.series_fixture()
+
+    {:ok, view, _html} = live(conn, ~p"/series")
+
+    before = :sys.get_state(view.pid).socket.assigns.entries
+    send(view.pid, {:view_count_updated, 99_999, -1})
+    _ = render(view)
+
+    assert :sys.get_state(view.pid).socket.assigns.entries == before
+  end
 end

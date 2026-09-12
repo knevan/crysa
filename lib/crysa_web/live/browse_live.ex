@@ -42,6 +42,11 @@ defmodule CrysaWeb.Live.BrowseLive do
       beginning, never mid-story). Only the first chapter per series is
       fetched — one batched query per page, no per-card queries and no
       user-specific progress lookup on this public page.
+    * Hybrid realtime: view/rating broadcasts patch visible cards in place
+      (no reorder, reload, or scroll movement) via `series:<id>` topics for
+      the current page; order-changing arrivals (`Catalog.create_series/1`,
+      chapter downloads) only bump a `pending_updates` counter rendered as a
+      Refresh pill — the grid never moves under the viewer until they tap it.
   """
 
   use CrysaWeb, :live_view
@@ -72,6 +77,7 @@ defmodule CrysaWeb.Live.BrowseLive do
         query={@query}
         sort={@sort}
         pubStatus={@pub_status}
+        pendingUpdates={@pending_updates}
       />
     </div>
     """
@@ -80,6 +86,10 @@ defmodule CrysaWeb.Live.BrowseLive do
   @impl true
   def mount(params, _session, socket) do
     filters = parse_filters(params)
+
+    if connected?(socket) do
+      Phoenix.PubSub.subscribe(Crysa.PubSub, Catalog.catalog_updates_topic())
+    end
 
     {:ok,
      socket
@@ -90,6 +100,8 @@ defmodule CrysaWeb.Live.BrowseLive do
        include_tags: filters.include_tags,
        exclude_tags: filters.exclude_tags,
        categories: list_category_json(),
+       pending_updates: 0,
+       subscribed_ids: MapSet.new(),
        page_title: "Browse Series"
      )
      |> load_entries(filters)}
@@ -206,6 +218,35 @@ defmodule CrysaWeb.Live.BrowseLive do
 
   def handle_event("browse_page", _params, socket), do: {:noreply, socket}
 
+  @impl true
+  def handle_event("browse_refresh", _params, socket) do
+    # Explicit viewer action: re-query at page 1 (arrivals live there for
+    # the `new` / `latest_updates` sorts) with filters preserved.
+    {:noreply,
+     socket
+     |> assign(pending_updates: 0)
+     |> push_patch(to: browse_url(socket, page: 1))}
+  end
+
+  @impl true
+  def handle_info(:catalog_updated, socket) do
+    {:noreply, update(socket, :pending_updates, &((&1 || 0) + 1))}
+  end
+
+  # In-place stat patches: values tick without reorder, reload, or scroll
+  # movement. Unknown ids (stale subscriptions after paging) are ignored.
+  def handle_info({:view_count_updated, view_count, series_id}, socket)
+      when is_integer(view_count) and is_integer(series_id) do
+    {:noreply, update(socket, :entries, &patch_view_count(&1, series_id, view_count))}
+  end
+
+  def handle_info({:rating_updated, summary, _dist, series_id}, socket)
+      when is_map(summary) and is_integer(series_id) do
+    {:noreply, update(socket, :entries, &patch_rating(&1, series_id, summary))}
+  end
+
+  def handle_info(_msg, socket), do: {:noreply, socket}
+
   # Filters
 
   defp parse_filters(params) do
@@ -316,12 +357,57 @@ defmodule CrysaWeb.Live.BrowseLive do
     series_ids = Enum.map(series_list, & &1.id)
     first_by_id = Catalog.first_chapters_by_series(series_ids)
 
-    assign(socket,
+    socket
+    |> assign(
       entries: Enum.map(series_list, &to_entry_json(&1, first_by_id)),
       pagination: to_pagination_json(pagination),
       page: pagination.page
     )
+    |> subscribe_series_ids(series_ids)
   end
+
+  # Per-card stat topics for the visible page only. The subscribed set is
+  # tracked so paging never registers the same topic twice (Phoenix.PubSub
+  # would deliver duplicates). Stale ids are left subscribed: their updates
+  # match no entry and are ignored, avoiding unsubscribe churn on every page.
+  defp subscribe_series_ids(socket, series_ids) do
+    if connected?(socket) do
+      known = socket.assigns[:subscribed_ids] || MapSet.new()
+
+      fresh = Enum.reject(series_ids, &MapSet.member?(known, &1))
+      Enum.each(fresh, &Phoenix.PubSub.subscribe(Crysa.PubSub, "series:#{&1}"))
+
+      assign(socket, :subscribed_ids, MapSet.union(known, MapSet.new(series_ids)))
+    else
+      socket
+    end
+  end
+
+  defp patch_view_count(entries, series_id, view_count) do
+    Enum.map(entries, fn
+      %{id: ^series_id} = entry ->
+        %{entry | viewCount: view_count, trending: view_count >= @trending_view_threshold}
+
+      entry ->
+        entry
+    end)
+  end
+
+  defp patch_rating(entries, series_id, summary) do
+    Enum.map(entries, fn
+      %{id: ^series_id} = entry ->
+        %{entry | ratingAverage: rounded_average(summary), ratingCount: summary[:count] || 0}
+
+      entry ->
+        entry
+    end)
+  end
+
+  defp rounded_average(%{count: count, average: average})
+       when is_integer(count) and count > 0 and is_number(average),
+       do: Float.round(average, 1)
+
+  defp rounded_average(_), do: nil
 
   defp list_category_json do
     Enum.map(Catalog.list_categories_with_counts(), fn {category, _count} ->

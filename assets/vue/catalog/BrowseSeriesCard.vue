@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Flame, Play, Star } from '@lucide/vue'
+import { computed, ref, watch } from 'vue'
+import { View, Star } from '@lucide/vue'
 import type { BrowseEntry } from '@/assets/vue/catalog/browseTypes'
 import { formatViews, gradientStyle } from '@/assets/vue/catalog/browseFormat'
 
@@ -17,6 +17,16 @@ const readHref = computed(() =>
 
 const views = computed(() => formatViews(props.entry.viewCount))
 const coverStyle = computed(() => gradientStyle(props.entry.id))
+
+// Brief highlight when a live view-count patch lands
+// Layout never shifts and the grid never reorders.
+const viewsFlash = ref(false)
+let flashTimer: ReturnType<typeof setTimeout> | undefined
+watch(views, () => {
+  viewsFlash.value = true
+  clearTimeout(flashTimer)
+  flashTimer = setTimeout(() => (viewsFlash.value = false), 500)
+})
 </script>
 
 <template>
@@ -54,8 +64,11 @@ const coverStyle = computed(() => gradientStyle(props.entry.id))
     </p>
 
     <div class="flex min-h-5.5 w-full items-center gap-2">
-      <Flame class="size-3.25 shrink-0 text-[#EF4444]" />
-      <span class="text-xs font-semibold text-[#DC2626]">{{ views }}</span>
+      <View class="size-3.25 shrink-0 text-xs font-medium text-[#64748B]"/>
+      <span
+        class="text-xs font-semibold tabular-nums transition-colors"
+        :class="viewsFlash ? 'text-[#2563EB]' : 'text-[#DC2626]'"
+      >{{ views }}</span>
       <span
         v-if="entry.ratingAverage != null"
         class="flex items-center gap-1 rounded-full bg-[#FEF3C7] px-2 py-0.5"

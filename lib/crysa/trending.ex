@@ -30,7 +30,14 @@ defmodule Crysa.Trending do
   @failure_ttl_ms 30_000
 
   @type period :: String.t()
-  @type item :: %{id: integer(), title: String.t(), slug: String.t(), coverUrl: String.t() | nil}
+  @type item :: %{
+          id: integer(),
+          title: String.t(),
+          slug: String.t(),
+          coverUrl: String.t() | nil,
+          ratingAverage: float() | nil,
+          chapterCount: non_neg_integer()
+        }
   @type result :: %{items: [item()], computedAt: String.t()}
   @type lists :: %{period() => result()}
 
@@ -116,6 +123,29 @@ defmodule Crysa.Trending do
   end
 
   @doc """
+  Patches the cached `ratingAverage` for `series_id` in every period list.
+
+  Ratings never affect ranking (windows rank by view volume only), so a full
+  recompute on every rating would waste a grouped query. The homepage is a
+  plain controller with no LiveView subscription, so without this patch a
+  refresh keeps serving the pre-rating snapshot until the period TTL expires
+  (up to 30 minutes). Patching the display-only field in place makes the
+  badge show up on the next refresh. Best-effort: never raises, no-op on
+  cache miss or when the series is not in a list.
+  """
+  @spec patch_cached_rating(integer(), %{optional(atom()) => term()}) :: :ok
+  def patch_cached_rating(series_id, summary)
+      when is_integer(series_id) and is_map(summary) do
+    average = rounded_summary_average(summary)
+    Enum.each(@periods, &patch_period_rating(&1, series_id, average))
+    :ok
+  rescue
+    _ -> :ok
+  catch
+    _, _ -> :ok
+  end
+
+  @doc """
   Uncached computation for a period. Public for tests; prefer
   `list_trending/1` in request paths.
   """
@@ -160,8 +190,56 @@ defmodule Crysa.Trending do
   end
 
   defp to_item(%Series{} = series) do
-    %{id: series.id, title: series.title, slug: series.slug, coverUrl: Catalog.cover_url(series)}
+    %{
+      id: series.id,
+      title: series.title,
+      slug: series.slug,
+      coverUrl: Catalog.cover_url(series),
+      ratingAverage: rating_average(series),
+      chapterCount: series.chapter_count || 0
+    }
   end
+
+  defp rating_average(%Series{rating_count: count, rating_sum: sum})
+       when is_integer(count) and count > 0 and is_number(sum) do
+    Float.round(sum / count, 1)
+  end
+
+  defp rating_average(_), do: nil
+
+  defp rounded_summary_average(%{count: count, average: average})
+       when is_integer(count) and count > 0 and is_number(average) do
+    Float.round(average, 1)
+  end
+
+  defp rounded_summary_average(_), do: nil
+
+  defp patch_period_rating(period, series_id, average) do
+    key = cache_key(period)
+
+    case Cachex.get(@cache, key) do
+      {:ok, %{items: items} = result} when is_list(items) ->
+        if Enum.any?(items, &(&1.id == series_id)) do
+          patched = Enum.map(items, &maybe_patch_item(&1, series_id, average))
+          Cachex.put(@cache, key, %{result | items: patched}, expire: ttl_ms(period))
+        end
+
+        :ok
+
+      _ ->
+        :ok
+    end
+  rescue
+    _ -> :ok
+  catch
+    _, _ -> :ok
+  end
+
+  defp maybe_patch_item(%{id: id} = item, series_id, average) when id == series_id do
+    %{item | ratingAverage: average}
+  end
+
+  defp maybe_patch_item(item, _series_id, _average), do: item
 
   defp empty_result, do: %{items: [], computedAt: DateTime.to_iso8601(DateTime.utc_now())}
 

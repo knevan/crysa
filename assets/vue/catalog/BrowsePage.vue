@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useTemplateRef, watch } from 'vue'
+import { computed, useTemplateRef, watch } from 'vue'
 import { useLiveVue } from 'live_vue'
-import { SearchX } from '@lucide/vue'
+import { ArrowDown, SearchX } from '@lucide/vue'
 import BrowseFilterCard from '@/assets/vue/catalog/BrowseFilterCard.vue'
 import BrowsePagination from '@/assets/vue/catalog/BrowsePagination.vue'
 import BrowseSeriesCard from '@/assets/vue/catalog/BrowseSeriesCard.vue'
@@ -17,6 +17,7 @@ const props = defineProps<{
   query: string
   sort: string
   pubStatus: string
+  pendingUpdates: number
 }>()
 
 const live = useLiveVue()
@@ -30,11 +31,20 @@ watch(
   () => props.pagination.page,
   () => scrollToResults(),
 )
+
+// Bulk scrapes bump the counter fast; cap the label so the pill stays compact.
+const pendingLabel = computed(() => {
+  const n = props.pendingUpdates || 0
+  if (n <= 0) return ''
+  if (n === 1) return '1 new update'
+  if (n > 20) return '20+ new updates'
+  return `${n} new updates`
+})
 </script>
 
 <template>
   <div class="min-h-screen bg-[#F8F9FB]">
-    <div class="mx-auto flex w-full max-w-[960px] flex-col gap-5 px-6 pb-12 pt-8">
+    <div class="mx-auto flex w-full max-w-240 flex-col gap-5 px-6 pb-12 pt-8">
       <BrowseFilterCard
         :categories="props.categories"
         :include-tags="props.includeTags"
@@ -56,6 +66,20 @@ watch(
       </div>
 
       <div ref="resultsTop" class="scroll-mt-4">
+        <div v-if="pendingLabel" class="sticky top-3 z-20 mb-3 flex justify-center">
+          <button
+            type="button"
+            role="status"
+            aria-live="polite"
+            aria-label="New updates available, refresh the list"
+            class="flex items-center gap-2 rounded-full bg-[#0F172A] py-2 pl-4 pr-3 text-[13px] font-semibold text-white shadow-lg transition-colors hover:bg-[#1E293B]"
+            @click="() => live.pushEvent('browse_refresh', {})"
+          >
+            <ArrowDown class="size-4 shrink-0" />
+            {{ pendingLabel }}
+            <span class="rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-bold">Refresh</span>
+          </button>
+        </div>
         <div v-if="props.entries.length > 0" class="grid w-full grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
           <BrowseSeriesCard v-for="entry in props.entries" :key="entry.id" :entry="entry" />
         </div>

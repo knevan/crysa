@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { Star } from '@lucide/vue'
 import type { TrendingItem } from '@/assets/vue/trending/types'
 
 const props = defineProps<{
@@ -8,6 +9,11 @@ const props = defineProps<{
 }>()
 
 const seriesHref = computed(() => `/series/${props.item.slug}`)
+
+// Keep one decimal in UI even though backend already rounds.
+const formattedRating = computed(() =>
+  props.item.ratingAverage != null ? props.item.ratingAverage.toFixed(1) : null,
+)
 
 // Medal colors for the podium ranks; the rest keep a neutral dark badge.
 const rankClasses = computed(() => {
@@ -40,6 +46,20 @@ const rankClasses = computed(() => {
           ]"
         >
           {{ props.rank }}
+        </span>
+        <span
+          v-if="formattedRating != null"
+          aria-hidden="true"
+          class="pointer-events-none absolute top-1 right-1 flex items-center gap-0.5 rounded-md bg-black/65 px-1.5 py-0.5 text-[11px] font-bold text-white shadow backdrop-blur-sm"
+        >
+          <Star class="size-3 fill-amber-400 text-amber-400" />
+          {{ formattedRating }}
+        </span>
+        <span
+          aria-hidden="true"
+          class="pointer-events-none absolute right-1 bottom-1 rounded-md bg-black/65 px-1.5 py-0.5 text-[11px] font-semibold text-white tabular-nums shadow backdrop-blur-sm"
+        >
+          Ch. {{ props.item.chapterCount }}
         </span>
       </div>
       <h3
