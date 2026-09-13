@@ -37,16 +37,23 @@ defmodule CrysaWeb.Live.NotificationBellLive do
   def render(assigns) do
     ~H"""
     <div class="relative" phx-click-away={JS.hide(to: "#notif-dropdown")}>
+      <div
+        id="notif-badge-sync"
+        phx-hook="NotifBadgeSync"
+        data-total={@unread_counts.total}
+        class="hidden"
+        aria-hidden="true"
+      />
       <button
         type="button"
         phx-click={JS.toggle(to: "#notif-dropdown") |> JS.push("notifications_opened")}
-        class="btn btn-ghost btn-circle relative"
+        class="btn btn-ghost btn-circle relative text-foreground"
         aria-label="Notifications"
       >
         <.icon name="hero-bell" class="h-5 w-5" />
         <span
           :if={@unread_counts.total > 0}
-          class="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-error px-1 text-[10px] font-bold text-white"
+          class="absolute -right-0.5 top-0.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-sm bg-[#DC2626] px-1 text-[10px] font-semibold text-white ring-white dark:ring-black"
         >
           {if @unread_counts.total > 99, do: "99+", else: @unread_counts.total}
         </span>
@@ -118,14 +125,16 @@ defmodule CrysaWeb.Live.NotificationBellLive do
   end
 
   # Reported by the bell button (after its instant client-side toggle)
-  # and by the island-mount safety net. Idempotent: repeated reports
-  # never refetch.
+  # and by the island-mount safety net. Always refetches: reads from
+  # other surfaces arrive without a broadcast, so a cached list would
+  # reopen stale. Cost is one bounded preview query (limit 5).
   def handle_event("notifications_opened", _params, socket) do
     {:noreply,
-     NotificationFeed.ensure_loaded(
+     NotificationFeed.load_first_page(
        socket,
        current_user_id(socket),
-       socket.assigns.active_tab
+       socket.assigns.active_tab,
+       @feed_opts
      )}
   end
 
@@ -148,7 +157,9 @@ defmodule CrysaWeb.Live.NotificationBellLive do
   end
 
   def handle_event("notifications_mark_read", %{"scope" => "item", "id" => id}, socket) do
-    case NotificationFeed.mark_item(socket, current_user_id(socket), id, remove: true) do
+    opts = Keyword.merge(@feed_opts, remove: true, tab: socket.assigns.active_tab)
+
+    case NotificationFeed.mark_item(socket, current_user_id(socket), id, opts) do
       {:ok, socket} -> {:noreply, socket}
       {:error, _} -> {:noreply, socket}
     end

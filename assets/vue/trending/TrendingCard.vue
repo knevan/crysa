@@ -21,12 +21,11 @@ const rankClasses = computed(() => {
   if (props.rank === 2) return 'bg-gradient-to-br from-gray-100 to-gray-400 text-gray-900'
   if (props.rank === 3) return 'bg-gradient-to-br from-orange-300 to-amber-700 text-white'
   return 'bg-black/60 text-white'
-})</script>
+})
+</script>
 
 <template>
-  <!-- Slide width lives in utilities (render-blocking app.css), not scoped
-       CSS (JS-injected): SSR first paint already lays out the track. -->
-  <div class="relative min-w-0 grow-0 shrink-0 basis-[31%] sm:basis-[23%] lg:basis-[15.5%]">
+  <div class="relative mr-3 min-w-0 grow-0 shrink-0 basis-[31%] sm:basis-[23%] lg:basis-[15.5%]">
     <a :href="seriesHref" class="group block" :aria-label="props.item.title">
       <div class="relative aspect-3/4 overflow-hidden rounded-lg bg-base-200 shadow-sm">
         <img

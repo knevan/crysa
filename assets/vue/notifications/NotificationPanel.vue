@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useLiveVue, Link } from 'live_vue'
-import { Bell, Check, ChevronLeft, ChevronRight, MessageCircle, ThumbsUp, ThumbsDown, X } from '@lucide/vue'
+import { Bell, BookMarked, Check, ChevronLeft, ChevronRight, MessageCircle, ThumbsUp, ThumbsDown, X } from '@lucide/vue'
 import { Button } from '@/assets/vue/components/ui/button'
 
 type Actor = { id: number; username: string }
@@ -47,6 +47,9 @@ const props = withDefaults(
 const live = useLiveVue()
 
 const rows = computed(() => props.items ?? [])
+// Full page (showViewAll false) renders borderless on the page background;
+// the dropdown keeps its floating card.
+const isPage = computed(() => !props.showViewAll)
 const tabUnread = computed(() =>
   props.activeTab === 'series' ? (props.unread?.series ?? 0) : (props.unread?.comment ?? 0),
 )
@@ -186,6 +189,10 @@ const swipeMax = 140
 function onTouchStart(e: TouchEvent, id: number) {
   const touch = e.touches[0]
   if (!touch) return
+  // Clear interrupted swipe on another row before taking over.
+  if (swipingId.value !== null && swipingId.value !== id) {
+    swipeOffset.value[swipingId.value] = 0
+  }
   touchStartX = touch.clientX
   touchStartY = touch.clientY
   swipingId.value = id
@@ -214,9 +221,20 @@ function onTouchEnd(id: number) {
     suppressClickUntil = Date.now() + 400
     swipeOffset.value[id] = -swipeMax
     markItemRead(id)
+    // Slide back after feedback; guard avoids killing a new swipe.
+    setTimeout(() => {
+      if (swipingId.value !== id && swipeOffset.value[id] === -swipeMax) {
+        swipeOffset.value[id] = 0
+      }
+    }, 300)
   } else {
     swipeOffset.value[id] = 0
   }
+}
+
+function onTouchCancel(id: number) {
+  if (swipingId.value === id) swipingId.value = null
+  swipeOffset.value[id] = 0
 }
 
 function guardSwipeClick(e: Event) {
@@ -226,20 +244,33 @@ function guardSwipeClick(e: Event) {
   }
 }
 
-// Prune offsets for rows that left the list (marked read elsewhere).
+// Prune offsets for rows that left the list (dropdown removes on read);
+// reset stuck offsets for rows kept as history (full page stamps read_at).
 watch(
-  () => props.items.map((item) => item.id),
-  (ids) => {
-    const alive = new Set(ids)
+  () => props.items.map((item) => `${item.id}:${item.read_at ?? ''}`),
+  () => {
+    const alive = new Set(props.items.map((item) => item.id))
     for (const key of Object.keys(swipeOffset.value)) {
       if (!alive.has(Number(key))) delete swipeOffset.value[Number(key)]
+    }
+    for (const item of props.items) {
+      if (item.read_at != null && swipingId.value !== item.id) {
+        if ((swipeOffset.value[item.id] ?? 0) !== 0) swipeOffset.value[item.id] = 0
+      }
     }
   },
 )
 </script>
 
 <template>
-  <div ref="panelRoot" class="rounded-2xl border border-border bg-card text-card-foreground shadow-xl">
+  <div
+    ref="panelRoot"
+    :class="
+      isPage
+        ? 'bg-transparent text-card-foreground'
+        : 'rounded-sm bg-muted text-card-foreground shadow-xl'
+    "
+  >
     <!-- Panel header -->
     <div class="flex items-start justify-between gap-3 p-4 pb-3">
       <div>
@@ -296,41 +327,74 @@ watch(
     </div>
 
     <!-- Rows -->
-    <div v-if="rows.length > 0" class="flex flex-col">
+    <div v-if="rows.length > 0" class="flex flex-col gap-2">
       <div
         v-for="item in rows"
         :key="item.id"
-        class="relative overflow-hidden border-t border-border"
-        :class="{ 'opacity-60': item.read_at != null }"
+        class="relative overflow-hidden rounded-xl"
         @click.capture="guardSwipeClick"
       >
-        <!-- Swipe-to-read backdrop, revealed by left swipe -->
-        <div class="absolute inset-y-0 right-0 flex w-24 items-center justify-center bg-red-500/15">
-          <X class="size-5 text-red-600" />
+        <!-- Swipe-to-read backdrop, revealed by left swipe (unread only) -->
+        <div
+          v-if="item.read_at == null"
+          class="absolute inset-y-0 right-0 flex w-24 items-center justify-center bg-red-500/15"
+        >
+          <X class="size-5 text-red-600 dark:text-red-400" />
         </div>
         <div
-          class="relative flex items-center gap-3 bg-card px-4 py-3 touch-pan-y select-none"
-          :class="{ 'transition-transform duration-200 ease-out': swipingId !== item.id }"
+          class="relative flex items-center gap-3 px-4 py-3 touch-pan-y select-none"
+          :class="[
+            { 'transition-transform duration-200 ease-out': swipingId !== item.id },
+            item.read_at == null ? 'bg-card' : 'bg-muted',
+          ]"
           :style="{ transform: `translateX(${swipeOffset[item.id] ?? 0}px)` }"
           @touchstart="(e) => item.read_at == null && onTouchStart(e, item.id)"
           @touchmove="(e) => item.read_at == null && onTouchMove(e, item.id)"
           @touchend="() => item.read_at == null && onTouchEnd(item.id)"
-          @touchcancel="() => (swipeOffset[item.id] = 0)"
+          @touchcancel="() => onTouchCancel(item.id)"
         >
+          <!-- Unread accent bar (left edge), inspired by reference; moves with the row -->
+          <span
+            v-if="item.read_at == null"
+            class="absolute bottom-0 left-0 top-0 w-0.75 bg-sky-400"
+            aria-hidden="true"
+          />
           <div
-            v-if="item.action !== 'series_chapter'"
-            class="flex size-8.5 shrink-0 items-center justify-center rounded-full bg-primary/10"
+            class="flex size-8.5 shrink-0 items-center justify-center rounded-full"
+            :class="item.read_at == null ? 'bg-primary/10' : 'bg-muted'"
           >
-            <MessageCircle v-if="item.action === 'comment_reply'" class="size-4 text-primary" />
-            <ThumbsUp v-else-if="item.action === 'comment_upvote'" class="size-4 text-primary" />
-            <ThumbsDown v-else-if="item.action === 'comment_downvote'" class="size-4 text-primary" />
-            <Bell v-else class="size-4 text-primary" />
+            <BookMarked
+              v-if="item.action === 'series_chapter'"
+              class="size-4"
+              :class="item.read_at == null ? 'text-primary' : 'text-muted-foreground'"
+            />
+            <MessageCircle
+              v-else-if="item.action === 'comment_reply'"
+              class="size-4"
+              :class="item.read_at == null ? 'text-primary' : 'text-muted-foreground'"
+            />
+            <ThumbsUp
+              v-else-if="item.action === 'comment_upvote'"
+              class="size-4"
+              :class="item.read_at == null ? 'text-primary' : 'text-muted-foreground'"
+            />
+            <ThumbsDown
+              v-else-if="item.action === 'comment_downvote'"
+              class="size-4"
+              :class="item.read_at == null ? 'text-primary' : 'text-muted-foreground'"
+            />
+            <Bell
+              v-else
+              class="size-4"
+              :class="item.read_at == null ? 'text-primary' : 'text-muted-foreground'"
+            />
           </div>
           <div class="min-w-0 flex-1">
             <component
               :is="rowHref(item) ? Link : 'span'"
               v-bind="rowHref(item) ? { href: rowHref(item) } : {}"
-              class="block truncate text-[13px] font-semibold text-foreground hover:underline"
+              class="block line-clamp-2 text-[15px] leading-snug hover:underline"
+              :class="item.read_at == null ? 'font-bold text-foreground' : 'font-semibold text-muted-foreground'"
             >
               {{ rowTitle(item) }}
             </component>
@@ -358,7 +422,7 @@ watch(
     </div>
 
     <!-- Empty state -->
-    <div v-else class="flex flex-col items-center gap-2 border-t border-border px-4 py-10 text-center">
+    <div v-else class="flex flex-col items-center gap-2 px-4 py-10 text-center">
       <div class="flex size-10 items-center justify-center rounded-full bg-muted">
         <Bell class="size-4 text-muted-foreground" />
       </div>
@@ -375,7 +439,7 @@ watch(
     <!-- Pagination (full page only; the dropdown caps at its preview window) -->
     <nav
       v-if="showLoadMore && totalPageCount > 1"
-      class="flex items-center justify-center gap-1 border-t border-border p-3"
+      class="flex items-center justify-center gap-1 p-3"
       aria-label="Notifications pages"
     >
       <Button
@@ -417,7 +481,7 @@ watch(
     </nav>
 
     <!-- View-all footer (dropdown only; the page itself is the view-all) -->
-    <div v-if="showViewAll" class="border-t border-border p-3">
+    <div v-if="showViewAll" class="p-3">
       <Link
         href="/notifications"
         class="flex w-full items-center justify-center gap-1 rounded-md bg-muted px-3 py-2 text-xs font-semibold text-muted-foreground hover:text-foreground"

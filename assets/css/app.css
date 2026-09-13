@@ -17,6 +17,7 @@
   themes: false;
 }
 
+/* Use the `.dark` class for dark mode */
 @custom-variant dark (&:is(.dark *));
 
 :root {
@@ -150,9 +151,6 @@
 @custom-variant phx-click-loading (.phx-click-loading&, .phx-click-loading &);
 @custom-variant phx-submit-loading (.phx-submit-loading&, .phx-submit-loading &);
 @custom-variant phx-change-loading (.phx-change-loading&, .phx-change-loading &);
-
-/* Use the data attribute for dark mode  */
-@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
 /* Spoiler inline (||text||) — click to reveal, click outside to hide */
 .spoiler {

@@ -19,13 +19,15 @@
           matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 
         const setTheme = (theme) => {
+          const resolved = theme === "system" ? systemTheme() : theme;
+          document.documentElement.classList.toggle("dark", resolved === "dark");
           if (theme === "system") {
             localStorage.removeItem("phx:theme");
-            document.documentElement.setAttribute("data-theme", systemTheme());
+            document.documentElement.setAttribute("data-theme", resolved);
             document.documentElement.setAttribute("data-theme-source", "system");
           } else {
             localStorage.setItem("phx:theme", theme);
-            document.documentElement.setAttribute("data-theme", theme);
+            document.documentElement.setAttribute("data-theme", resolved);
             document.documentElement.setAttribute("data-theme-source", "user");
           }
         };
@@ -41,6 +43,7 @@
         matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
           if (document.documentElement.getAttribute("data-theme-source") === "system") {
             document.documentElement.setAttribute("data-theme", systemTheme());
+            document.documentElement.classList.toggle("dark", e.matches);
           }
         });
       })();
@@ -78,7 +81,7 @@
               </div>
               <ul
                 tabindex="0"
-                class="dropdown-content menu bg-white rounded-box z-10 w-52 p-2 shadow"
+                class="dropdown-content menu bg-popover text-popover-foreground border border-border rounded-box z-10 w-52 p-2 shadow"
               >
                 <li><a href={~p"/users/profile"}>Profile</a></li>
                 <li><a href={~p"/bookmarks"}>Bookmarks</a></li>
@@ -109,14 +112,20 @@
             </div>
             <ul
               tabindex="0"
-              class="menu menu-sm dropdown-content bg-white rounded-box z-50 mt-1 w-52 p-2 shadow-xl"
+              class="menu menu-sm dropdown-content bg-popover text-popover-foreground border border-border rounded-box z-50 mt-1 w-52 p-2 shadow-xl"
             >
               <li><a href={~p"/series"}>Browse</a></li>
               <li :if={moderator?(@current_user)}><a href={~p"/admin"}>Admin Panel</a></li>
               <li :if={@current_user}>
                 <a href={~p"/notifications"}>
                   Notifications
-                  <span :if={@unread_notifications_count > 0} class="badge badge-error badge-sm">
+                  <span
+                    id="hamburger-notif-count"
+                    class={[
+                      "badge badge-sm rounded-full border-transparent bg-[#DC2626] text-white",
+                      @unread_notifications_count <= 0 && "hidden"
+                    ]}
+                  >
                     {if @unread_notifications_count > 99,
                       do: "99+",
                       else: @unread_notifications_count}

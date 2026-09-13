@@ -28,7 +28,7 @@ function goToPage(page: number) {
 }
 
 const segBase =
-  'flex h-9 w-10 items-center justify-center border-y border-r border-[#E2E8F0] text-sm transition-colors'
+  'flex h-9 w-10 items-center justify-center border-y border-r border-[#E2E8F0] dark:border-zinc-800 text-sm transition-colors'
 </script>
 
 <template>
@@ -41,7 +41,7 @@ const segBase =
       type="button"
       aria-label="Previous page"
       :disabled="!props.pagination.hasPrevious"
-      class="flex h-9 w-10 items-center justify-center rounded-l-lg border border-[#E2E8F0] bg-[#F8FAFC] text-sm text-[#94A3B8] transition-colors hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
+      class="flex h-9 w-10 items-center justify-center rounded-l-lg border border-[#E2E8F0] dark:border-zinc-800 bg-[#F8FAFC] dark:bg-muted text-sm text-[#94A3B8] dark:text-zinc-500 transition-colors hover:bg-white dark:hover:bg-card disabled:cursor-not-allowed disabled:opacity-50"
       @click="goToPage(currentPage - 1)"
     >
       «
@@ -49,7 +49,7 @@ const segBase =
     <template v-for="(item, i) in pageWindow" :key="item === '…' ? `gap-${i}` : item">
       <span
         v-if="item === '…'"
-        class="flex h-9 w-11 items-center justify-center border-y border-r border-[#E2E8F0] bg-white text-sm text-[#94A3B8]"
+        class="flex h-9 w-11 items-center justify-center border-y border-r border-[#E2E8F0] dark:border-zinc-800 bg-white dark:bg-card text-sm text-[#94A3B8] dark:text-zinc-500"
       >
         …
       </span>
@@ -61,8 +61,8 @@ const segBase =
         :class="[
           segBase,
           item === currentPage
-            ? 'border-[#0F172A] bg-[#0F172A] font-bold text-white'
-            : 'bg-white font-medium text-[#0F172A] hover:bg-[#F8F9FB]',
+            ? 'border-[#0F172A] bg-[#0F172A] font-bold text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900'
+            : 'bg-white dark:bg-card text-[#0F172A] dark:text-zinc-100 hover:bg-[#F8F9FB] dark:hover:bg-muted',
         ]"
         @click="goToPage(item)"
       >
@@ -73,7 +73,7 @@ const segBase =
       type="button"
       aria-label="Next page"
       :disabled="!props.pagination.hasNext"
-      class="flex h-9 w-10 items-center justify-center rounded-r-lg border border-[#E2E8F0] bg-white text-sm text-[#0F172A] transition-colors hover:bg-[#F8F9FB] disabled:cursor-not-allowed disabled:opacity-50"
+      class="flex h-9 w-10 items-center justify-center rounded-r-lg border border-[#E2E8F0] dark:border-zinc-800 bg-white dark:bg-card text-sm text-[#0F172A] dark:text-zinc-100 transition-colors hover:bg-[#F8F9FB] dark:hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
       @click="goToPage(currentPage + 1)"
     >
       »

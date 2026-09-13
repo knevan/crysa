@@ -54,27 +54,27 @@ watch(views, () => {
     <a
       :href="seriesHref"
       :title="entry.title"
-      class="line-clamp-2 block min-h-10 w-full text-sm font-bold leading-5 text-[#0F172A] hover:text-[#2563EB]"
+      class="line-clamp-2 block min-h-10 w-full text-sm font-bold leading-5 text-[#0F172A] dark:text-zinc-100 hover:text-[#2563EB] dark:hover:text-blue-400"
     >
       {{ entry.title }}
     </a>
 
-    <p class="line-clamp-2 min-h-10 w-full text-xs leading-5 text-[#64748B]">
+    <p class="line-clamp-2 min-h-10 w-full text-xs leading-5 text-[#64748B] dark:text-zinc-400">
       {{ entry.description }}
     </p>
 
     <div class="flex min-h-5.5 w-full items-center gap-2">
-      <View class="size-3.25 shrink-0 text-xs font-medium text-[#64748B]"/>
+      <View class="size-3.25 shrink-0 text-xs font-medium text-[#64748B] dark:text-zinc-400"/>
       <span
         class="text-xs font-semibold tabular-nums transition-colors"
-        :class="viewsFlash ? 'text-[#2563EB]' : 'text-[#DC2626]'"
+        :class="viewsFlash ? 'text-[#2563EB] dark:text-blue-400' : 'text-[#DC2626] dark:text-red-400'"
       >{{ views }}</span>
       <span
         v-if="entry.ratingAverage != null"
-        class="flex items-center gap-1 rounded-full bg-[#FEF3C7] px-2 py-0.5"
+        class="flex items-center gap-1 rounded-full bg-[#FEF3C7] dark:bg-amber-950 px-2 py-0.5"
       >
         <Star class="size-2.75 fill-[#F59E0B] text-[#F59E0B]" />
-        <span class="text-[11px] font-bold text-[#B45309]">{{ entry.ratingAverage.toFixed(1) }}</span>
+        <span class="text-[11px] font-bold text-[#B45309] dark:text-amber-300">{{ entry.ratingAverage.toFixed(1) }}</span>
       </span>
     </div>
 

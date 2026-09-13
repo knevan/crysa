@@ -133,42 +133,42 @@ function elapsedText(): string {
 
     <a
       :href="seriesHref"
-      class="block w-full truncate text-sm font-bold text-[#0F172A] hover:text-[#2563EB]"
+      class="block w-full truncate text-sm font-bold text-[#0F172A] dark:text-zinc-100 hover:text-[#2563EB] dark:hover:text-blue-400"
       :title="entry.title"
     >
       {{ entry.title }}
     </a>
 
     <div class="flex items-center gap-1.5">
-      <Clock3 class="size-3.5 shrink-0 text-[#94A3B8]" />
-      <span class="truncate text-xs text-[#64748B]">{{ elapsedText() }}</span>
+      <Clock3 class="size-3.5 shrink-0 text-[#94A3B8] dark:text-zinc-500" />
+      <span class="truncate text-xs text-[#64748B] dark:text-zinc-400">{{ elapsedText() }}</span>
     </div>
 
-    <div class="h-px w-full bg-[#E2E8F0]" />
+    <div class="h-px w-full bg-[#E2E8F0] dark:bg-zinc-800" />
 
     <div class="flex w-full items-center gap-2.5">
       <div class="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span class="text-[11px] font-medium text-[#94A3B8]">Latest</span>
+        <span class="text-[11px] font-medium text-[#94A3B8] dark:text-zinc-500">Latest</span>
         <a
           v-if="latestHref"
           :href="latestHref"
-          class="truncate text-[13px] font-bold text-[#2563EB] hover:underline"
+          class="truncate text-[13px] font-bold text-[#2563EB] dark:text-blue-400 hover:underline"
         >
           {{ latestLabel }}
         </a>
-        <span v-else class="truncate text-[13px] font-bold text-[#2563EB]">{{ latestLabel }}</span>
+        <span v-else class="truncate text-[13px] font-bold text-[#2563EB] dark:text-blue-400">{{ latestLabel }}</span>
       </div>
-      <div class="h-8 w-px shrink-0 bg-[#E2E8F0]" />
+      <div class="h-8 w-px shrink-0 bg-[#E2E8F0] dark:bg-zinc-800" />
       <div class="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span class="text-[11px] font-medium text-[#94A3B8]">Last Reading</span>
+        <span class="text-[11px] font-medium text-[#94A3B8] dark:text-zinc-500">Last Reading</span>
         <a
           v-if="readingHref"
           :href="readingHref"
-          class="truncate text-[13px] font-semibold text-[#0F172A] hover:text-[#2563EB] hover:underline"
+          class="truncate text-[13px] font-semibold text-[#0F172A] dark:text-zinc-100 hover:text-[#2563EB] dark:hover:text-blue-400 hover:underline"
         >
           {{ readingLabel }}
         </a>
-        <span v-else class="truncate text-[13px] font-semibold text-[#0F172A]">{{ readingLabel }}</span>
+        <span v-else class="truncate text-[13px] font-semibold text-[#0F172A] dark:text-zinc-100">{{ readingLabel }}</span>
       </div>
     </div>
   </article>

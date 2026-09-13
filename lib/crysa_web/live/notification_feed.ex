@@ -165,8 +165,8 @@ defmodule CrysaWeb.Live.NotificationFeed do
   @doc """
   Marks one row read; reports `:not_found` for foreign ids.
 
-  With `remove: true` the row is dropped from the local list (dropdown
-  surfaces show unread only); otherwise it is stamped in place so
+  With `remove: true` the preview window reloads (dropdown surfaces
+  show unread only); otherwise it is stamped in place so
   history surfaces keep it greyed out.
   """
   @spec mark_item(Phoenix.LiveView.Socket.t(), integer(), term(), keyword()) ::
@@ -174,16 +174,21 @@ defmodule CrysaWeb.Live.NotificationFeed do
   def mark_item(socket, user_id, id_param, opts \\ []) do
     with {id, ""} <- Integer.parse(to_string(id_param)),
          {:ok, _} <- Notifications.mark_as_read(user_id, %{scope: "item", id: id}) do
-      items = apply_mark_local(socket.assigns.items, id, Keyword.get(opts, :remove, false))
-      {:ok, socket |> assign(items: items) |> load_counts(user_id)}
+      # Dropdown shows unread only: dropping the row locally leaves a hole
+      # (stale has_more/cursor/total_pages), so reload the preview window.
+      if Keyword.get(opts, :remove, false) do
+        tab = Keyword.get(opts, :tab, socket.assigns.active_tab)
+        {:ok, load_first_page(socket, user_id, tab, opts)}
+      else
+        items = apply_mark_local(socket.assigns.items, id)
+        {:ok, socket |> assign(items: items) |> load_counts(user_id)}
+      end
     else
       _ -> {:error, :not_found}
     end
   end
 
-  defp apply_mark_local(items, id, true), do: Enum.reject(items, &(&1.id == id))
-
-  defp apply_mark_local(items, id, false) do
+  defp apply_mark_local(items, id) do
     now = DateTime.utc_now() |> DateTime.to_iso8601()
 
     Enum.map(items, fn

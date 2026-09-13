@@ -29,10 +29,23 @@ import {getHooks} from "live_vue"
 import liveVueApp from "../vue"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
+
+function syncNotifBadge(el) {
+  const badge = document.getElementById("hamburger-notif-count")
+  if (!badge) return
+  const total = Number(el.dataset.total || 0)
+  badge.textContent = total > 99 ? "99+" : String(total)
+  badge.classList.toggle("hidden", total <= 0)
+}
+const NotifBadgeSync = {
+  mounted() { syncNotifBadge(this.el) },
+  updated() { syncNotifBadge(this.el) },
+}
+
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {...colocatedHooks, ...getHooks(liveVueApp)},
+  hooks: {...colocatedHooks, ...getHooks(liveVueApp), NotifBadgeSync},
 })
 
 // Show progress bar on live navigation and form submits
@@ -41,7 +54,7 @@ window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
 window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
 
 // Spoiler: click to reveal, click outside to hide
-// Delegated handler works for both server-rendered comments and Vue preview (v-html)
+// Delegated handler works for both server-rendered comments and vue preview
 document.addEventListener('click', (e) => {
   const spoiler = e.target.closest('.spoiler')
   if (spoiler) {

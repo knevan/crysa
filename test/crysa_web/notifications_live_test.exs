@@ -233,7 +233,10 @@ defmodule CrysaWeb.NotificationsLiveTest do
 
       assert html =~ "aria-label=\"Notifications\""
       # Dead render carries the unread snapshot badge.
-      assert html =~ "bg-error px-1"
+      assert html =~ "bg-[#DC2626] px-1"
+      # Hamburger badge always renders with a stable id so the bell's
+      # live hook can mirror counts into it (hidden when zero).
+      assert html =~ "hamburger-notif-count"
 
       # Guests get no bell at all.
       guest_html = get(conn, ~p"/series") |> html_response(200)
@@ -288,17 +291,77 @@ defmodule CrysaWeb.NotificationsLiveTest do
       assert vue.props["showLoadMore"] == false
     end
 
-    test "open report is idempotent once preloaded", %{conn: conn} do
+    test "open report refetches so reopen never shows stale rows", %{conn: conn} do
       user = AccountsFixtures.user_fixture()
+      other = AccountsFixtures.user_fixture()
+      series = CatalogFixtures.series_fixture()
 
       {:ok, bell, _html} = live_bell(conn, user)
 
-      render_hook(bell, "notifications_opened", %{})
+      {:ok, comment} =
+        Comments.create_comment(%{
+          user_id: user.id,
+          series_id: series.id,
+          body_markdown: "my comment"
+        })
+
+      assert {:ok, _} = Comments.vote_comment(other, comment, 1)
+
+      # Read happened outside the dropdown (page center, other device):
+      # reopen must pick it up instead of serving the mount snapshot.
+      {:ok, {rows, _}} = Notifications.list_notifications(user.id, "comment", limit: 50)
+      row = hd(rows)
+      {:ok, _} = Notifications.mark_as_read(user.id, %{scope: "item", id: row.id})
+
       render_hook(bell, "notifications_opened", %{})
 
       assigns = :sys.get_state(bell.pid).socket.assigns
       assert assigns.loaded == true
       assert assigns.items == []
+      assert assigns.unread_counts == %{comment: 0, series: 0, total: 0}
+    end
+
+    test "marking one dropdown item refills the preview window", %{conn: conn} do
+      user = AccountsFixtures.user_fixture()
+      other = AccountsFixtures.user_fixture()
+      series = CatalogFixtures.series_fixture()
+
+      {:ok, parent} =
+        Comments.create_comment(%{
+          user_id: user.id,
+          series_id: series.id,
+          body_markdown: "my comment"
+        })
+
+      for n <- 1..6 do
+        {:ok, _} =
+          Comments.create_comment(%{
+            user_id: other.id,
+            series_id: series.id,
+            parent_id: parent.id,
+            body_markdown: "reply #{n}"
+          })
+      end
+
+      {:ok, bell, _html} = live_bell(conn, user)
+      before = :sys.get_state(bell.pid).socket.assigns
+      assert length(before.items) == 5
+      assert before.has_more == true
+
+      [first | _] = before.items
+      render_hook(bell, "notifications_mark_read", %{"scope" => "item", "id" => first.id})
+
+      # Unread-only preview must backfill the 6th row instead of
+      # leaving a 4-row hole with a stale cursor.
+      assigns = :sys.get_state(bell.pid).socket.assigns
+      assert length(assigns.items) == 5
+      assert assigns.has_more == false
+      assert assigns.unread_counts == %{comment: 5, series: 0, total: 5}
+
+      {:ok, {expected, _}} =
+        Notifications.list_notifications(user.id, "comment", limit: 5, unread_only: true)
+
+      assert Enum.map(assigns.items, & &1.id) == Enum.map(expected, & &1.id)
     end
 
     test "tab switch, mark read, and realtime arrival inside the dropdown", %{conn: conn} do

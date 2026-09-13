@@ -56,13 +56,13 @@ function pick(value: string) {
       aria-haspopup="listbox"
       :aria-expanded="open"
       :aria-label="props.label"
-      class="flex h-10 w-full items-center justify-center gap-2.5 rounded-lg border bg-white px-4 text-[13px] font-semibold text-[#0F172A] transition-colors hover:bg-[#F8FAFC] sm:w-auto"
-      :class="props.variant === 'accent' ? 'border-[#93C5FD]' : 'border-[#E2E8F0]'"
+      class="flex h-10 w-full items-center justify-center gap-2.5 rounded-lg border bg-white dark:bg-card px-4 text-[13px] font-semibold text-[#0F172A] dark:text-zinc-100 transition-colors hover:bg-[#F8FAFC] dark:hover:bg-muted sm:w-auto"
+      :class="props.variant === 'accent' ? 'border-[#93C5FD] dark:border-blue-800' : 'border-[#E2E8F0] dark:border-zinc-800'"
       @click="open = !open"
     >
       {{ currentLabel }}
       <ChevronDown
-        class="size-3.75 shrink-0 text-[#64748B] transition-transform"
+        class="size-3.75 shrink-0 text-[#64748B] dark:text-zinc-400 transition-transform"
         :class="open ? 'rotate-180' : ''"
       />
     </button>
@@ -70,13 +70,13 @@ function pick(value: string) {
       v-if="open"
       role="listbox"
       :aria-label="props.label"
-      class="absolute right-0 z-30 mt-1.5 w-full min-w-44 overflow-hidden rounded-lg border border-[#E2E8F0] bg-white py-1 shadow-xl sm:w-44"
+      class="absolute right-0 z-30 mt-1.5 w-full min-w-44 overflow-hidden rounded-lg border border-[#E2E8F0] dark:border-zinc-800 bg-white dark:bg-card py-1 shadow-xl sm:w-44"
     >
       <li v-for="o in props.options" :key="o.value" role="option" :aria-selected="o.value === props.value">
         <button
           type="button"
-          class="flex w-full items-center justify-between px-3.5 py-2 text-left text-[13px] transition-colors hover:bg-[#F1F5F9]"
-          :class="o.value === props.value ? 'font-bold text-[#1D4ED8]' : 'font-semibold text-[#0F172A]'"
+          class="flex w-full items-center justify-between px-3.5 py-2 text-left text-[13px] transition-colors hover:bg-[#F1F5F9] dark:hover:bg-muted"
+          :class="o.value === props.value ? 'font-bold text-[#1D4ED8] dark:text-blue-400' : 'font-semibold text-[#0F172A] dark:text-zinc-100'"
           @click="pick(o.value)"
         >
           {{ o.label }}

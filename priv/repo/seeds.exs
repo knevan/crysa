@@ -1,7 +1,7 @@
 # Production-safe seeds: roles + bootstrap superadmin only.
 #
 # Runs via `mix ecto.setup`. Stays free of demo content (series, chapters,
-# users, notifications) — development fixtures live in `devseeds.exs`
+# users, notifications), development fixtures live in `devseeds.exs`
 # (`mix ecto.devsetup`, which requires this file first). Idempotent.
 alias Crysa.Accounts
 

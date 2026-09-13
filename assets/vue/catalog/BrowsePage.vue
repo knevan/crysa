@@ -43,7 +43,7 @@ const pendingLabel = computed(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#F8F9FB]">
+  <div class="min-h-screen bg-[#F8F9FB] dark:bg-background">
     <div class="mx-auto flex w-full max-w-240 flex-col gap-5 px-6 pb-12 pt-8">
       <BrowseFilterCard
         :categories="props.categories"
@@ -72,7 +72,7 @@ const pendingLabel = computed(() => {
             role="status"
             aria-live="polite"
             aria-label="New updates available, refresh the list"
-            class="flex items-center gap-2 rounded-full bg-[#0F172A] py-2 pl-4 pr-3 text-[13px] font-semibold text-white shadow-lg transition-colors hover:bg-[#1E293B]"
+            class="flex items-center gap-2 rounded-full bg-[#0F172A] py-2 pl-4 pr-3 text-[13px] font-semibold text-white shadow-lg transition-colors hover:bg-[#1E293B] dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
             @click="() => live.pushEvent('browse_refresh', {})"
           >
             <ArrowDown class="size-4 shrink-0" />
@@ -85,13 +85,13 @@ const pendingLabel = computed(() => {
         </div>
         <div
           v-else
-          class="flex w-full flex-col items-center gap-3 rounded-xl border border-[#E2E8F0] bg-white px-6 py-14 text-center"
+          class="flex w-full flex-col items-center gap-3 rounded-xl border border-[#E2E8F0] dark:border-zinc-800 bg-white dark:bg-card px-6 py-14 text-center"
         >
-          <div class="flex size-12 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#F8F9FB]">
-            <SearchX class="size-5 text-[#94A3B8]" />
+          <div class="flex size-12 items-center justify-center rounded-xl border border-[#E2E8F0] dark:border-zinc-800 bg-[#F8F9FB] dark:bg-muted">
+            <SearchX class="size-5 text-[#94A3B8] dark:text-zinc-500" />
           </div>
-          <p class="text-sm font-bold text-[#0F172A]">No series match your filters.</p>
-          <p class="max-w-[320px] text-xs leading-5 text-[#64748B]">
+          <p class="text-sm font-bold text-[#0F172A] dark:text-zinc-100">No series match your filters.</p>
+          <p class="max-w-[320px] text-xs leading-5 text-[#64748B] dark:text-zinc-400">
             Try a different search term or clear some genre filters.
           </p>
         </div>
@@ -102,11 +102,11 @@ const pendingLabel = computed(() => {
         @page="(page) => live.pushEvent('browse_page', { page })"
       />
 
-      <div class="border-t border-[#E2E8F0] bg-white py-5 text-center">
-        <p class="hidden text-xs text-[#94A3B8] sm:block">
+      <div class="border-t border-[#E2E8F0] dark:border-zinc-800 bg-white dark:bg-card py-5 text-center">
+        <p class="hidden text-xs text-[#94A3B8] dark:text-zinc-500 sm:block">
           © 2025 Crysa • Crafted for manga lovers • Terms • Privacy • DMCA
         </p>
-        <p class="text-xs text-[#94A3B8] sm:hidden">© 2025 Crysa • Terms • Privacy</p>
+        <p class="text-xs text-[#94A3B8] dark:text-zinc-500 sm:hidden">© 2025 Crysa • Terms • Privacy</p>
       </div>
     </div>
   </div>

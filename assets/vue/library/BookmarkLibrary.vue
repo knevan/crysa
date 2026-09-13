@@ -117,19 +117,19 @@ function pageButtonClass(page: number): string {
     'flex h-9 w-10 items-center justify-center rounded-lg border text-[13px] font-semibold transition-colors'
 
   return page === currentPage.value
-    ? `${base} border-[#0F172A] bg-[#0F172A] text-white`
-    : `${base} border-[#E2E8F0] bg-white text-[#0F172A] hover:bg-[#F8F9FB]`
+    ? `${base} border-[#0F172A] bg-[#0F172A] text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900`
+    : `${base} border-[#E2E8F0] dark:border-zinc-800 bg-white dark:bg-card text-[#0F172A] dark:text-zinc-100 hover:bg-[#F8F9FB] dark:hover:bg-muted`
 }
 </script>
 
 <template>
   <!-- Page Content -->
-  <div ref="libraryRoot" class="min-h-screen bg-[#F8F9FB]">
+  <div ref="libraryRoot" class="min-h-screen bg-[#F8F9FB] dark:bg-background">
     <div class="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 md:py-8">
       <!-- Title Block -->
       <div class="flex w-full flex-col items-center gap-1.5 text-center">
-        <h1 class="text-2xl font-bold text-[#0F172A]">Your Bookmarked Manga Library</h1>
-        <p class="text-sm text-[#64748B]">The list of Manga you subscribe to follow.</p>
+        <h1 class="text-2xl font-bold text-[#0F172A] dark:text-zinc-100">Your Bookmarked Manga Library</h1>
+        <p class="text-sm text-[#64748B] dark:text-zinc-400">The list of Manga you subscribe to follow.</p>
       </div>
 
       <!-- Toolbar -->
@@ -144,7 +144,7 @@ function pageButtonClass(page: number): string {
       </div>
 
       <!-- Divider Strong -->
-      <div class="mt-4.5 h-0.5 w-full bg-[#0F172A]" />
+      <div class="mt-4.5 h-0.5 w-full bg-[#0F172A] dark:bg-zinc-600" />
 
       <!-- Grid -->
       <div v-if="localEntries.length > 0" class="mt-7 grid w-full grid-cols-2 gap-4 md:gap-5 lg:grid-cols-4">
@@ -159,18 +159,18 @@ function pageButtonClass(page: number): string {
       <!-- Empty state, required for zero-bookmark users. -->
       <div
         v-else
-        class="mt-7 flex w-full flex-col items-center gap-3 rounded-xl border border-[#E2E8F0] bg-white px-6 py-14 text-center"
+        class="mt-7 flex w-full flex-col items-center gap-3 rounded-xl border border-[#E2E8F0] dark:border-zinc-800 bg-white dark:bg-card px-6 py-14 text-center"
       >
-        <div class="flex size-12 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#F8F9FB]">
-          <BookmarkIcon class="size-5 text-[#94A3B8]" />
+        <div class="flex size-12 items-center justify-center rounded-xl border border-[#E2E8F0] dark:border-zinc-800 bg-[#F8F9FB] dark:bg-muted">
+          <BookmarkIcon class="size-5 text-[#94A3B8] dark:text-zinc-500" />
         </div>
-        <p class="text-sm font-bold text-[#0F172A]">No bookmarks yet</p>
-        <p class="max-w-[320px] text-xs leading-5 text-[#64748B]">
+        <p class="text-sm font-bold text-[#0F172A] dark:text-zinc-100">No bookmarks yet</p>
+        <p class="max-w-[320px] text-xs leading-5 text-[#64748B] dark:text-zinc-400">
           Series you bookmark will appear here with their latest chapter.
         </p>
         <a
           href="/series"
-          class="mt-1 inline-flex h-9 items-center gap-2 rounded-lg bg-[#0F172A] px-4 text-xs font-bold text-white hover:bg-[#1E293B]"
+          class="mt-1 inline-flex h-9 items-center gap-2 rounded-lg bg-[#0F172A] dark:bg-zinc-100 px-4 text-xs font-bold text-white dark:text-zinc-900 hover:bg-[#1E293B] dark:hover:bg-white"
         >
           <BookOpen class="size-3.5" />
           Browse series
@@ -187,13 +187,13 @@ function pageButtonClass(page: number): string {
           type="button"
           aria-label="Previous page"
           :disabled="!props.pagination.hasPrevious"
-          class="flex h-9 w-10 items-center justify-center rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] text-sm text-[#94A3B8] transition-colors hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
+          class="flex h-9 w-10 items-center justify-center rounded-lg border border-[#E2E8F0] dark:border-zinc-800 bg-[#F8FAFC] dark:bg-muted text-sm text-[#94A3B8] dark:text-zinc-500 transition-colors hover:bg-white dark:hover:bg-card disabled:cursor-not-allowed disabled:opacity-50"
           @click="goToPage(currentPage - 1)"
         >
           «
         </button>
         <template v-for="(entry, i) in pageWindow" :key="entry === '…' ? `gap-${i}` : entry">
-          <span v-if="entry === '…'" class="flex h-9 w-11 items-center justify-center text-sm text-[#94A3B8]">
+          <span v-if="entry === '…'" class="flex h-9 w-11 items-center justify-center text-sm text-[#94A3B8] dark:text-zinc-500">
             …
           </span>
           <button
@@ -211,7 +211,7 @@ function pageButtonClass(page: number): string {
           type="button"
           aria-label="Next page"
           :disabled="!props.pagination.hasNext"
-          class="flex h-9 w-10 items-center justify-center rounded-lg border border-[#E2E8F0] bg-white text-sm text-[#0F172A] transition-colors hover:bg-[#F8F9FB] disabled:cursor-not-allowed disabled:opacity-50"
+          class="flex h-9 w-10 items-center justify-center rounded-lg border border-[#E2E8F0] dark:border-zinc-800 bg-white dark:bg-card text-sm text-[#0F172A] dark:text-zinc-100 transition-colors hover:bg-[#F8F9FB] dark:hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
           @click="goToPage(currentPage + 1)"
         >
           »
@@ -219,11 +219,11 @@ function pageButtonClass(page: number): string {
       </nav>
 
       <!-- Footer -->
-      <div class="mt-10 border-t border-[#E2E8F0] bg-white py-5 text-center">
-        <p class="hidden text-xs text-[#94A3B8] sm:block">
+      <div class="mt-10 border-t border-[#E2E8F0] dark:border-zinc-800 bg-white dark:bg-card py-5 text-center">
+        <p class="hidden text-xs text-[#94A3B8] dark:text-zinc-500 sm:block">
           © 2025 Crysa • Crafted for manga lovers • Terms • Privacy • DMCA
         </p>
-        <p class="text-xs text-[#94A3B8] sm:hidden">© 2025 Crysa • Terms • Privacy</p>
+        <p class="text-xs text-[#94A3B8] dark:text-zinc-500 sm:hidden">© 2025 Crysa • Terms • Privacy</p>
       </div>
     </div>
   </div>

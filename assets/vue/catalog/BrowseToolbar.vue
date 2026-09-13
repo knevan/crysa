@@ -37,13 +37,13 @@ watch(searchText, (value) => debouncedSearch(value))
 <template>
   <div class="flex w-full flex-col gap-3 md:flex-row md:items-center">
     <div class="relative flex-1">
-      <Search class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#94A3B8]" />
+      <Search class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#94A3B8] dark:text-zinc-500" />
       <input
         v-model="searchText"
         type="search"
         placeholder="Search by title..."
         aria-label="Search by title"
-        class="h-10 w-full rounded-lg border border-[#E2E8F0] bg-white pl-9 pr-3 text-sm text-[#0F172A] placeholder:text-[#94A3B8] focus:border-[#93C5FD] focus:outline-none focus:ring-2 focus:ring-[#93C5FD]/40"
+        class="h-10 w-full rounded-lg border border-[#E2E8F0] dark:border-zinc-800 bg-white dark:bg-card pl-9 pr-3 text-sm text-[#0F172A] dark:text-zinc-100 placeholder:text-[#94A3B8] dark:placeholder:text-zinc-500 focus:border-[#93C5FD] focus:outline-none focus:ring-2 focus:ring-[#93C5FD]/40"
       />
     </div>
 

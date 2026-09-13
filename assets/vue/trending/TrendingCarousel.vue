@@ -12,7 +12,12 @@ const props = defineProps<{
 }>()
 
 // Autoplay construction
-const autoplay = Autoplay({ delay: 3000, stopOnInteraction: true, stopOnMouseEnter: true })
+const autoplay = Autoplay({
+  delay: 3000,
+  stopOnInteraction: false,
+  stopOnMouseEnter: false,
+  stopOnFocusIn: false,
+})
 
 const [emblaRef, emblaApi] = useEmblaCarousel({ align: 'start', dragFree: true, loop: true }, [
   autoplay,
@@ -22,9 +27,14 @@ const [emblaRef, emblaApi] = useEmblaCarousel({ align: 'start', dragFree: true, 
 // syncNavButtons corrects this once Embla measures.
 const canScrollPrev = shallowRef(true)
 const canScrollNext = shallowRef(true)
-// Idle timer that resumes autoplay 3s after the last interruption
-// (drag, hover-leave gap, hidden tab shown again).
+// Pause sources tracked: touch/drag, mouse hover, keyboard focus
+// Resume waits 3s idle after ALL sources clear. Hover uses
+// mouse-typed pointer events only, so touch-emulated mouse events can never
+// latch the hover state on mobile.
 let resumeTimer: ReturnType<typeof setTimeout> | undefined
+let isPointerDown = false
+let isHovering = false
+let domCleanup: (() => void) | undefined
 
 function syncNavButtons(api: EmblaCarouselType) {
   canScrollPrev.value = api.canScrollPrev()
@@ -35,10 +45,6 @@ function prefersReducedMotion(): boolean {
   return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
-function hasFineHover(): boolean {
-  return typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches
-}
-
 function clearResumeTimer() {
   if (resumeTimer !== undefined) {
     clearTimeout(resumeTimer)
@@ -46,16 +52,53 @@ function clearResumeTimer() {
   }
 }
 
+function pauseAutoplay() {
+  clearResumeTimer()
+  autoplay.stop()
+}
+
 function scheduleResume() {
   clearResumeTimer()
+  // Hold the stopped state first: the plugin restarts its own timer on
+  // pointerUp/visibility, so cancel that and resume only after 3s idle.
+  autoplay.stop()
   if (prefersReducedMotion()) return
   resumeTimer = setTimeout(() => {
     resumeTimer = undefined
     if (typeof document !== 'undefined' && document.hidden) return
-    // Don't fight the plugin's own mouse-enter pause on desktop.
-    if (hasFineHover() && emblaRef.value?.matches(':hover')) return
+    if (isPointerDown || isHovering) return
     autoplay.play()
   }, 3000)
+}
+
+function onPointerDown() {
+  isPointerDown = true
+  pauseAutoplay()
+}
+
+function onPointerUp() {
+  isPointerDown = false
+  scheduleResume()
+}
+
+function onPointerEnter(event: PointerEvent) {
+  if (event.pointerType !== 'mouse') return
+  isHovering = true
+  pauseAutoplay()
+}
+
+function onPointerLeave(event: PointerEvent) {
+  if (event.pointerType !== 'mouse') return
+  isHovering = false
+  scheduleResume()
+}
+
+function onFocusIn() {
+  pauseAutoplay()
+}
+
+function onFocusOut() {
+  scheduleResume()
 }
 
 watch(
@@ -63,12 +106,25 @@ watch(
   (api) => {
     if (!api) return
     if (prefersReducedMotion()) autoplay.stop()
-    // The plugin stops itself on interaction; resume after 3s idle.
-    api.on('pointerDown', clearResumeTimer)
-    api.on('pointerUp', scheduleResume)
+    api.on('pointerDown', onPointerDown)
+    api.on('pointerUp', onPointerUp)
     api.on('select', syncNavButtons)
     api.on('reInit', syncNavButtons)
     syncNavButtons(api)
+
+    // Viewport exists only client-side once Embla initialises; re-bind if
+    // the api instance ever changes.
+    domCleanup?.()
+    const viewport = emblaRef.value
+    if (viewport) {
+      const controller = new AbortController()
+      const opts: AddEventListenerOptions = { signal: controller.signal }
+      viewport.addEventListener('pointerenter', onPointerEnter, opts)
+      viewport.addEventListener('pointerleave', onPointerLeave, opts)
+      viewport.addEventListener('focusin', onFocusIn, opts)
+      viewport.addEventListener('focusout', onFocusOut, opts)
+      domCleanup = () => controller.abort()
+    }
   },
   { immediate: true },
 )
@@ -103,6 +159,7 @@ if (typeof document !== 'undefined') {
 
 onUnmounted(() => {
   clearResumeTimer()
+  domCleanup?.()
   if (typeof document !== 'undefined') {
     document.removeEventListener('visibilitychange', onVisibilityChange)
   }
@@ -115,7 +172,9 @@ onUnmounted(() => {
   </div>
   <div v-else class="trending-carousel relative">
     <div ref="emblaRef" class="overflow-hidden select-none">
-      <div class="flex gap-3">
+      <!-- Slide spacing lives on the slide so the loop 
+      wrap seam last->first keeps the same gutter. -->
+      <div class="flex">
         <TrendingCard v-for="(item, index) in props.items" :key="item.id" :item="item" :rank="index + 1" />
       </div>
     </div>

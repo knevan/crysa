@@ -62,12 +62,12 @@ onBeforeUnmount(() => {
       :aria-label="label"
       aria-haspopup="listbox"
       :aria-expanded="open"
-      class="flex w-full items-center justify-between gap-2 rounded-lg border border-[#93C5FD] bg-white py-2.5 pl-4 pr-3 text-[13px] font-semibold text-[#0F172A] outline-none transition-colors focus-visible:ring-1 focus-visible:ring-[#2563EB]"
+      class="flex w-full items-center justify-between gap-2 rounded-lg border border-[#93C5FD] dark:border-blue-800 bg-white dark:bg-card py-2.5 pl-4 pr-3 text-[13px] font-semibold text-[#0F172A] dark:text-zinc-100 outline-none transition-colors focus-visible:ring-1 focus-visible:ring-[#2563EB]"
       @click="toggle"
     >
       <span class="truncate">{{ currentLabel }}</span>
       <ChevronDown
-        class="size-3.75 shrink-0 text-[#64748B] transition-transform"
+        class="size-3.75 shrink-0 text-[#64748B] dark:text-zinc-400 transition-transform"
         :class="open ? 'rotate-180' : ''"
       />
     </button>
@@ -76,7 +76,7 @@ onBeforeUnmount(() => {
       v-if="open"
       role="listbox"
       :aria-label="label"
-      class="absolute right-0 top-full z-30 mt-1 w-max min-w-full max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-[#93C5FD] bg-white"
+      class="absolute right-0 top-full z-30 mt-1 w-max min-w-full max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-[#93C5FD] dark:border-blue-800 bg-white dark:bg-card"
     >
       <button
         v-for="opt in options"
@@ -84,8 +84,8 @@ onBeforeUnmount(() => {
         type="button"
         role="option"
         :aria-selected="opt.value === modelValue"
-        class="flex w-full items-center justify-between gap-2 px-4 py-2.5 text-left text-[13px] transition-colors hover:bg-[#F1F5F9]"
-        :class="opt.value === modelValue ? 'font-bold text-[#1D4ED8]' : 'font-semibold text-[#0F172A]'"
+        class="flex w-full items-center justify-between gap-2 px-4 py-2.5 text-left text-[13px] transition-colors hover:bg-[#F1F5F9] dark:hover:bg-muted"
+        :class="opt.value === modelValue ? 'font-bold text-[#1D4ED8] dark:text-blue-400' : 'font-semibold text-[#0F172A] dark:text-zinc-100'"
         @click="choose(opt.value)"
       >
         <span class="truncate">{{ opt.label }}</span>

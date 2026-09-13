@@ -23,9 +23,10 @@ defmodule CrysaWeb.BookmarkLiveTest do
 
     # Regression: with daisyUI themes disabled, `bg-base-100` resolves to an
     # undefined variable (transparent), letting page text pass through the
-    # open menu. Both menus must use an opaque background instead.
-    assert html =~ "dropdown-content menu bg-white"
-    assert html =~ "menu menu-sm dropdown-content bg-white"
+    # open menu. Both menus must use an opaque token background that also
+    # follows dark mode (`bg-popover` is opaque in both themes).
+    assert html =~ "dropdown-content menu bg-popover"
+    assert html =~ "menu menu-sm dropdown-content bg-popover"
     assert html =~ ~s(href="/bookmarks")
   end
 
