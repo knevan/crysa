@@ -1,5 +1,9 @@
 <Layouts.flash_group flash={@flash} />
 <div class="space-y-6">
+  <section aria-label="Featured series">
+    <.vue v-component="FeaturedHero" v-ssr={true} lists={@trending} />
+  </section>
+
   <section aria-label="Trending series">
     <.vue v-component="TrendingSection" v-ssr={true} initialPeriod="day" lists={@trending} />
   </section>

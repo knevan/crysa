@@ -80,6 +80,31 @@ defmodule Crysa.TrendingTest do
 
       assert Trending.fetch_live("bogus").items == Trending.fetch_live("day").items
     end
+
+    test "items carry status, capped genres, and the first chapter key" do
+      series = CatalogFixtures.series_fixture(%{publication_status: "completed"})
+
+      categories =
+        CatalogFixtures.categories_fixture(["Action", "Drama", "Fantasy", "Horror"])
+
+      {:ok, _} = Crysa.Catalog.set_series_categories(series, categories)
+      chapter = CatalogFixtures.chapter_fixture(series)
+      log_view(series, hours_ago(1))
+
+      assert %{items: [item]} = Trending.fetch_live("day")
+      assert item.status == "completed"
+      assert item.genres == ["Action", "Drama", "Fantasy"]
+      assert item.firstChapterKey == chapter.chapter_key
+    end
+
+    test "items without categories or chapters degrade gracefully" do
+      series = CatalogFixtures.series_fixture()
+      log_view(series, hours_ago(1))
+
+      assert %{items: [item]} = Trending.fetch_live("day")
+      assert item.genres == []
+      assert item.firstChapterKey == nil
+    end
   end
 
   describe "list_trending/1" do

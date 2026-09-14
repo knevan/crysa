@@ -7,6 +7,9 @@ export interface TrendingItem {
   coverUrl: string | null
   ratingAverage: number | null
   chapterCount: number
+  status: string
+  genres: string[]
+  firstChapterKey: string | null
 }
 
 export interface TrendingList {

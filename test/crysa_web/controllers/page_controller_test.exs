@@ -14,6 +14,7 @@ defmodule CrysaWeb.PageControllerTest do
     body = html_response(conn, 200)
     assert body =~ "New Series"
     assert body =~ "TrendingSection"
+    assert body =~ "FeaturedHero"
   end
 
   test "trending island is server-rendered on first paint", %{conn: conn} do

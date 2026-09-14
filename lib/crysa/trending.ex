@@ -36,7 +36,10 @@ defmodule Crysa.Trending do
           slug: String.t(),
           coverUrl: String.t() | nil,
           ratingAverage: float() | nil,
-          chapterCount: non_neg_integer()
+          chapterCount: non_neg_integer(),
+          status: String.t(),
+          genres: [String.t()],
+          firstChapterKey: String.t() | nil
         }
   @type result :: %{items: [item()], computedAt: String.t()}
   @type lists :: %{period() => result()}
@@ -178,26 +181,51 @@ defmodule Crysa.Trending do
   defp load_items([]), do: []
 
   defp load_items(ids) do
-    by_id =
+    series =
       from(s in Series, where: s.id in ^ids)
       |> Repo.all()
-      |> Map.new(fn series -> {series.id, series} end)
+      |> Repo.preload(:categories)
+
+    by_id = Map.new(series, fn item -> {item.id, item} end)
+    first_chapters = Catalog.first_chapters_by_series(ids)
 
     ids
     |> Enum.map(&Map.get(by_id, &1))
     |> Enum.reject(&is_nil/1)
-    |> Enum.map(&to_item/1)
+    |> Enum.map(&to_item(&1, first_chapters))
   end
 
-  defp to_item(%Series{} = series) do
+  defp to_item(%Series{} = series, first_chapters) do
     %{
       id: series.id,
       title: series.title,
       slug: series.slug,
       coverUrl: Catalog.cover_url(series),
       ratingAverage: rating_average(series),
-      chapterCount: series.chapter_count || 0
+      chapterCount: series.chapter_count || 0,
+      status: series.publication_status,
+      genres: series_genres(series),
+      firstChapterKey: first_chapter_key(first_chapters, series.id)
     }
+  end
+
+  # Display names sorted for stability, capped so hero genre badges
+  # stay a single row. Unassociated series get an empty list.
+  defp series_genres(%Series{categories: categories}) when is_list(categories) do
+    categories
+    |> Enum.map(& &1.name)
+    |> Enum.reject(&is_nil/1)
+    |> Enum.sort()
+    |> Enum.take(3)
+  end
+
+  defp series_genres(_), do: []
+
+  defp first_chapter_key(first_chapters, series_id) do
+    case Map.get(first_chapters, series_id) do
+      %{chapter_key: key} -> key
+      _ -> nil
+    end
   end
 
   defp rating_average(%Series{rating_count: count, rating_sum: sum})
