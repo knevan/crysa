@@ -21,12 +21,12 @@ defineProps<{
 <template>
   <div class="mx-auto w-full max-w-200 space-y-7 px-4 py-5 md:space-y-9 md:px-6 md:py-9">
     <div class="flex flex-col items-center gap-1.5 text-center md:gap-2">
-      <h1 class="text-xl font-bold tracking-tight text-slate-900 md:text-[26px]">
+      <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-zinc-100 md:text-[26px]">
         Change Profile Settings
       </h1>
       <p class="flex items-center gap-1 text-sm md:text-[15px]">
-        <span class="text-[#64748B]">Hello,</span>
-        <span class="font-bold text-slate-900">{{ username }}.</span>
+        <span class="text-[#64748B] dark:text-zinc-400">Hello,</span>
+        <span class="font-bold text-slate-900 dark:text-zinc-100">{{ username }}.</span>
       </p>
     </div>
 

@@ -50,14 +50,14 @@ function firstError(list: string[]): string | null {
 
 <template>
   <section aria-labelledby="settings-password-title" class="space-y-3">
-    <h2 id="settings-password-title" class="text-base font-bold text-slate-900 md:text-lg">
+    <h2 id="settings-password-title" class="text-base font-bold text-slate-900 dark:text-zinc-100 md:text-lg">
       Change Password
     </h2>
-    <div class="h-px w-full bg-[#E2E8F0]" role="separator" />
+    <div class="h-px w-full bg-[#E2E8F0] dark:bg-zinc-800" role="separator" />
 
     <form class="space-y-3" @submit.prevent="submit">
       <div class="space-y-1.5">
-        <Label for="password-current" class="text-[13px] font-medium text-[#64748B]">
+        <Label for="password-current" class="text-[13px] font-medium text-[#64748B] dark:text-zinc-400">
           Current password
         </Label>
         <div class="relative">
@@ -93,7 +93,7 @@ function firstError(list: string[]): string | null {
       </div>
 
       <div class="space-y-1.5">
-        <Label for="password-new" class="text-[13px] font-medium text-[#64748B]">
+        <Label for="password-new" class="text-[13px] font-medium text-[#64748B] dark:text-zinc-400">
           New Password
         </Label>
         <div class="relative">
@@ -130,7 +130,7 @@ function firstError(list: string[]): string | null {
       </div>
 
       <div class="space-y-1.5">
-        <Label for="password-confirm" class="text-[13px] font-medium text-[#64748B]">
+        <Label for="password-confirm" class="text-[13px] font-medium text-[#64748B] dark:text-zinc-400">
           Confirm Password
         </Label>
         <div class="relative">

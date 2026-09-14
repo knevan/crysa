@@ -135,11 +135,11 @@ const statusLabel = computed(() => {
 const statusClass = computed(() => {
   switch (props.stats.status) {
     case 'ongoing':
-      return 'text-emerald-600'
+      return 'text-emerald-600 dark:text-emerald-400'
     case 'completed':
-      return 'text-sky-600'
+      return 'text-sky-600 dark:text-sky-400'
     case 'hiatus':
-      return 'text-amber-600'
+      return 'text-amber-600 dark:text-amber-400'
     default:
       return 'text-muted-foreground'
   }
@@ -480,7 +480,7 @@ function authorDisplay(): string {
     <!-- Content container: mobile 390, expand to 680 on larger screens -->
     <div class="mx-auto w-full max-w-97.5 px-3 py-4 md:max-w-170 md:px-4 lg:max-w-180">
       <!-- Series Card M — overflow-visible so ellipsis dropdown is not clipped (feedback #1) -->
-      <div class="rounded-2xl border bg-card shadow-[0_8px_20px_rgba(15,23,42,0.06)] overflow-visible">
+      <div class="rounded-2xl bg-card shadow-[0_8px_20px_rgba(15,23,42,0.06)] overflow-visible">
         <div class="p-4 flex flex-col gap-3.5">
           <!-- Breadcrumb M -->
           <nav class="flex items-center gap-1 text-[10px] text-muted-foreground">
@@ -658,7 +658,7 @@ function authorDisplay(): string {
             <!-- Rating Dist M -->
             <div class="rounded-xl border bg-card p-3.5 flex gap-3">
               <div class="flex w-22.5 flex-col items-center justify-center gap-1">
-                <span class="text-[40px] font-extrabold leading-none text-amber-500">{{ averageDisplay }}</span>
+                <span class="text-[40px] font-extrabold leading-none text-amber-500 dark:text-amber-400">{{ averageDisplay }}</span>
                 <div class="flex items-center gap-0.5">
                   <template v-for="i in 5" :key="i">
                     <Star
@@ -716,11 +716,11 @@ function authorDisplay(): string {
                   >
                     <Star
                       v-if="displayRating >= n"
-                      class="size-6 fill-amber-500 text-amber-500"
+                      class="size-6 fill-amber-500 dark:fill-amber-400 text-amber-500 dark:text-amber-400"
                     />
                     <StarHalf
                       v-else-if="displayRating >= n - 0.5"
-                      class="size-6 fill-amber-500 text-amber-500"
+                      class="size-6 fill-amber-500 dark:fill-amber-400 text-amber-500 dark:text-amber-400"
                     />
                     <Star v-else class="size-6 text-muted-foreground/40" />
                   </button>
@@ -752,7 +752,7 @@ function authorDisplay(): string {
                     <Separator />
                     <button
                       type="button"
-                      class="flex w-full items-center gap-2 px-3 py-2.5 text-xs hover:bg-accent text-left text-red-500"
+                      class="flex w-full items-center gap-2 px-3 py-2.5 text-xs hover:bg-accent text-left text-red-500 dark:text-red-400"
                       @click="handleReport"
                     >
                       <Flag class="size-3.5" />

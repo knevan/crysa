@@ -51,14 +51,14 @@ function submit() {
 
 <template>
   <section aria-labelledby="settings-account-title" class="space-y-3">
-    <h2 id="settings-account-title" class="text-base font-bold text-slate-900 md:text-lg">
+    <h2 id="settings-account-title" class="text-base font-bold text-slate-900 dark:text-zinc-100 md:text-lg">
       Account Information
     </h2>
-    <div class="h-px w-full bg-[#E2E8F0]" role="separator" />
+    <div class="h-px w-full bg-[#E2E8F0] dark:bg-zinc-800" role="separator" />
 
     <form class="space-y-3" @submit.prevent="submit">
       <div class="space-y-1.5">
-        <Label for="account-display-name" class="text-[13px] font-medium text-[#64748B]">
+        <Label for="account-display-name" class="text-[13px] font-medium text-[#64748B] dark:text-zinc-400">
           Comment Name
         </Label>
         <Input
@@ -83,7 +83,7 @@ function submit() {
       </div>
 
       <div class="space-y-1.5">
-        <Label for="account-email" class="text-[13px] font-medium text-[#64748B]">
+        <Label for="account-email" class="text-[13px] font-medium text-[#64748B] dark:text-zinc-400">
           Change Email
         </Label>
         <Input

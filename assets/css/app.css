@@ -117,6 +117,10 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-base-100: var(--card);
+  --color-base-200: var(--background);
+  --color-base-300: var(--border);
+  --color-base-content: var(--foreground);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);

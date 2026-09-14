@@ -77,17 +77,17 @@ const shownAvatar = () => previewUrl.value ?? props.avatarUrl
 
 <template>
   <section aria-labelledby="settings-avatar-title" class="space-y-3">
-    <h2 id="settings-avatar-title" class="text-base font-bold text-slate-900 md:text-lg">
+    <h2 id="settings-avatar-title" class="text-base font-bold text-slate-900 dark:text-zinc-100 md:text-lg">
       Change Avatar
     </h2>
-    <div class="h-px w-full bg-[#E2E8F0]" role="separator" />
-    <p class="text-xs text-[#64748B] md:text-[13px]">
+    <div class="h-px w-full bg-[#E2E8F0] dark:bg-zinc-800" role="separator" />
+    <p class="text-xs text-[#64748B] dark:text-zinc-400 md:text-[13px]">
       Use the form below to change your avatar.
     </p>
 
     <div class="flex flex-col items-center gap-2.5 md:items-start">
       <div
-        class="flex h-19 w-19 items-center justify-center overflow-hidden rounded-full border border-[#E2E8F0] bg-[#F1F5F9] md:h-21 md:w-21"
+        class="flex h-19 w-19 items-center justify-center overflow-hidden rounded-full border border-[#E2E8F0] dark:border-zinc-800 bg-[#F1F5F9] dark:bg-muted md:h-21 md:w-21"
       >
         <img
           v-if="shownAvatar()"
@@ -95,13 +95,13 @@ const shownAvatar = () => previewUrl.value ?? props.avatarUrl
           alt="Your avatar"
           class="h-full w-full object-cover"
         />
-        <UserRound v-else class="h-12 w-12 text-slate-400 md:h-12 md:w-12" />
+        <UserRound v-else class="h-12 w-12 text-slate-400 dark:text-zinc-500 md:h-12 md:w-12" />
       </div>
 
       <div class="flex flex-col items-center gap-2 md:items-start">
         <button
           type="button"
-          class="inline-flex cursor-pointer items-center justify-center rounded-lg bg-[#1E293B] px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-slate-700 md:px-3 md:py-1.5"
+          class="inline-flex cursor-pointer items-center justify-center rounded-lg bg-[#1E293B] dark:bg-zinc-100 px-4 py-2 text-xs font-bold text-white dark:text-zinc-900 transition-colors hover:bg-slate-700 dark:hover:bg-white md:px-3 md:py-1.5"
           @click="onPickFile"
         >
           Choose File
@@ -116,7 +116,7 @@ const shownAvatar = () => previewUrl.value ?? props.avatarUrl
         />
         <p
           v-if="activeEntry() && (activeEntry()?.progress ?? 100) < 100"
-          class="text-xs text-[#64748B]"
+          class="text-xs text-[#64748B] dark:text-zinc-400"
           role="status"
         >
           Uploading… {{ activeEntry()?.progress ?? 0 }}%
@@ -127,7 +127,7 @@ const shownAvatar = () => previewUrl.value ?? props.avatarUrl
         <p v-else-if="localError" class="text-xs text-destructive" role="alert">
           {{ localError }}
         </p>
-        <p class="text-xs text-[#64748B]">Maximum 2 MB. JPEG, PNG, WebP, or GIF.</p>
+        <p class="text-xs text-[#64748B] dark:text-zinc-400">Maximum 2 MB. JPEG, PNG, WebP, or GIF.</p>
       </div>
     </div>
   </section>

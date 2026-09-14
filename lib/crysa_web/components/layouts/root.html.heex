@@ -66,6 +66,9 @@
           </ul>
         </div>
         <div class="navbar-end">
+          <!-- Theme switch (system/light/dark), visible on all viewports so
+               users can always escape a wrong-guessed system theme. -->
+          <.theme_toggle />
           <!-- Notification bell: same-page dropdown, live in every page via a
                sticky child LiveView. Guests render nothing. -->
           {live_render(@conn, CrysaWeb.Live.NotificationBellLive,
